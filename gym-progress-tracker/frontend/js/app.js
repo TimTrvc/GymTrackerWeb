@@ -1,6 +1,7 @@
 const progressList = document.getElementById('progressList');
 
 const fetchProgress = async () => {
+  console.log("Fetching...")
     try {
         const response = await fetch('http://localhost:5000/api/progress');
         console.log('Fetch Response Status:', response.status); // Debug log

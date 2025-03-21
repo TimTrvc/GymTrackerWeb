@@ -1,43 +1,553 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gym Progress Tracker</title>
-    <link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GymTrack - Dein Fitness-Tracker</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <header>
-        <h1>Gym Progress Tracker</h1>
-    </header>
-    <main>
-        <section id="progress-form">
-            <h2>Add Progress</h2>
-            <form id="add-progress">
-                <label for="date">Date:</label>
-                <input type="date" id="date" required>
-                
-                <label for="exercise">Exercise:</label>
-                <input type="text" id="exercise" list="exercise-list" required>
-                <datalist id="exercise-list"></datalist>
-                
-                <label for="reps">Reps:</label>
-                <input type="number" id="reps" required>
-                
-                <label for="weight">Weight (kg):</label>
-                <input type="number" id="weight" required>
-                
-                <button type="submit">Add Progress</button>
-            </form>
-        </section>
-        <section id="progress-list">
-            <h2>Your Progress</h2>
-            <div id="progress-items"></div>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 Gym Progress Tracker</p>
-    </footer>
-    <script src="js/app.js"></script>
+<body class="bg-gray-100 min-h-screen font-sans">
+<!-- Navigation -->
+<nav class="bg-indigo-600 text-white shadow-lg">
+  <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+    <a href="#" class="text-2xl font-bold flex items-center">
+      <span class="mr-2">💪</span> GymTrack
+    </a>
+    <div class="flex items-center space-x-4">
+      <a href="#" class="hover:text-indigo-200">Dashboard</a>
+      <a href="#" class="hover:text-indigo-200">Übungen</a>
+      <a href="#" class="hover:text-indigo-200">Statistiken</a>
+      <a href="#" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100">Login</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<div class="bg-indigo-700 text-white py-12">
+  <div class="container mx-auto px-4 text-center">
+    <h1 class="text-4xl font-bold mb-4">Verfolge deinen Fitness-Fortschritt</h1>
+    <p class="text-xl mb-8 max-w-2xl mx-auto">Mit GymTrack kannst du deine Workouts protokollieren, Fortschritte verfolgen und deine Fitnessziele erreichen.</p>
+    <button class="bg-white text-indigo-700 px-6 py-3 rounded-lg font-bold text-lg hover:bg-indigo-100 transition" id="start-tracking">Jetzt starten</button>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="container mx-auto px-4 py-8">
+
+  <!-- Add Progress Form Section -->
+  <div class="mb-12 bg-white p-6 rounded-xl shadow-md">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">Fortschritt hinzufügen</h2>
+    <form id="add-progress" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label for="date" class="block text-gray-700 mb-2">Datum:</label>
+        <input type="date" id="date" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <div>
+        <label for="exercise" class="block text-gray-700 mb-2">Übung:</label>
+        <input type="text" id="exercise" list="exercise-list" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <datalist id="exercise-list">
+          <option value="Bankdrücken">
+          <option value="Kniebeugen">
+          <option value="Kreuzheben">
+          <option value="Schulterdrücken">
+          <option value="Klimmzüge">
+          <option value="Bizeps Curls">
+          <option value="Trizeps Extensions">
+          <option value="Beinpresse">
+        </datalist>
+      </div>
+
+      <div>
+        <label for="reps" class="block text-gray-700 mb-2">Wiederholungen:</label>
+        <input type="number" id="reps" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <div>
+        <label for="weight" class="block text-gray-700 mb-2">Gewicht (kg):</label>
+        <input type="number" id="weight" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <div class="md:col-span-2">
+        <button type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold text-lg hover:bg-indigo-700 transition w-full md:w-auto">Fortschritt hinzufügen</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Dashboard Section -->
+  <div class="mb-12">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">Dein Dashboard</h2>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <!-- Workout Stats -->
+      <div class="bg-white p-6 rounded-xl shadow-md">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-500 mb-1">Einträge diese Woche</p>
+            <h3 class="text-3xl font-bold text-gray-800" id="entries-count">0</h3>
+          </div>
+          <span class="bg-green-100 text-green-800 text-sm px-2 py-1 rounded" id="entries-diff">+0 von letzter Woche</span>
+        </div>
+        <div class="mt-4 flex items-center">
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-green-500 h-2 rounded-full" style="width: 0%" id="entries-progress"></div>
+          </div>
+          <span class="ml-2 text-sm text-gray-600" id="entries-percentage">0%</span>
+        </div>
+      </div>
+
+      <!-- Weight Lifted -->
+      <div class="bg-white p-6 rounded-xl shadow-md">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-500 mb-1">Gehobenes Gewicht (kg)</p>
+            <h3 class="text-3xl font-bold text-gray-800" id="total-weight">0</h3>
+          </div>
+          <span class="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded" id="weight-diff">+0 von letzter Woche</span>
+        </div>
+        <div class="mt-4 flex items-center">
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-blue-500 h-2 rounded-full" style="width: 0%" id="weight-progress"></div>
+          </div>
+          <span class="ml-2 text-sm text-gray-600" id="weight-percentage">0%</span>
+        </div>
+      </div>
+
+      <!-- Total Reps -->
+      <div class="bg-white p-6 rounded-xl shadow-md">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-500 mb-1">Gesamtwiederholungen</p>
+            <h3 class="text-3xl font-bold text-gray-800" id="total-reps">0</h3>
+          </div>
+          <span class="bg-indigo-100 text-indigo-800 text-sm px-2 py-1 rounded" id="reps-diff">+0 von letzter Woche</span>
+        </div>
+        <div class="mt-4 flex items-center">
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-indigo-500 h-2 rounded-full" style="width: 0%" id="reps-progress"></div>
+          </div>
+          <span class="ml-2 text-sm text-gray-600" id="reps-percentage">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Chart -->
+    <div class="bg-white p-6 rounded-xl shadow-md">
+      <h3 class="text-xl font-bold mb-4 text-gray-800">Dein Fortschritt</h3>
+      <div class="h-64">
+        <canvas id="progressChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress List -->
+  <div class="mb-12">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold text-gray-800">Deine Fortschritte</h2>
+      <button id="clear-progress" class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700">Alle löschen</button>
+    </div>
+
+    <!-- Progress Table -->
+    <div class="overflow-x-auto bg-white rounded-xl shadow-md">
+      <table class="min-w-full">
+        <thead>
+        <tr class="bg-gray-100 text-gray-600 text-sm leading-normal">
+          <th class="py-3 px-6 text-left">Datum</th>
+          <th class="py-3 px-6 text-left">Übung</th>
+          <th class="py-3 px-6 text-left">Wiederholungen</th>
+          <th class="py-3 px-6 text-left">Gewicht (kg)</th>
+          <th class="py-3 px-6 text-left">Aktionen</th>
+        </tr>
+        </thead>
+        <tbody id="progress-items" class="text-gray-600 text-sm">
+        <!-- Progress items will be inserted here via JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Exercise Library -->
+  <div>
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">Übungsbibliothek</h2>
+
+    <!-- Exercise Categories -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer">
+        <div class="bg-red-100 text-red-600 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-800">Brust</h3>
+        <p class="text-gray-500 text-sm">15 Übungen</p>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer">
+        <div class="bg-blue-100 text-blue-600 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-800">Rücken</h3>
+        <p class="text-gray-500 text-sm">18 Übungen</p>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer">
+        <div class="bg-green-100 text-green-600 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-800">Beine</h3>
+        <p class="text-gray-500 text-sm">12 Übungen</p>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer">
+        <div class="bg-purple-100 text-purple-600 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-800">Arme</h3>
+        <p class="text-gray-500 text-sm">10 Übungen</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-8 mt-12">
+  <div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <h4 class="text-xl font-bold mb-4">GymTrack</h4>
+        <p class="text-gray-400">Dein persönlicher Fitness-Tracker für optimale Erfolge im Gym.</p>
+      </div>
+      <div>
+        <h4 class="text-xl font-bold mb-4">Links</h4>
+        <ul class="space-y-2 text-gray-400">
+          <li><a href="#" class="hover:text-white">Home</a></li>
+          <li><a href="#" class="hover:text-white">Features</a></li>
+          <li><a href="#" class="hover:text-white">Preise</a></li>
+          <li><a href="#" class="hover:text-white">Kontakt</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xl font-bold mb-4">Newsletter</h4>
+        <p class="text-gray-400 mb-4">Erhalte Fitness-Tipps und Updates.</p>
+        <div class="flex">
+          <input type="email" placeholder="Deine Email" class="py-2 px-4 rounded-l outline-none text-gray-800 flex-grow">
+          <button class="bg-indigo-600 py-2 px-4 rounded-r hover:bg-indigo-700">Abonnieren</button>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+      <p>&copy; 2025 GymTrack. Alle Rechte vorbehalten.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // DOM Elements
+  const addProgressForm = document.getElementById('add-progress');
+  const dateInput = document.getElementById('date');
+  const exerciseInput = document.getElementById('exercise');
+  const repsInput = document.getElementById('reps');
+  const weightInput = document.getElementById('weight');
+  const progressItems = document.getElementById('progress-items');
+  const clearProgressBtn = document.getElementById('clear-progress');
+  const startTrackingBtn = document.getElementById('start-tracking');
+
+  // Set default date to today
+  const today = new Date();
+  const formattedDate = today.toISOString().substr(0, 10);
+  dateInput.value = formattedDate;
+
+  // Progress Data
+  let progressData = JSON.parse(localStorage.getItem('progressData')) || [];
+
+  // Exercise chart data
+  let chartData = {};
+  let progressChart;
+
+  // Initialize
+  function init() {
+    displayProgressItems();
+    updateStats();
+    initChart();
+
+    // Scroll to form when "Start Tracking" is clicked
+    startTrackingBtn.addEventListener('click', () => {
+      document.getElementById('add-progress').scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+
+  // Add Progress
+  // addProgressForm.addEventListener('submit', function(e) {
+  //   e.preventDefault();
+  //
+  //   const newProgress = {
+  //     id: Date.now(),
+  //     date: dateInput.value,
+  //     exercise: exerciseInput.value,
+  //     reps: parseInt(repsInput.value),
+  //     weight: parseFloat(weightInput.value)
+  //   };
+  //
+  //   progressData.push(newProgress);
+  //   saveProgressData();
+  //   updateStats();
+  //   updateChart();
+  //
+  //   // Reset form
+  //   exerciseInput.value = '';
+  //   repsInput.value = '';
+  //   weightInput.value = '';
+  //   dateInput.value = formattedDate;
+  // });
+
+  // Delete Progress Item
+  function deleteProgressItem(id) {
+    progressData = progressData.filter(item => item.id !== id);
+    saveProgressData();
+    updateStats();
+    updateChart();
+  }
+
+  // Clear All Progress
+  clearProgressBtn.addEventListener('click', function() {
+    if (confirm('Möchtest du wirklich alle Fortschrittsdaten löschen?')) {
+      progressData = [];
+      saveProgressData();
+      updateStats();
+      updateChart();
+    }
+  });
+
+  // Save Progress Data to localStorage
+  function saveProgressData() {
+    localStorage.setItem('progressData', JSON.stringify(progressData));
+    displayProgressItems();
+  }
+
+  // Display Progress Items
+  function displayProgressItems() {
+    progressItems.innerHTML = '';
+
+    if (progressData.length === 0) {
+      progressItems.innerHTML = `
+        <tr>
+          <td colspan="5" class="py-6 text-center text-gray-500">Keine Fortschrittsdaten vorhanden. Füge deinen ersten Eintrag hinzu!</td>
+        </tr>
+      `;
+      return;
+    }
+
+    // Sort by date (newest first)
+    const sortedData = [...progressData].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    sortedData.forEach(item => {
+      const row = document.createElement('tr');
+      row.className = 'border-b border-gray-200 hover:bg-gray-50';
+
+      const formattedDate = new Date(item.date).toLocaleDateString('de-DE');
+
+      row.innerHTML = `
+        <td class="py-3 px-6">${formattedDate}</td>
+        <td class="py-3 px-6">${item.exercise}</td>
+        <td class="py-3 px-6">${item.reps}</td>
+        <td class="py-3 px-6">${item.weight}</td>
+        <td class="py-3 px-6 flex space-x-2">
+          <button class="text-red-500 hover:text-red-700 delete-btn" data-id="${item.id}">Löschen</button>
+        </td>
+      `;
+
+      progressItems.appendChild(row);
+    });
+
+    // Add event listeners to delete buttons
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const id = parseInt(this.getAttribute('data-id'));
+        deleteProgressItem(id);
+      });
+    });
+  }
+
+  // Update Stats
+  function updateStats() {
+    const entriesCount = document.getElementById('entries-count');
+    const entriesDiff = document.getElementById('entries-diff');
+    const entriesProgress = document.getElementById('entries-progress');
+    const entriesPercentage = document.getElementById('entries-percentage');
+
+    const totalWeight = document.getElementById('total-weight');
+    const weightDiff = document.getElementById('weight-diff');
+    const weightProgress = document.getElementById('weight-progress');
+    const weightPercentage = document.getElementById('weight-percentage');
+
+    const totalReps = document.getElementById('total-reps');
+    const repsDiff = document.getElementById('reps-diff');
+    const repsProgress = document.getElementById('reps-progress');
+    const repsPercentage = document.getElementById('reps-percentage');
+
+    // Current week data
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+
+    const currentWeekData = progressData.filter(item => new Date(item.date) >= oneWeekAgo);
+    const previousWeekData = progressData.filter(item => new Date(item.date) >= twoWeeksAgo && new Date(item.date) < oneWeekAgo);
+
+    // Entries this week
+    const currentWeekEntries = currentWeekData.length;
+    const previousWeekEntries = previousWeekData.length;
+    const entriesDifference = currentWeekEntries - previousWeekEntries;
+
+    entriesCount.textContent = currentWeekEntries;
+    entriesDiff.textContent = `${entriesDifference >= 0 ? '+' : ''}${entriesDifference} von letzter Woche`;
+    entriesProgress.style.width = `${Math.min(currentWeekEntries * 10, 100)}%`;
+    entriesPercentage.textContent = `${Math.min(currentWeekEntries * 10, 100)}%`;
+
+    // Total weight
+    const currentWeekWeight = currentWeekData.reduce((sum, item) => sum + item.weight * item.reps, 0);
+    const previousWeekWeight = previousWeekData.reduce((sum, item) => sum + item.weight * item.reps, 0);
+    const weightDifference = currentWeekWeight - previousWeekWeight;
+
+    totalWeight.textContent = Math.round(currentWeekWeight);
+    weightDiff.textContent = `${weightDifference >= 0 ? '+' : ''}${Math.round(weightDifference)} von letzter Woche`;
+
+    const weightProgressPercentage = Math.min(Math.round(currentWeekWeight / 100), 100);
+    weightProgress.style.width = `${weightProgressPercentage}%`;
+    weightPercentage.textContent = `${weightProgressPercentage}%`;
+
+    // Total reps
+    const currentWeekReps = currentWeekData.reduce((sum, item) => sum + item.reps, 0);
+    const previousWeekReps = previousWeekData.reduce((sum, item) => sum + item.reps, 0);
+    const repsDifference = currentWeekReps - previousWeekReps;
+
+    totalReps.textContent = currentWeekReps;
+    repsDiff.textContent = `${repsDifference >= 0 ? '+' : ''}${repsDifference} von letzter Woche`;
+
+    const repsProgressPercentage = Math.min(Math.round(currentWeekReps / 5), 100);
+    repsProgress.style.width = `${repsProgressPercentage}%`;
+    repsPercentage.textContent = `${repsProgressPercentage}%`;
+  }
+
+  // Initialize Chart
+  function initChart() {
+    const ctx = document.getElementById('progressChart').getContext('2d');
+
+    // Process data for chart
+    processChartData();
+
+    progressChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartData.labels,
+        datasets: chartData.datasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: false,
+            grid: {
+              display: true,
+              color: 'rgba(0, 0, 0, 0.05)'
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
+    });
+  }
+
+  // Process Chart Data
+  function processChartData() {
+    // Get unique exercises and dates
+    const exercises = [...new Set(progressData.map(item => item.exercise))];
+
+    // Create a record of dates (up to 10 recent dates)
+    let dates = [...new Set(progressData.map(item => item.date))];
+    dates.sort((a, b) => new Date(a) - new Date(b));
+    dates = dates.slice(-10); // Get the 10 most recent dates
+
+    // Format dates for display
+    const formattedDates = dates.map(date => {
+      const d = new Date(date);
+      return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+    });
+
+    // Create datasets
+    const datasets = [];
+    const colors = [
+      { border: 'rgb(99, 102, 241)', background: 'rgba(99, 102, 241, 0.1)' },
+      { border: 'rgb(239, 68, 68)', background: 'rgba(239, 68, 68, 0.1)' },
+      { border: 'rgb(16, 185, 129)', background: 'rgba(16, 185, 129, 0.1)' },
+      { border: 'rgb(245, 158, 11)', background: 'rgba(245, 158, 11, 0.1)' }
+    ];
+
+    // Only show up to 4 exercises for clarity
+    const displayExercises = exercises.slice(0, 4);
+
+    displayExercises.forEach((exercise, index) => {
+      const data = [];
+
+      dates.forEach(date => {
+        // Find matching exercise for this date
+        const match = progressData.find(item => item.date === date && item.exercise === exercise);
+        if (match) {
+          data.push(match.weight);
+        } else {
+          data.push(null); // No data for this date
+        }
+      });
+
+      // Only add to chart if we have data
+      if (data.some(val => val !== null)) {
+        datasets.push({
+          label: `${exercise} (kg)`,
+          data: data,
+          borderColor: colors[index % colors.length].border,
+          backgroundColor: colors[index % colors.length].background,
+          tension: 0.3,
+          fill: true
+        });
+      }
+    });
+
+    chartData = {
+      labels: formattedDates,
+      datasets: datasets
+    };
+  }
+
+  // Update Chart
+  function updateChart() {
+    processChartData();
+    progressChart.data.labels = chartData.labels;
+    progressChart.data.datasets = chartData.datasets;
+    progressChart.update();
+  }
+
+  // Initialize the app
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
+<script src="js/app.js"></script>
 </body>
 </html>
