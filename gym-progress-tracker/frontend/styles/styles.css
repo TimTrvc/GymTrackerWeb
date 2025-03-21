@@ -1,0 +1,109 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background-color: #4caf50;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+}
+
+h1 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+main {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    color: #4caf50;
+    margin-bottom: 10px;
+}
+
+/* Form Styles */
+form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+form label {
+    grid-column: span 2;
+    font-weight: bold;
+}
+
+form input, form button {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+form button {
+    grid-column: span 2;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+form button:hover {
+    background-color: #45a049;
+}
+
+/* Progress List Styles */
+.exercise-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.exercise-section h3 {
+    margin: 0 0 10px;
+    font-size: 1.2rem;
+    color: #4caf50;
+}
+
+/* Table Styles */
+.progress-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.progress-table th, .progress-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.progress-table th {
+    background-color: #4caf50;
+    color: white;
+    font-weight: bold;
+}
+
+.progress-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.progress-table tr:hover {
+    background-color: #ddd;
+}
