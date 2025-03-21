@@ -11,12 +11,12 @@
 <!-- Navigation -->
 <nav class="bg-indigo-600 text-white shadow-lg">
   <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-    <a href="#" class="text-2xl font-bold flex items-center">
+    <a href="../index.html" class="text-2xl font-bold flex items-center">
       <span class="mr-2">💪</span> GymTrack
     </a>
     <div class="flex items-center space-x-4">
       <a href="#" class="hover:text-indigo-200">Dashboard</a>
-      <a href="sites/exercises.html" class="hover:text-indigo-200">Übungen</a>
+      <a href="#" class="hover:text-indigo-200">Übungen</a>
       <a href="#" class="hover:text-indigo-200">Statistiken</a>
       <a href="#" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100">Login</a>
     </div>
@@ -26,148 +26,12 @@
 <!-- Hero Section -->
 <div class="bg-indigo-700 text-white py-12">
   <div class="container mx-auto px-4 text-center">
-    <h1 class="text-4xl font-bold mb-4">Verfolge deinen Fitness-Fortschritt</h1>
-    <p class="text-xl mb-8 max-w-2xl mx-auto">Mit GymTrack kannst du deine Workouts protokollieren, Fortschritte verfolgen und deine Fitnessziele erreichen.</p>
-    <button class="bg-white text-indigo-700 px-6 py-3 rounded-lg font-bold text-lg hover:bg-indigo-100 transition" id="start-tracking">Jetzt starten</button>
+    <h1 class="text-4xl font-bold mb-4">Übungen</h1>
   </div>
 </div>
 
 <!-- Main Content -->
 <div class="container mx-auto px-4 py-8">
-
-  <!-- Add Progress Form Section -->
-  <div class="mb-12 bg-white p-6 rounded-xl shadow-md">
-    <h2 class="text-2xl font-bold mb-6 text-gray-800">Fortschritt hinzufügen</h2>
-    <form id="add-progress" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <label for="date" class="block text-gray-700 mb-2">Datum:</label>
-        <input type="date" id="date" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-      </div>
-
-      <div>
-        <label for="exercise" class="block text-gray-700 mb-2">Übung:</label>
-        <input type="text" id="exercise" list="exercise-list" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        <datalist id="exercise-list">
-          <option value="Bankdrücken">
-          <option value="Kniebeugen">
-          <option value="Kreuzheben">
-          <option value="Schulterdrücken">
-          <option value="Klimmzüge">
-          <option value="Bizeps Curls">
-          <option value="Trizeps Extensions">
-          <option value="Beinpresse">
-        </datalist>
-      </div>
-
-      <div>
-        <label for="reps" class="block text-gray-700 mb-2">Wiederholungen:</label>
-        <input type="number" id="reps" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-      </div>
-
-      <div>
-        <label for="weight" class="block text-gray-700 mb-2">Gewicht (kg):</label>
-        <input type="number" id="weight" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-      </div>
-
-      <div class="md:col-span-2">
-        <button type="submit" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold text-lg hover:bg-indigo-700 transition w-full md:w-auto">Fortschritt hinzufügen</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Dashboard Section -->
-  <div class="mb-12">
-    <h2 class="text-2xl font-bold mb-6 text-gray-800">Dein Dashboard</h2>
-
-    <!-- Stats Overview -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <!-- Workout Stats -->
-      <div class="bg-white p-6 rounded-xl shadow-md">
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-gray-500 mb-1">Einträge diese Woche</p>
-            <h3 class="text-3xl font-bold text-gray-800" id="entries-count">0</h3>
-          </div>
-          <span class="bg-green-100 text-green-800 text-sm px-2 py-1 rounded" id="entries-diff">+0 von letzter Woche</span>
-        </div>
-        <div class="mt-4 flex items-center">
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-green-500 h-2 rounded-full" style="width: 0%" id="entries-progress"></div>
-          </div>
-          <span class="ml-2 text-sm text-gray-600" id="entries-percentage">0%</span>
-        </div>
-      </div>
-
-      <!-- Weight Lifted -->
-      <div class="bg-white p-6 rounded-xl shadow-md">
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-gray-500 mb-1">Gehobenes Gewicht (kg)</p>
-            <h3 class="text-3xl font-bold text-gray-800" id="total-weight">0</h3>
-          </div>
-          <span class="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded" id="weight-diff">+0 von letzter Woche</span>
-        </div>
-        <div class="mt-4 flex items-center">
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-blue-500 h-2 rounded-full" style="width: 0%" id="weight-progress"></div>
-          </div>
-          <span class="ml-2 text-sm text-gray-600" id="weight-percentage">0%</span>
-        </div>
-      </div>
-
-      <!-- Total Reps -->
-      <div class="bg-white p-6 rounded-xl shadow-md">
-        <div class="flex justify-between items-start">
-          <div>
-            <p class="text-gray-500 mb-1">Gesamtwiederholungen</p>
-            <h3 class="text-3xl font-bold text-gray-800" id="total-reps">0</h3>
-          </div>
-          <span class="bg-indigo-100 text-indigo-800 text-sm px-2 py-1 rounded" id="reps-diff">+0 von letzter Woche</span>
-        </div>
-        <div class="mt-4 flex items-center">
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-indigo-500 h-2 rounded-full" style="width: 0%" id="reps-progress"></div>
-          </div>
-          <span class="ml-2 text-sm text-gray-600" id="reps-percentage">0%</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Progress Chart -->
-    <div class="bg-white p-6 rounded-xl shadow-md">
-      <h3 class="text-xl font-bold mb-4 text-gray-800">Dein Fortschritt</h3>
-      <div class="h-64">
-        <canvas id="progressChart"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- Progress List -->
-  <div class="mb-12">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">Deine Fortschritte</h2>
-      <button id="clear-progress" class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700">Alle löschen</button>
-    </div>
-
-    <!-- Progress Table -->
-    <div class="overflow-x-auto bg-white rounded-xl shadow-md">
-      <table class="min-w-full">
-        <thead>
-        <tr class="bg-gray-100 text-gray-600 text-sm leading-normal">
-          <th class="py-3 px-6 text-left">Datum</th>
-          <th class="py-3 px-6 text-left">Übung</th>
-          <th class="py-3 px-6 text-left">Wiederholungen</th>
-          <th class="py-3 px-6 text-left">Gewicht (kg)</th>
-          <th class="py-3 px-6 text-left">Aktionen</th>
-        </tr>
-        </thead>
-        <tbody id="progress-items" class="text-gray-600 text-sm">
-        <!-- Progress items will be inserted here via JavaScript -->
-        </tbody>
-      </table>
-    </div>
-  </div>
-
   <!-- Exercise Library -->
   <div>
     <h2 class="text-2xl font-bold mb-6 text-gray-800">Übungsbibliothek</h2>
