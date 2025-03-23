@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: gym-progress-tracker
+    env: docker
+    region: frankfurt  # Wählen Sie die für Sie passende Region
+    plan: free  # oder paid-Pläne je nach Bedarf
+    branch: main  # Zweig, von dem deployt werden soll
+    healthCheckPath: /api
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_USER
+        sync: false  # Manuelle Eingabe in der Render-Konsole
+      - key: DB_HOST
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true  # Generiert automatisch einen sicheren Wert
