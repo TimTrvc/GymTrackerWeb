@@ -48,7 +48,6 @@ function renderNavigation() {
   } else {
     // Für nicht eingeloggte Benutzer
     navElement.innerHTML = `
-      <a href="../index.html" class="hover:text-indigo-200">Dashboard</a>
       <a href="sites/login.html" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100">Login</a>
     `;
   }
