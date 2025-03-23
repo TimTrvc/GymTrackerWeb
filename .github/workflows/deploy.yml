@@ -4,12 +4,16 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "gym-progress-tracker/frontend/**"
+      - "gym-progress-tracker/backend/**"
 
 jobs:
   deploy-frontend:
+    if: contains(github.event.head_commit.modified, 'gym-progress-tracker/frontend/')
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Deploy Frontend
@@ -18,9 +22,10 @@ jobs:
           FRONTEND_DEPLOY_URL: ${{ secrets.FRONTEND_DEPLOY_URL }}
 
   deploy-backend:
+    if: contains(github.event.head_commit.modified, 'gym-progress-tracker/backend/')
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Deploy Backend
