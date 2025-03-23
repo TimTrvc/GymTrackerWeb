@@ -2,3 +2,4 @@ node_modules
 dist
 .cache
 gym-progress-tracker/backend/.env
+gym-progress-tracker/frontend/.env

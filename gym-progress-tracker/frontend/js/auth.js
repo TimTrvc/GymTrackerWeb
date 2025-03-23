@@ -1,3 +1,6 @@
+const API_URL = process.env.API_URL;
+
+
 document.addEventListener('DOMContentLoaded', function() {
   // DOM-Elemente für Tabs
   const loginTab = document.getElementById('login-tab');
@@ -63,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/login', {
+      const response = await fetch(`${API_URL}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/register', {
+      const response = await fetch(`${API_URL}/api/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

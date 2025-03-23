@@ -1,9 +1,11 @@
+const API_URL = process.env.API_URL;
+
 const progressList = document.getElementById('progressList');
 
 const fetchProgress = async () => {
   console.log("Fetching...")
     try {
-        const response = await fetch('http://localhost:5000/api/progress');
+        const response = await fetch(`${API_URL}/api/progress`);
         console.log('Fetch Response Status:', response.status); // Debug log
 
         if (response.ok) {
@@ -79,7 +81,7 @@ progressForm.addEventListener('submit', async (e) => {
 
     try {
         // Send data to the backend
-        const response = await fetch('http://localhost:5000/api/progress', {
+        const response = await fetch(`${API_URL}/api/progress`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ date, exercise, reps, weight }),
