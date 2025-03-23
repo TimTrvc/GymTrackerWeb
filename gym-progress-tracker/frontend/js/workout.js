@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.view-workout-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         const workoutId = this.getAttribute('data-id');
-        // Hier Logik zum Anzeigen des Workouts
+        viewWorkoutDetails(workoutId);
       });
     });
 
@@ -257,3 +257,97 @@ function checkAuth() {
   }
 }
 
+function viewWorkoutDetails(workoutId) {
+  // Workout-Details von der API abrufen
+  fetch(`${API_URL}/api/workouts/${workoutId}`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  })
+    .then(response => response.json())
+    .then(workout => {
+      // Modal mit den Workout-Details öffnen
+      openWorkoutModal(workout);
+    })
+    .catch(error => {
+      console.error('Fehler beim Laden der Workout-Details:', error);
+      alert('Fehler beim Laden der Workout-Details. Bitte versuchen Sie es später erneut.');
+    });
+}
+
+function openWorkoutModal(workout) {
+  // Falls du noch kein Modal-Element hast, erstelle eines
+  let modal = document.getElementById('workout-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'workout-modal';
+    modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50';
+    document.body.appendChild(modal);
+  }
+
+  // Modal-Inhalt
+  modal.innerHTML = `
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">${workout.name}</h2>
+        <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <h3 class="font-semibold">Beschreibung:</h3>
+          <p>${workout.description || 'Keine Beschreibung verfügbar'}</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <h3 class="font-semibold">Schwierigkeitsgrad:</h3>
+            <p>${workout.difficulty_level}</p>
+          </div>
+          <div>
+            <h3 class="font-semibold">Ziel:</h3>
+            <p>${workout.goal}</p>
+          </div>
+          <div>
+            <h3 class="font-semibold">Zielgruppe:</h3>
+            <p>${workout.target_audience}</p>
+          </div>
+          <div>
+            <h3 class="font-semibold">Dauer:</h3>
+            <p>${workout.estimated_duration_minutes} Minuten</p>
+          </div>
+        </div>
+
+        <!-- Hier könntest du weitere Workout-Details anzeigen -->
+
+        <div class="mt-6 flex justify-end">
+          <button id="edit-from-modal" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 mr-2">
+            Bearbeiten
+          </button>
+          <button id="close-modal-btn" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+            Schließen
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Event-Listener für Modal-Buttons
+  document.getElementById('close-modal').addEventListener('click', () => {
+    modal.remove();
+  });
+
+  document.getElementById('close-modal-btn').addEventListener('click', () => {
+    modal.remove();
+  });
+
+  document.getElementById('edit-from-modal').addEventListener('click', () => {
+    modal.remove();
+    // Hier könntest du die Bearbeitungsfunktion aufrufen
+    // editWorkout(workout.template_id);
+  });
+}

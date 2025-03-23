@@ -38,6 +38,32 @@ const getWorkouts = async (req, res) => {
     }
 }
 
+const getWorkoutById = async (req, res) => {
+    const pool = req.app.get('db');
+    const user_id = req.users.id;
+    const workout_id = req.params.workout_template_id; // Nehme die ID aus den URL-Parametern
+
+    try {
+        // Sichere Parameterized Query mit Bedingung:
+        // Workout gehört dem angemeldeten Benutzer ODER ist featured
+        const result = await pool.query(
+            'SELECT * FROM workout_templates WHERE template_id = $1 AND (created_by = $2 OR is_featured = true)',
+            [workout_id, user_id]
+        );
+
+        // Prüfen, ob ein Workout gefunden wurde
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Workout nicht gefunden oder Sie haben keine Berechtigung darauf zuzugreifen' });
+        }
+
+        // Nur das einzelne Workout zurückgeben (rows[0] statt des ganzen result-Objekts)
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Fehler bei der Workoutabfrage:', err);
+        return res.status(500).json({ error: 'Serverseiten-Fehler bei der Workoutabfrage' });
+    }
+};
+
 // Für workoutController.js
 const editWorkout = async (req, res) => {
     const pool = req.app.get('db');
@@ -97,4 +123,4 @@ const removeWorkout = async (req, res) => {
         res.status(500).json({ error: 'Serverseiten-Fehler beim Löschen des Workouts' });
     }
 };
-module.exports = { addWorkout, getWorkouts, editWorkout, removeWorkout };
+module.exports = { addWorkout, getWorkouts, getWorkoutById, editWorkout, removeWorkout };
