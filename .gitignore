@@ -1,4 +1,4 @@
 node_modules
 dist
 .cache
-gym-progress-tracker/backend/secrets.env
+gym-progress-tracker/backend/.env
