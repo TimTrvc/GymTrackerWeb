@@ -19,7 +19,10 @@
       <a href="sites/workout.html" class="hover:text-indigo-200">Workouts</a>
       <a href="sites/exercises.html" class="hover:text-indigo-200">Übungen</a>
       <a href="#" class="hover:text-indigo-200">Statistiken</a>
-      <a href="sites/login.html" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100">Login</a>
+      <!-- Dieser Button wird nur angezeigt, wenn der Benutzer nicht angemeldet ist -->
+      <a href="sites/login.html" id="login-button" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100">Login</a>
+      <!-- Dieser Button wird nur angezeigt, wenn der Benutzer angemeldet ist -->
+      <button id="logout-button" class="bg-white text-red-600 px-4 py-2 rounded-lg font-medium hover:bg-red-100" style="display: none;">Logout</button>
     </div>
   </div>
 </nav>
@@ -549,6 +552,6 @@
 </script>
 </body>
 </html>
-<script src="js/app.js"></script>
+<script src="js/base.js"></script>
 </body>
 </html>

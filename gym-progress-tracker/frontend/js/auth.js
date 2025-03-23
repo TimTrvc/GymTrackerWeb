@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loginForm.classList.add('hidden');
 
     messageContainer.innerHTML = '';
+
   });
 
   // Login-Funktion
@@ -185,3 +186,4 @@ document.addEventListener('DOMContentLoaded', function() {
     // window.location.href = '/index.html';
   }
 });
+

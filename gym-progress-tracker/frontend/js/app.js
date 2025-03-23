@@ -101,4 +101,4 @@ progressForm.addEventListener('submit', async (e) => {
 });
 
 // Fetch progress on page load
-fetchProgress();
+//fetchProgress();

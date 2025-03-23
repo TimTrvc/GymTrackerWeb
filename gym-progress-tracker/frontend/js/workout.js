@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
   workoutForm.addEventListener('submit', async function(e) {
     e.preventDefault();
 
+
     // Formular-Daten sammeln
     const formData = {
       name: document.getElementById('name').value,
@@ -53,3 +54,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+function checkAuth() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    // Kein Token gefunden, Umleitung zum Login
+    window.location.href = '/frontend/sites/login.html';
+  }
+}
+
