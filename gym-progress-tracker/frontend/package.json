@@ -1,0 +1,31 @@
+{
+  "name": "workout-tracker-frontend",
+  "version": "1.0.0",
+  "description": "Frontend für eine Workout-Tracking-Anwendung",
+  "main": "js/app.js",
+  "scripts": {
+    "dev": "webpack serve --config webpack.config.dev.js",
+    "build": "webpack --config webpack.config.prod.js",
+    "start": "live-server dist"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^11.0.0",
+    "dotenv-webpack": "^8.0.1",
+    "html-webpack-plugin": "^5.5.3",
+    "live-server": "^1.2.1",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1",
+    "webpack-merge": "^5.9.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
