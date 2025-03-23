@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
   workoutForm.addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    checkAuth()
+
     // Formular-Daten sammeln
     const formData = {
       name: document.getElementById('name').value,
