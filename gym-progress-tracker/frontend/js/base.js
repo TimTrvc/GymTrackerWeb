@@ -48,7 +48,7 @@ function renderNavigation() {
   } else {
     // Für nicht eingeloggte Benutzer
     navElement.innerHTML = `
-      <a href="sites/login.html" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100">Login</a>
+      <a href="/sites/login.html" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100">Login</a>
     `;
   }
 }
@@ -62,7 +62,7 @@ function protectPage() {
 
   if (protectedPaths.includes(currentPath) && !isLoggedIn()) {
     // Benutzer ist nicht eingeloggt, aber versucht auf geschützte Seite zuzugreifen
-    window.location.href = 'login.html';
+    window.location.href = '/sites/login.html';
   }
 }
 
@@ -73,7 +73,7 @@ function logout() {
   localStorage.removeItem('user');
 
   // Zur Login-Seite umleiten
-  window.location.href = '/frontend/sites/login.html';
+  window.location.href = '/sites/login.html';
 }
 
 
