@@ -1,3 +1,5 @@
+const API_URL = 'http://localhost:5000'
+
 // Prüfen, ob der Benutzer authentifiziert ist
 document.addEventListener('DOMContentLoaded', function() {
   // Token aus localStorage holen
@@ -15,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
   workoutForm.addEventListener('submit', async function(e) {
     e.preventDefault();
 
-
     // Formular-Daten sammeln
     const formData = {
       name: document.getElementById('name').value,
@@ -29,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     try {
       // API-Aufruf, um das Workout hinzuzufügen
-      const response = await fetch('http://localhost:5000/api/workouts/add', {
+      const response = await fetch(API_URL + '/api/workouts/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,35 +95,39 @@ document.addEventListener('DOMContentLoaded', function() {
     const workoutsList = document.getElementById('workoutsList');
 
     // API-Aufruf zum Laden der Workouts
-    fetch('/api/workouts', {
+    fetch(API_URL + '/api/workouts/get', {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
     })
       .then(response => response.json())
       .then(data => {
-        if (data.length === 0) {
+        const workouts = data.workouts.rows;
+
+        if (workouts.length === 0) {
           workoutsList.innerHTML = '<p>Keine Workouts gefunden. Erstellen Sie ein neues Workout!</p>';
           return;
         }
 
         workoutsList.innerHTML = '';
-        data.forEach(workout => {
+        workouts.forEach(workout => {
+          const shortDescription = workout.description ? workout.description.slice(0, 100) + '...' : 'Keine Beschreibung';
+
           workoutsList.innerHTML += `
           <div class="border rounded-lg p-4 hover:bg-gray-50">
             <h3 class="font-bold text-lg">${workout.name}</h3>
-            <p class="text-gray-600">${workout.description.slice(0, 100)}...</p>
+            <p class="text-gray-600">${shortDescription}</p>
             <div class="flex mt-3">
               <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded mr-2">${workout.difficulty_level}</span>
               <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">${workout.goal}</span>
             </div>
             <div class="mt-4 flex space-x-2">
               <button class="view-workout-btn px-3 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200"
-                      data-id="${workout.id}">Ansehen</button>
+                      data-id="${workout.template_id}">Ansehen</button>
               <button class="edit-workout-btn px-3 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200"
-                      data-id="${workout.id}">Bearbeiten</button>
+                      data-id="${workout.template_id}">Bearbeiten</button>
               <button class="delete-workout-btn px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
-                      data-id="${workout.id}">Löschen</button>
+                      data-id="${workout.template_id}">Löschen</button>
             </div>
           </div>
         `;
@@ -141,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const workoutSelect = document.getElementById('workout-select');
 
     // API-Aufruf zum Laden der Workouts für das Dropdown-Menü
-    fetch('/api/workouts', {
+    fetch(API_URL + '/api/workouts', {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -171,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function loadWorkoutForEdit(workoutId) {
     // API-Aufruf zum Laden eines bestimmten Workouts
-    fetch(`/api/workouts/${workoutId}`, {
+    fetch(`{API_URL}/api/workouts/${workoutId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -223,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function deleteWorkout(workoutId) {
     // API-Aufruf zum Löschen eines Workouts
-    fetch(`/api/workouts/${workoutId}`, {
+    fetch(`{API_URL}/api/workouts/${workoutId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`

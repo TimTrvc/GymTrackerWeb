@@ -21,6 +21,23 @@ const addWorkout = async (req, res) => {
     }
 };
 
+const getWorkouts = async (req, res) => {
+    const pool = req.app.get('db');
+    const user_id = req.users.id;
+
+    try {
+        const result = await pool.query(
+            'SELECT * FROM workout_templates WHERE created_by = ' + user_id
+        );
+        res.json({
+            workouts: result
+        });
+    } catch (err) {
+        console.error('Fehler bei der Workoutabfrage:', err);
+        return res.status(500).json({ error: 'Serverseiten-Fehler bei der Workoutabfrage' });
+    }
+}
+
 // Für workoutController.js
 const editWorkout = async (req, res) => {
     const pool = req.app.get('db');
@@ -80,4 +97,4 @@ const removeWorkout = async (req, res) => {
         res.status(500).json({ error: 'Serverseiten-Fehler beim Löschen des Workouts' });
     }
 };
-module.exports = { addWorkout, editWorkout, removeWorkout };
+module.exports = { addWorkout, getWorkouts, editWorkout, removeWorkout };
