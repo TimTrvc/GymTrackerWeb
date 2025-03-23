@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GymTrack - Workout hinzufügen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+<!-- Navigation -->
+<nav class="bg-indigo-600 text-white shadow-lg">
+  <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+    <a href="../index.html" class="text-2xl font-bold flex items-center">
+      <span class="mr-2">💪</span> GymTrack
+    </a>
+    <div class="flex items-center space-x-4">
+      <a href="#" class="hover:text-indigo-200">Dashboard</a>
+      <a href="#" class="hover:text-indigo-200">Übungen</a>
+      <a href="#" class="hover:text-indigo-200">Statistiken</a>
+      <a href="#" class="hover:text-indigo-200">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<div class="bg-indigo-700 text-white py-12">
+  <div class="container mx-auto px-4 text-center">
+    <h1 class="text-4xl font-bold mb-4">Neues Workout erstellen</h1>
+    <p class="text-xl">Erstelle dein eigenes Trainingsprogramm und verfolge deinen Fortschritt</p>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
+    <form id="workoutForm" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Workout Name -->
+        <div class="col-span-2">
+          <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Workout Name*</label>
+          <input type="text" id="name" name="name" required
+                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <!-- Beschreibung -->
+        <div class="col-span-2">
+          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Beschreibung*</label>
+          <textarea id="description" name="description" rows="4" required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+
+        <!-- Schwierigkeitsgrad -->
+        <div>
+          <label for="difficulty_level" class="block text-sm font-medium text-gray-700 mb-1">Schwierigkeitsgrad*</label>
+          <select id="difficulty_level" name="difficulty_level" required
+                  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="">Bitte wählen</option>
+            <option value="Anfänger">Anfänger</option>
+            <option value="Mittel">Mittel</option>
+            <option value="Fortgeschritten">Fortgeschritten</option>
+            <option value="Profi">Profi</option>
+          </select>
+        </div>
+
+        <!-- Zielgruppe -->
+        <div>
+          <label for="target_audience" class="block text-sm font-medium text-gray-700 mb-1">Zielgruppe*</label>
+          <select id="target_audience" name="target_audience" required
+                  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="">Bitte wählen</option>
+            <option value="Alle">Alle</option>
+            <option value="Anfänger">Anfänger</option>
+            <option value="Bodybuilder">Bodybuilder</option>
+            <option value="Frauen">Frauen</option>
+            <option value="Männer">Männer</option>
+            <option value="Senioren">Senioren</option>
+          </select>
+        </div>
+
+        <!-- Trainingsziel -->
+        <div>
+          <label for="goal" class="block text-sm font-medium text-gray-700 mb-1">Trainingsziel*</label>
+          <select id="goal" name="goal" required
+                  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="">Bitte wählen</option>
+            <option value="Muskelaufbau">Muskelaufbau</option>
+            <option value="Kraftaufbau">Kraftaufbau</option>
+            <option value="Fettabbau">Fettabbau</option>
+            <option value="Ausdauer">Ausdauer</option>
+            <option value="Flexibilität">Flexibilität</option>
+            <option value="Allgemeine Fitness">Allgemeine Fitness</option>
+          </select>
+        </div>
+
+        <!-- Dauer (Minuten) -->
+        <div>
+          <label for="estimated_duration_minutes" class="block text-sm font-medium text-gray-700 mb-1">Dauer (Minuten)*</label>
+          <input type="number" id="estimated_duration_minutes" name="estimated_duration_minutes" min="1" required
+                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <!-- Featured Workout -->
+        <div>
+          <label class="flex items-center cursor-pointer">
+            <input type="checkbox" id="is_featured" name="is_featured" class="h-5 w-5 text-indigo-600 rounded-md">
+            <span class="ml-2 text-sm font-medium text-gray-700">Als Featured Workout markieren</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="flex justify-end">
+        <button type="submit" class="px-6 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          Workout hinzufügen
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-8 mt-12">
+  <div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <h4 class="text-xl font-bold mb-4">GymTrack</h4>
+        <p class="text-gray-400">Dein persönlicher Fitness-Tracker für optimale Erfolge im Gym.</p>
+      </div>
+      <div>
+        <h4 class="text-xl font-bold mb-4">Links</h4>
+        <ul class="space-y-2 text-gray-400">
+          <li><a href="#" class="hover:text-white">Home</a></li>
+          <li><a href="#" class="hover:text-white">Features</a></li>
+          <li><a href="#" class="hover:text-white">Preise</a></li>
+          <li><a href="#" class="hover:text-white">Kontakt</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xl font-bold mb-4">Newsletter</h4>
+        <p class="text-gray-400 mb-4">Erhalte Fitness-Tipps und Updates.</p>
+        <div class="flex">
+          <input type="email" placeholder="Deine Email" class="py-2 px-4 rounded-l outline-none text-gray-800 flex-grow">
+          <button class="bg-indigo-600 py-2 px-4 rounded-r hover:bg-indigo-700">Abonnieren</button>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+      <p>&copy; 2025 GymTrack. Alle Rechte vorbehalten.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/workout.js"></script>
+</body>
+</html>
