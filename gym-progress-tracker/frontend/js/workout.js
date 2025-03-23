@@ -55,6 +55,195 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+  // Tab-Funktionalität
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      // Tab-Buttons aktualisieren
+      tabButtons.forEach(btn => {
+        btn.classList.remove('active', 'border-indigo-500', 'text-indigo-600');
+        btn.classList.add('border-transparent', 'text-gray-500');
+      });
+      this.classList.add('active', 'border-indigo-500', 'text-indigo-600');
+      this.classList.remove('border-transparent', 'text-gray-500');
+
+      // Tab-Inhalte aktualisieren
+      const targetId = this.id.replace('tab-', 'tab-content-');
+      tabContents.forEach(content => {
+        content.classList.add('hidden');
+      });
+      document.getElementById(targetId).classList.remove('hidden');
+
+      // Bei Wechsel zum Anzeigen-Tab die Workouts laden
+      if (this.id === 'tab-view') {
+        loadWorkouts();
+      }
+
+      // Bei Wechsel zum Bearbeiten-Tab die Workout-Liste laden
+      if (this.id === 'tab-edit') {
+        loadWorkoutsForEdit();
+      }
+    });
+  });
+
+  // Funktionen zum Laden der Workouts
+  function loadWorkouts() {
+    const workoutsList = document.getElementById('workoutsList');
+
+    // API-Aufruf zum Laden der Workouts
+    fetch('/api/workouts', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.length === 0) {
+          workoutsList.innerHTML = '<p>Keine Workouts gefunden. Erstellen Sie ein neues Workout!</p>';
+          return;
+        }
+
+        workoutsList.innerHTML = '';
+        data.forEach(workout => {
+          workoutsList.innerHTML += `
+          <div class="border rounded-lg p-4 hover:bg-gray-50">
+            <h3 class="font-bold text-lg">${workout.name}</h3>
+            <p class="text-gray-600">${workout.description.slice(0, 100)}...</p>
+            <div class="flex mt-3">
+              <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded mr-2">${workout.difficulty_level}</span>
+              <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">${workout.goal}</span>
+            </div>
+            <div class="mt-4 flex space-x-2">
+              <button class="view-workout-btn px-3 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200"
+                      data-id="${workout.id}">Ansehen</button>
+              <button class="edit-workout-btn px-3 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200"
+                      data-id="${workout.id}">Bearbeiten</button>
+              <button class="delete-workout-btn px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                      data-id="${workout.id}">Löschen</button>
+            </div>
+          </div>
+        `;
+        });
+
+        // Event-Listener für die Workout-Aktionen
+        addWorkoutActionListeners();
+      })
+      .catch(error => {
+        console.error('Fehler beim Laden der Workouts:', error);
+        workoutsList.innerHTML = '<p>Fehler beim Laden der Workouts. Bitte versuchen Sie es später erneut.</p>';
+      });
+  }
+
+  function loadWorkoutsForEdit() {
+    const workoutSelect = document.getElementById('workout-select');
+
+    // API-Aufruf zum Laden der Workouts für das Dropdown-Menü
+    fetch('/api/workouts', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        // Dropdown-Menü mit Workouts füllen
+        workoutSelect.innerHTML = '<option value="">Bitte Workout wählen</option>';
+        data.forEach(workout => {
+          workoutSelect.innerHTML += `<option value="${workout.id}">${workout.name}</option>`;
+        });
+      })
+      .catch(error => {
+        console.error('Fehler beim Laden der Workouts:', error);
+      });
+
+    // Event-Listener für das Dropdown-Menü
+    workoutSelect.addEventListener('change', function() {
+      const selectedWorkoutId = this.value;
+      if (selectedWorkoutId) {
+        loadWorkoutForEdit(selectedWorkoutId);
+      } else {
+        document.getElementById('editWorkoutForm').classList.add('hidden');
+      }
+    });
+  }
+
+  function loadWorkoutForEdit(workoutId) {
+    // API-Aufruf zum Laden eines bestimmten Workouts
+    fetch(`/api/workouts/${workoutId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+      .then(response => response.json())
+      .then(workout => {
+        const form = document.getElementById('editWorkoutForm');
+
+        // Formular mit den Workout-Daten füllen
+        // Hier müssen Sie die entsprechenden Formularfelder anlegen und befüllen
+
+        form.classList.remove('hidden');
+      })
+      .catch(error => {
+        console.error('Fehler beim Laden des Workouts:', error);
+      });
+  }
+
+  function addWorkoutActionListeners() {
+    // Event-Listener für die Ansehen-Buttons
+    document.querySelectorAll('.view-workout-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const workoutId = this.getAttribute('data-id');
+        // Hier Logik zum Anzeigen des Workouts
+      });
+    });
+
+    // Event-Listener für die Bearbeiten-Buttons
+    document.querySelectorAll('.edit-workout-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const workoutId = this.getAttribute('data-id');
+        // Tab zum Bearbeiten wechseln und das entsprechende Workout laden
+        document.getElementById('tab-edit').click();
+        document.getElementById('workout-select').value = workoutId;
+        loadWorkoutForEdit(workoutId);
+      });
+    });
+
+    // Event-Listener für die Löschen-Buttons
+    document.querySelectorAll('.delete-workout-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        if (confirm('Sind Sie sicher, dass Sie dieses Workout löschen möchten?')) {
+          const workoutId = this.getAttribute('data-id');
+          deleteWorkout(workoutId);
+        }
+      });
+    });
+  }
+
+  function deleteWorkout(workoutId) {
+    // API-Aufruf zum Löschen eines Workouts
+    fetch(`/api/workouts/${workoutId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+      .then(response => {
+        if (response.ok) {
+          // Workout aus der Liste entfernen und Liste aktualisieren
+          loadWorkouts();
+        } else {
+          throw new Error('Fehler beim Löschen des Workouts');
+        }
+      })
+      .catch(error => {
+        console.error('Fehler:', error);
+        alert('Fehler beim Löschen des Workouts. Bitte versuchen Sie es später erneut.');
+      });
+  }
+});
+
 function checkAuth() {
   const token = localStorage.getItem('token');
   if (!token) {
