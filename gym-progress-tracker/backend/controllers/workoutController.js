@@ -6,10 +6,10 @@ const addWorkout = async (req, res) => {
     try {
         // Workout in Datenbank einfügen
         const result = await pool.query(
-            `INSERT INTO workouts (name, description, difficulty_level, target_audience, goal, 
-      estimated_duration_minutes, created_by, is_featured, created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP) 
-      RETURNING workout_id, name, created_by`,
+            `INSERT INTO workout_templates (name, description, difficulty_level, target_audience, goal, 
+      estimated_duration_minutes, created_by, is_featured)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+      RETURNING template_id, name, created_by`,
             [name, description, difficulty_level, target_audience, goal,
                 estimated_duration_minutes, created_by, is_featured]
         );
@@ -30,7 +30,7 @@ const editWorkout = async (req, res) => {
     try {
         // Workout in Datenbank aktualisieren
         const result = await pool.query(
-            `UPDATE workouts 
+            `UPDATE workout_templates 
              SET name = $1, description = $2, difficulty_level = $3, 
                  target_audience = $4, goal = $5, estimated_duration_minutes = $6, 
                  is_featured = $7, modified_at = CURRENT_TIMESTAMP, modified_by = $8
@@ -61,7 +61,7 @@ const removeWorkout = async (req, res) => {
 
     try {
         const result = await pool.query(
-            `DELETE FROM workouts 
+            `DELETE FROM workout_templates 
              WHERE workout_id = $1
              RETURNING workout_id`,
             [workout_id]

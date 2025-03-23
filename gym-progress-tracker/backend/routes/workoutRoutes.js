@@ -8,8 +8,8 @@ const router = express.Router();
 
 // HTTP-Methoden anpassen - POST für das Erstellen/Bearbeiten,
 // DELETE für das Löschen oder behalte GET für removeWorkout
-router.post('/add', addWorkout);
-router.post('/edit', editWorkout);
-router.delete('/remove', removeWorkout);  // oder router.get('/remove', removeWorkout);
+router.post('/add', authMiddleware, addWorkout);
+router.post('/edit', authMiddleware,  editWorkout);
+router.delete('/remove', authMiddleware,  removeWorkout);  // oder router.get('/remove', removeWorkout);
 
 module.exports = router;
