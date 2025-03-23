@@ -3,7 +3,7 @@ FROM node:18
 WORKDIR /app
 
 # Kopieren Sie nur die package.json-Dateien zunächst, um die Caching-Vorteile von Docker zu nutzen
-COPY ../package*.json ./
+COPY package*.json ./
 RUN npm install
 
 # Dann den Rest des Codes kopieren
