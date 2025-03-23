@@ -39,7 +39,7 @@ app.use(express.static('public'));
 
 // Routen
 app.use('/api/users', userRoutes);
-app.use('api/workouts', workoutRoutes);
+app.use('/api/workouts', workoutRoutes);
 
 // Einfache Home-Route
 app.get('/api', (req, res) => {
