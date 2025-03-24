@@ -24,17 +24,23 @@ function isLoggedIn() {
   return localStorage.getItem('token') !== null;
 }
 
+function getPathPrefix() {
+  // Prüft, ob die aktuelle Seite im /sites/ Ordner liegt
+  return window.location.pathname.includes('/sites/') ? '' : 'sites/';
+}
+
 function renderNavigation() {
   const navElement = document.querySelector('nav .flex.items-center.space-x-4');
   if (!navElement) return;
 
+  const prefix = getPathPrefix(); // entweder '' oder 'sites/'
+
   if (isLoggedIn()) {
-    // Für eingeloggte Benutzer
     navElement.innerHTML = `
-      <a href="../index.html" class="hover:text-indigo-200">Dashboard</a>
-      <a href="sites/workout.html" class="hover:text-indigo-200">Workouts</a>
-      <a href="sites/exercises.html" class="hover:text-indigo-200">Übungen</a>
-      <a href="#" class="hover:text-indigo-200">Statistiken</a>
+      <a href="${prefix}dashboard.html" class="hover:text-indigo-200">Dashboard</a>
+      <a href="${prefix}workout.html" class="hover:text-indigo-200">Workouts</a>
+      <a href="${prefix}exercises.html" class="hover:text-indigo-200">Übungen</a>
+      <a href="${prefix}statistics.html" class="hover:text-indigo-200">Statistiken</a>
       <a href="#" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100" id="logout-btn">Logout</a>
     `;
 
@@ -55,7 +61,7 @@ function renderNavigation() {
 
 function protectPage() {
   // Liste der geschützten Pfade
-  const protectedPaths = ['workout.html', 'exercises.html', 'statistics.html'];
+  const protectedPaths = ['workout.html', 'exercises.html', 'statistics.html','dashboard.html'];
 
   // Aktueller Pfad
   const currentPath = window.location.pathname.split('/').pop();
