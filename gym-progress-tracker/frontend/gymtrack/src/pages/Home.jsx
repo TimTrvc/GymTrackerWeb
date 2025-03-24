@@ -64,14 +64,14 @@ const Home = () => {
               <ProgressForm onSubmit={handleAddProgress} />
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <h2 className="text-2xl font-bold mb-6 text-gray-800">Deine Fortschritte</h2>
-              {loading ? (
-                <p>Lade Daten...</p>
-              ) : (
-                <ProgressList data={progressData} />
-              )}
-            </div>
+            {/*<div className="bg-white p-6 rounded-xl shadow-md">*/}
+            {/*  <h2 className="text-2xl font-bold mb-6 text-gray-800">Deine Fortschritte</h2>*/}
+            {/*  {loading ? (*/}
+            {/*    <p>Lade Daten...</p>*/}
+            {/*  ) : (*/}
+            {/*    <ProgressList data={progressData} />*/}
+            {/*  )}*/}
+            {/*</div>*/}
           </>
         )}
 
