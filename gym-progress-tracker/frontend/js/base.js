@@ -31,7 +31,7 @@ function renderNavigation() {
   if (isLoggedIn()) {
     // Für eingeloggte Benutzer
     navElement.innerHTML = `
-      <a href="../index.html" class="hover:text-indigo-200">Dashboard</a>
+      <a href="../public/index.html" class="hover:text-indigo-200">Dashboard</a>
       <a href="sites/workout.html" class="hover:text-indigo-200">Workouts</a>
       <a href="sites/exercises.html" class="hover:text-indigo-200">Übungen</a>
       <a href="#" class="hover:text-indigo-200">Statistiken</a>
@@ -43,7 +43,7 @@ function renderNavigation() {
       e.preventDefault();
       localStorage.removeItem('token');
       localStorage.removeItem('userId');
-      window.location.href = '../index.html';
+      window.location.href = '../public/index.html';
     });
   } else {
     // Für nicht eingeloggte Benutzer
