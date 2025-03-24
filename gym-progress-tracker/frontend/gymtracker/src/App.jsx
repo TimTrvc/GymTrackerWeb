@@ -1,13 +1,13 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router';
 import { AuthProvider } from './context/AuthContext';
 
 // Seiten
 import Home from './pages/Home';
 import Login from './pages/Login';
-import Workouts from './pages/Workouts';
-import Exercises from './pages/Exercises';
-import Statistics from './pages/Statistics';
+//import Workouts from './pages/Workouts';
+// import Exercises from './pages/Exercises';
+// import Statistics from './pages/Statistics';
 
 // Layout
 import Navbar from './components/layout/Navbar';
@@ -18,7 +18,7 @@ const privateRoute = (Component) => (
   <PrivateRoute>
     <Component />
   </PrivateRoute>
-)
+);
 
 function App() {
   return (
@@ -30,30 +30,10 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
-              <Route
-                path="/workouts"
-                element={
-                  <PrivateRoute>
-                    <Workouts />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/exercises"
-                element={
-                  <PrivateRoute>
-                    <Exercises />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/statistics"
-                element={
-                  <PrivateRoute>
-                    <Statistics />
-                  </PrivateRoute>
-                }
-              />
+              <Route path="/dashboard" element={privateRoute(Dashboard)} />
+              <Route path="/workouts" element={privateRoute(Workouts)} />
+              <Route path="/exercises" element={privateRoute(Übungen)} />
+              <Route path="/statistics" element={privateRoute(Statistiken)} />
             </Routes>
           </main>
           <Footer />
