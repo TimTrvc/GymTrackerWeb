@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
+import authService from '../services/authService';
+import { useNavigate } from 'react-router-dom';
 
-const Login = ({ onSubmit }) => {
+const Login = ({ onLoginSuccess }) => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
     rememberMe: false
   });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -15,13 +20,40 @@ const Login = ({ onSubmit }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const response = await authService.login({
+        username: formData.username,
+        password: formData.password
+      });
+
+      setIsLoading(false);
+
+      // Callback für erfolgreichen Login
+      if (onLoginSuccess) {
+        onLoginSuccess(response.user);
+      }
+
+      // Weiterleitung nach erfolgreichem Login
+      navigate('/dashboard');
+    } catch (error) {
+      setIsLoading(false);
+      setError(error.message);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit}>
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+
       <div className="mb-4">
         <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">
           Benutzername
@@ -76,9 +108,10 @@ const Login = ({ onSubmit }) => {
       <div>
         <button
           type="submit"
+          disabled={isLoading}
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
-          Anmelden
+          {isLoading ? 'Wird angemeldet...' : 'Anmelden'}
         </button>
       </div>
     </form>
