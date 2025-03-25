@@ -6,7 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Workouts from './pages/Workouts';
-// import Exercises from './pages/Exercises';
+import Exercises from './pages/Exercises';
 // import Statistics from './pages/Statistics';
 
 // Layout
@@ -31,9 +31,9 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/workouts" element={privateRoute(Workouts)} />
+              <Route path="/exercises" element={privateRoute(Exercises)} />
               {/* <Route path="/dashboard" element={privateRoute(Dashboard)} />
-              <Route path="/exercises" element={privateRoute(Übungen)} />
-              <Route path="/statistics" element={privateRoute(Statistiken)} /> */}
+                            <Route path="/statistics" element={privateRoute(Statistiken)} /> */}
             </Routes>
           </main>
           <Footer />
