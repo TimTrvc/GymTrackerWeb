@@ -4,6 +4,8 @@ const cors = require('cors');
 const { Pool } = require('pg');
 const userRoutes = require('./routes/userRoutes');
 const workoutRoutes = require('./routes/workoutRoutes');
+const exerciseCategoriesRoutes = require('./routes/exerciseCategoriesRoutes');
+const exerciseRoutes = require('./routes/exerciseRoutes');
 
 const app = express();
 app.use(cors());
@@ -40,6 +42,8 @@ app.use(express.static('public'));
 // Routen
 app.use('/api/users', userRoutes);
 app.use('/api/workouts', workoutRoutes);
+app.use('/api/exercise-categories', exerciseCategoriesRoutes);
+app.use('/api/exercises', exerciseRoutes);
 
 // Einfache Home-Route
 app.get('/api', (req, res) => {
