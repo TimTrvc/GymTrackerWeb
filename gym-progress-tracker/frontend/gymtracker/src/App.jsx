@@ -30,10 +30,10 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/dashboard" element={privateRoute(Dashboard)} />
+              {/* <Route path="/dashboard" element={privateRoute(Dashboard)} />
               <Route path="/workouts" element={privateRoute(Workouts)} />
               <Route path="/exercises" element={privateRoute(Übungen)} />
-              <Route path="/statistics" element={privateRoute(Statistiken)} />
+              <Route path="/statistics" element={privateRoute(Statistiken)} /> */}
             </Routes>
           </main>
           <Footer />

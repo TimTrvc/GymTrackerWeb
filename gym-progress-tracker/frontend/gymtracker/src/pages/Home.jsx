@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { AuthContext } from '../context/AuthContext';
-import ProgressForm from '../components/progress/ProgressForm';
-import ProgressList from '../components/progress/ProgressList';
+// import ProgressForm from '../components/progress/ProgressForm';
+// import ProgressList from '../components/progress/ProgressList';
 import HeroSection from '../components/layout/HeroSection';
-import { fetchProgressData, addProgressData } from '../services/progressService';
+// import { fetchProgressData, addProgressData } from '../services/progressService';
 
 const Home = () => {
   const { isAuthenticated } = useContext(AuthContext);
@@ -17,6 +17,7 @@ const Home = () => {
     }
   }, [isAuthenticated]);
 
+  /*
   const loadProgressData = async () => {
     setLoading(true);
     try {
@@ -38,7 +39,7 @@ const Home = () => {
       return { success: false, error: error.message };
     }
   };
-
+  */
   return (
     <>
       <HeroSection

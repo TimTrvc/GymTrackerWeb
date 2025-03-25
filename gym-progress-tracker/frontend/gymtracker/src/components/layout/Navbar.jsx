@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { AuthContext } from '../../context/AuthContext';
 
 const Navbar = () => {
@@ -14,7 +14,7 @@ const Navbar = () => {
   return (
     <nav className="bg-indigo-600 text-white shadow-lg">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold flex items-center">
+        <Link to="/" className="text-2xl font-bold text-white flex items-center">
           <span className="mr-2">💪</span> GymTrack
         </Link>
         <div className="flex items-center space-x-4">

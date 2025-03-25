@@ -21,7 +21,7 @@ const Login = ({ onSubmit }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-10 p-6 bg-white">
       <div className="mb-4">
         <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">
           Benutzername
