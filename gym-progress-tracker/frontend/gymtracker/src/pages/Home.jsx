@@ -1,45 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { AuthContext } from '../context/AuthContext';
-// import ProgressForm from '../components/progress/ProgressForm';
-// import ProgressList from '../components/progress/ProgressList';
 import HeroSection from '../components/layout/HeroSection';
-// import { fetchProgressData, addProgressData } from '../services/progressService';
 
 const Home = () => {
   const { isAuthenticated } = useContext(AuthContext);
-  const [progressData, setProgressData] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
-      loadProgressData();
     }
   }, [isAuthenticated]);
 
-  /*
-  const loadProgressData = async () => {
-    setLoading(true);
-    try {
-      const data = await fetchProgressData();
-      setProgressData(data);
-    } catch (error) {
-      console.error('Failed to load progress data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddProgress = async (formData) => {
-    try {
-      await addProgressData(formData);
-      loadProgressData();
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  };
-  */
   return (
     <>
       <HeroSection
@@ -62,17 +34,7 @@ const Home = () => {
           <>
             <div className="mb-12 bg-white p-6 rounded-xl shadow-md">
               <h2 className="text-2xl font-bold mb-6 text-gray-800">Fortschritt hinzufügen</h2>
-              <ProgressForm onSubmit={handleAddProgress} />
             </div>
-
-            {/*<div className="bg-white p-6 rounded-xl shadow-md">*/}
-            {/*  <h2 className="text-2xl font-bold mb-6 text-gray-800">Deine Fortschritte</h2>*/}
-            {/*  {loading ? (*/}
-            {/*    <p>Lade Daten...</p>*/}
-            {/*  ) : (*/}
-            {/*    <ProgressList data={progressData} />*/}
-            {/*  )}*/}
-            {/*</div>*/}
           </>
         )}
 
