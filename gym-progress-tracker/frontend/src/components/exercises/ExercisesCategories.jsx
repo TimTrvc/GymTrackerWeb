@@ -1,6 +1,6 @@
 import ExerciseCategoryCard from "./ExerciseCategoryCard.jsx";
 
-const ExercisesCategories = ({ categories }) => {
+const ExercisesCategories = ({ categories, onCategoryClick }) => {
     console.log(categories);
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -9,6 +9,8 @@ const ExercisesCategories = ({ categories }) => {
                     key={index}
                     name={category.name}
                     description={category.description}
+                    category_id={category.id}
+                    onCategoryClick={onCategoryClick}
                 />
             ))}
         </div>

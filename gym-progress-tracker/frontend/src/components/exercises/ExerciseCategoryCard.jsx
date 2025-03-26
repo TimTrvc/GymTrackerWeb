@@ -1,8 +1,8 @@
 import React from 'react';
 
-const ExerciseCategoryCard = ({ name, description, category_id }) => {
+const ExerciseCategoryCard = ({ name, description, category_id, onCategoryClick }) => {
     return (
-        <div className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer">
+        <div className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer" onClick={() => onCategoryClick(category_id)}>
             <div className="bg-red-100 text-red-600 rounded-full w-12 h-12 flex items-center justify-center mb-3">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor">

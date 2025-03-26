@@ -1,7 +1,6 @@
 import api from "./api.js";
 
 export const getExerciseCategories = async () => {
-    const token = localStorage.getItem('token');
     try {
         const response = await api.get('/api/exercise-categories/');
 
