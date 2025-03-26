@@ -1,7 +1,6 @@
 import api from './api';
 
 export const getWorkouts = async () => {
-  const token = localStorage.getItem('token');
   try {
     const response = await api.get('/api/workout-templates/get');
 
@@ -14,7 +13,6 @@ export const getWorkouts = async () => {
 };
 
 export const addWorkout = async (workout) => {
-  const token = localStorage.getItem('token');
   try {
     const response = api.get('/api/workout-templates/add', {
       body:

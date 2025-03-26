@@ -77,7 +77,6 @@ const Workout = () => {
   };
 
   const loadWorkoutsForEdit = async () => {
-    // Hier können Sie die Logik für das Laden der Workouts zum Bearbeiten implementieren
     await loadWorkouts();
   };
 
