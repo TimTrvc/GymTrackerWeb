@@ -15,8 +15,7 @@ const Exercises = () => {
         const loadExerciseCategories = async () => {
             try {
                 const data = await getExerciseCategories();
-                console.log('API Antwort:', data); // Wichtig zum Debuggen
-                setExerciseCategories(data); // Direkt das gesamte data-Array setzen
+                setExerciseCategories(data || []);
             } catch (error) {
                 console.error('Fehler beim Laden der Workouts:', error);
             }
@@ -29,14 +28,8 @@ const Exercises = () => {
     try {
       setLoading(true);
       setSelectedCategory(categoryId);
-
-      // Hier müsstest du eine API-Funktion aufrufen, die Übungen nach Kategorie lädt
-      // z.B.: const exercisesData = await getExercisesByCategory(categoryId);
-      // setExercises(exercisesData);
-
-      // Beispiel-Mockdaten (durch tatsächlichen API-Aufruf ersetzen):
-      await loadExercisesByCategory(categoryId);
-      setExercises(mockExercises);
+      const exercisesLoaded = await loadExercisesByCategory(categoryId);
+      setExercises(exercisesLoaded);
       setLoading(false);
 
     } catch (error) {
@@ -58,7 +51,7 @@ const renderExercises = () => {
     return null;
   }
 
-  if (exercises.length === 0) {
+  if (exercises == undefined || exercises.length === 0) {
     return <div className="text-center py-8">Keine Übungen in dieser Kategorie gefunden.</div>;
   }
 
@@ -93,9 +86,16 @@ const renderExercises = () => {
 return (
         <>
             <HeroSection title="Übungen" subtitle="Erstelle oder betrachte hier deine Übungen"/>
-            <div className="max-w-5xl mx-auto">
-                <ExercisesCategories categories={exerciseCategories} onCategoryClick={handleCategoryClick} />
-            </div>
+          <div className="max-w-5xl mx-auto p-4">
+            {!selectedCategory && (
+              <ExercisesCategories
+                categories={exerciseCategories}
+                onCategoryClick={handleCategoryClick}
+              />
+            )}
+            {renderExercises()}
+          </div>
+
         </>
     );
 }
