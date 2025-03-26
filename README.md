@@ -49,15 +49,15 @@ gym-progress-tracker
 ## Usage
 1. Start the backend server:
    ```
-   node backend/app.js
+   node server.js in gym-progress-tracker/backend
    ```
-2. Open `frontend/index.html` in your web browser to access the application.
+2. Run npm/pnpm run dev in gym-progress-tracker/frontend
 
 ## Technologies Used
 - Node.js
 - Express.js
-- MongoDB (or any other database of your choice)
-- HTML, CSS, JavaScript for the frontend
+- PostgreSQL
+- React with TailwindCSS for frontend
 
 ## Contributing
 Contributions are welcome! Please submit a pull request or open an issue for any suggestions or improvements.
