@@ -6,8 +6,8 @@ const {
     addExercise,
     updateExercise,
     deleteExercise
-} = require('../controllers/exercisesController');
-const authMiddleware = require('../middleware/authMiddleware');
+} = require('../../controllers/exercises/exercisesController');
+const authMiddleware = require('../../middleware/authMiddleware');
 
 const router = express.Router();
 
