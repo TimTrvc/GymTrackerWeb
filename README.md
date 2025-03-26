@@ -11,25 +11,108 @@ The Gym Progress Tracker is a web application designed to help users track their
 
 ## Project Structure
 ```
-gym-progress-tracker
-├── backend
-│   ├── app.js
-│   ├── controllers
-│   │   └── progressController.js
-│   ├── models
-│   │   └── progressModel.js
-│   ├── routes
-│   │   └── progressRoutes.js
-│   └── utils
-│       └── db.js
-├── frontend
+gym-progress-tracker/
+├── backend/
+│   ├── controllers/
+│   │   ├── exercises/
+│   │   │   ├── exerciseCategoriesController.js
+│   │   │   ├── exercisePerformanceController.js
+│   │   │   ├── exercisesController.js
+│   │   │   └── templateExercisesController.js
+│   │   ├── stats/
+│   │   │   ├── activityStatsController.js
+│   │   │   ├── bodyMeasurementsController.js
+│   │   │   ├── goalsController.js
+│   │   │   ├── nutritionLogsController.js
+│   │   │   ├── personalRecordsController.js
+│   │   │   └── trainingSessionsController.js
+│   │   ├── user/
+│   │   │   ├── userConnectionsController.js
+│   │   │   ├── userController.js
+│   │   │   └── userWeightLogsController.js
+│   │   ├── workouts/
+│   │       ├── workoutController.js
+│   │       ├── workoutExercisesController.js
+│   │       └── workoutTemplatesController.js
+│   ├── middleware/
+│   │   └── authMiddleware.js
+│   ├── routes/
+│   │   ├── exercises/
+│   │   │   ├── exerciseCategoriesRoutes.js
+│   │   │   ├── exercisePerformanceRoutes.js
+│   │   │   ├── exerciseRoutes.js
+│   │   │   └── templateExercisesRoutes.js
+│   │   ├── stats/
+│   │   │   ├── activityStatsRoutes.js
+│   │   │   ├── bodyMeasurementRoutes.js
+│   │   │   ├── goalsRoutes.js
+│   │   │   ├── nutritionLogsRoutes.js
+│   │   │   ├── personalRecordsRoutes.js
+│   │   │   └── trainingSessionsRoutes.js
+│   │   ├── user/
+│   │   │   ├── userConnectionsRoutes.js
+│   │   │   ├── userRoutes.js
+│   │   │   └── userWeightLogsRoutes.js
+│   │   ├── workouts/
+│   │       ├── workoutExercisesRoutes.js
+│   │       ├── workoutRoutes.js
+│   │       └── workoutTemplateRoutes.js
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   ├── package.json
+│   ├── render.yaml
+│   └── server.js
+├── frontend/
+│   ├── public/
+│   │   └── vite.svg
+│   ├── src/
+│   │   ├── assets/
+│   │   │   └── react.svg
+│   │   ├── components/
+│   │   │   ├── auth/
+│   │   │   │   ├── AuthTab.jsx
+│   │   │   │   ├── Login.jsx
+│   │   │   │   ├── PrivateRoute.jsx
+│   │   │   │   └── Register.jsx
+│   │   │   ├── exercises/
+│   │   │   │   ├── ExerciseCategoryCard.jsx
+│   │   │   │   └── ExercisesCategories.jsx
+│   │   │   ├── layout/
+│   │   │   │   ├── Footer.jsx
+│   │   │   │   ├── HeroSection.jsx
+│   │   │   │   └── Navbar.jsx
+│   │   │   ├── workouts/
+│   │   │       ├── WorkoutCreate.jsx
+│   │   │       ├── WorkoutEdit.jsx
+│   │   │       ├── WorkoutNav.jsx
+│   │   │       ├── WorkoutTabs.jsx
+│   │   │       └── WorkoutView.jsx
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx
+│   │   ├── pages/
+│   │   │   ├── Exercises.jsx
+│   │   │   ├── Home.jsx
+│   │   │   ├── Login.jsx
+│   │   │   └── Workouts.jsx
+│   │   ├── services/
+│   │   │   ├── api.js
+│   │   │   ├── authService.js
+│   │   │   ├── exerciseCategoriesService.js
+│   │   │   ├── exercisesService.js
+│   │   │   └── workoutService.js
+│   │   ├── App.css
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── README.md
+│   ├── eslint.config.js
 │   ├── index.html
-│   ├── styles
-│   │   └── styles.css
-│   └── scripts
-│       └── app.js
-├── package.json
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── pnpm-lock.yaml
+│   └── vite.config.js
 └── README.md
+
 ```
 
 ## Installation
