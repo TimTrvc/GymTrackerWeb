@@ -1,10 +1,10 @@
 import { motion } from "motion/react"
 
-const Hoverer = ({ children }) => {
+const Hoverer = ({ children, scaleTap = 0.9, scaleHover = 1.1 }) => {
     return (
         <motion.div
-            whileHover={{ scale: 1.2 }}
-            whileTap={{ scale: 0.8 }}
+            whileHover={{ scale: scaleHover }}
+            whileTap={{ scale: scaleTap }}
         >
             {children}
         </motion.div>
