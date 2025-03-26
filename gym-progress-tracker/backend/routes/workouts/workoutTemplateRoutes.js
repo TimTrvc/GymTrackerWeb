@@ -1,8 +1,8 @@
 // workoutRoutes.js korrigieren
 const express = require('express');
-const { addWorkout, getWorkouts, getWorkoutById, editWorkout, removeWorkout } = require('../controllers/workoutController');
+const { addWorkout, getWorkouts, getWorkoutById, editWorkout, removeWorkout } = require('../../controllers/workouts/workoutTemplatesController');
 
-const authMiddleware = require('../middleware/authMiddleware');
+const authMiddleware = require('../../middleware/authMiddleware');
 
 const router = express.Router();
 

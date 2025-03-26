@@ -3,7 +3,7 @@ import api from './api';
 export const getWorkouts = async () => {
   const token = localStorage.getItem('token');
   try {
-    const response = await api.get('/api/workouts/get');
+    const response = await api.get('/api/workout-templates/get');
 
     if (response) {
       return response.data
@@ -16,7 +16,7 @@ export const getWorkouts = async () => {
 export const addWorkout = async (workout) => {
   const token = localStorage.getItem('token');
   try {
-    const response = api.get('/api/workouts/add', {
+    const response = api.get('/api/workout-templates/add', {
       body:
         JSON.stringify(workout)
     });
