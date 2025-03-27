@@ -68,7 +68,31 @@ const Exercises = () => {
         }
 
         if (exercises == undefined || exercises.length === 0) {
-            return <div className="text-center py-8">Keine Übungen in dieser Kategorie gefunden.</div>;
+            return (
+                <>
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold">Übungen: {selectedCategory}</h2>
+                    <div className="flex space-x-2">
+                        <button
+                            onClick={() => setSelectedCategory(null)}
+                            className="text-indigo-600 hover:text-indigo-800 mr-4"
+                        >
+                            Zurück zu Kategorien
+                        </button>
+                        <button
+                            onClick={() => setIsAddModalOpen(true)}
+                            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                        >
+                            Übung hinzufügen
+                        </button>
+                    </div>
+                </div>
+                <div className="text-center py-8">
+                    Keine Übungen in dieser Kategorie gefunden.
+                </div>
+                </>
+        )
+            ;
         }
 
         const categoryName = exerciseCategories.find(cat => cat.id === selectedCategory)?.name || '';
