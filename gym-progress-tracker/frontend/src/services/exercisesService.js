@@ -11,3 +11,13 @@ export const getExerciseByCategory = async (category_id) => {
     console.error('Fehler beim Laden der Workouts:', error);
   }
 };
+
+export const createExercise = async (exerciseData) => {
+  try {
+    const response = await api.post('/api/exercises', exerciseData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating exercise:', error);
+    throw error;
+  }
+};
