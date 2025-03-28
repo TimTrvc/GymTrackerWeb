@@ -7,7 +7,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Workouts from './pages/Workouts';
 import Exercises from './pages/Exercises';
-// import Statistics from './pages/Statistics';
+import Statistics from './pages/Statistics';
+import Dashboard from './pages/Dashboard';
 
 // Layout
 import Navbar from './components/layout/Navbar';
@@ -32,8 +33,8 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/workouts" element={privateRoute(Workouts)} />
               <Route path="/exercises" element={privateRoute(Exercises)} />
-              {/* <Route path="/dashboard" element={privateRoute(Dashboard)} />
-                            <Route path="/statistics" element={privateRoute(Statistiken)} /> */}
+              <Route path="/dashboard" element={privateRoute(Dashboard)} />
+              <Route path="/statistics" element={privateRoute(Statistics)} />
             </Routes>
           </main>
           <Footer />

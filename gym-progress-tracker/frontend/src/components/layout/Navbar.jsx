@@ -18,9 +18,9 @@ const Navbar = () => {
           <span className="mr-2">💪</span> GymTrack
         </Link>
         <div className="flex items-center space-x-4">
-          <Link to="/" className="hover:text-indigo-200">Dashboard</Link>
           {isAuthenticated && (
             <>
+              <Link to="/dashboard" className="hover:text-indigo-200">Dashboard</Link>
               <Link to="/workouts" className="hover:text-indigo-200">Workouts</Link>
               <Link to="/exercises" className="hover:text-indigo-200">Übungen</Link>
               <Link to="/statistics" className="hover:text-indigo-200">Statistiken</Link>
