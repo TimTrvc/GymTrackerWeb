@@ -119,9 +119,15 @@ const Exercises = () => {
 
                 <ul className="divide-y divide-gray-200">
                     {exercises.map(exercise => (
-                        <li key={exercise.id} className="py-4">
-                            <h3 className="font-semibold">{exercise.name}</h3>
-                            <p className="text-gray-600 text-sm">{exercise.description}</p>
+                        <li key={exercise.id} className="py-4 flex items-center justify-between">
+                            <div className="flex-grow">
+                                <h3 className="font-semibold">{exercise.name}</h3>
+                                <p className="text-gray-600 text-sm">{exercise.description}</p>
+                            </div>
+                            <button
+                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ml-4">
+                                Details
+                            </button>
                         </li>
                     ))}
                 </ul>
