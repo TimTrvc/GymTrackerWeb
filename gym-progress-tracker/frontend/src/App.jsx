@@ -9,6 +9,9 @@ import Workouts from './pages/Workouts';
 import Exercises from './pages/Exercises';
 import Statistics from './pages/Statistics';
 import Dashboard from './pages/Dashboard';
+import Prices from './pages/Prices';
+import Contact from './pages/Contact';
+import Features from './pages/Features';
 
 // Layout
 import Navbar from './components/layout/Navbar';
@@ -35,6 +38,9 @@ function App() {
               <Route path="/exercises" element={privateRoute(Exercises)} />
               <Route path="/dashboard" element={privateRoute(Dashboard)} />
               <Route path="/statistics" element={privateRoute(Statistics)} />
+              <Route path="/contact" element={privateRoute(Contact)} />
+              <Route path="/prices" element={privateRoute(Prices)} />
+              <Route path="/features" element={privateRoute(Features)} />
             </Routes>
           </main>
           <Footer />
