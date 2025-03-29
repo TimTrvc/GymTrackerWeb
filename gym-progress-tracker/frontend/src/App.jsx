@@ -35,6 +35,9 @@ function App() {
               <Route path="/exercises" element={privateRoute(Exercises)} />
               <Route path="/dashboard" element={privateRoute(Dashboard)} />
               <Route path="/statistics" element={privateRoute(Statistics)} />
+              <Route path="/contact" element={privateRoute(Contact)} />
+              <Route path="/prices" element={privateRoute(Prices)} />
+              <Route path="/features" element={privateRoute(Features)} />
             </Routes>
           </main>
           <Footer />
