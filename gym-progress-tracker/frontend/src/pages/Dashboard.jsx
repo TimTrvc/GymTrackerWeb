@@ -1,4 +1,4 @@
-import HeroSection from '../components/layout/HeroSection';
+import HeroSection from '@/components/layout/HeroSection';
 
 const Dashboard = () => {
     return (

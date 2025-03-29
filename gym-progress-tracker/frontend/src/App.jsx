@@ -3,17 +3,17 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router';
 import { AuthProvider } from './context/AuthContext';
 
 // Seiten
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Workouts from './pages/Workouts';
-import Exercises from './pages/Exercises';
-import Statistics from './pages/Statistics';
-import Dashboard from './pages/Dashboard';
+import Home from '@/pages/Home';
+import Login from '@/pages/Login';
+import Workouts from '@/pages/Workouts';
+import Exercises from '@/pages/Exercises';
+import Statistics from '@/pages/Statistics';
+import Dashboard from '@/pages/Dashboard';
 
 // Layout
-import Navbar from './components/layout/Navbar';
-import Footer from './components/layout/Footer';
-import PrivateRoute from './components/auth/PrivateRoute';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import PrivateRoute from '@/components/auth/PrivateRoute';
 
 const privateRoute = (Component) => (
   <PrivateRoute>

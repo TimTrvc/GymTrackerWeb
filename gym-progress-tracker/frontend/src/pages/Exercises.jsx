@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import HeroSection from '../components/layout/HeroSection';
-import ExercisesCategories from '../components/exercises/ExercisesCategories.jsx';
-import AddExerciseModal from '../components/exercises/AddExerciseModal.jsx';
-import { getExerciseCategories } from "../services/exerciseCategoriesService.js";
-import {getExerciseByCategory, createExercise, getExerciseById} from "../services/exercisesService.js";
-import ExerciseDetailsModal from "../components/exercises/ExerciseDetailsModal.jsx";
+import HeroSection from '@/components/layout/HeroSection';
+import ExercisesCategories from '@/components/exercises/ExercisesCategories.jsx';
+import AddExerciseModal from '@/components/exercises/AddExerciseModal.jsx';
+import { getExerciseCategories } from "@/services/exerciseCategoriesService.js";
+import {getExerciseByCategory, createExercise, getExerciseById} from "@/services/exercisesService.js";
+import ExerciseDetailsModal from "@/components/exercises/ExerciseDetailsModal.jsx";
 
 const Exercises = () => {
     const [exerciseCategories, setExerciseCategories] = useState([]);

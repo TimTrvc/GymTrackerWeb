@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import AuthTabs from '../components/auth/AuthTab.jsx';
-import { login, register } from '../services/authService.js';
+import AuthTabs from '@/components/auth/AuthTab.jsx';
+import { login, register } from '@/services/authService.js';
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
