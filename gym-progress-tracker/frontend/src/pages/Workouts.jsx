@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import { getWorkouts, addWorkout } from '../services/workoutService';
-import HeroSection from "../components/layout/HeroSection.jsx";
-import WorkoutNav from "../components/workouts/WorkoutNav.jsx";
-import WorkoutCreate from "../components/workouts/WorkoutCreate.jsx";
-import WorkoutView from "../components/workouts/WorkoutView.jsx";
-import WorkoutEdit from "../components/workouts/WorkoutEdit.jsx";
+import { getWorkouts, addWorkout } from '@/services/workoutService';
+import HeroSection from "@/components/layout/HeroSection.jsx";
+import WorkoutNav from "@/components/workouts/WorkoutNav.jsx";
+import WorkoutCreate from "@/components/workouts/WorkoutCreate.jsx";
+import WorkoutView from "@/components/workouts/WorkoutView.jsx";
+import WorkoutEdit from "@/components/workouts/WorkoutEdit.jsx";
 
 const Workout = () => {
   const [activeTab, setActiveTab] = useState('create');

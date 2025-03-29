@@ -1,5 +1,5 @@
 import ExerciseCategoryCard from "./ExerciseCategoryCard.jsx";
-import Hoverer from "../animation/Hoverer.jsx";
+import Hoverer from "@/components/animation/Hoverer.jsx";
 
 const ExercisesCategories = ({ categories, onCategoryClick }) => {
     return (

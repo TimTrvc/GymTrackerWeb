@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import HeroSection from '../components/layout/HeroSection';
-import ExercisesCategories from '../components/exercises/ExercisesCategories.jsx';
-import AddExerciseModal from '../components/exercises/AddExerciseModal.jsx';
-import { getExerciseCategories } from "../services/exerciseCategoriesService.js";
-import { getExerciseByCategory, createExercise } from "../services/exercisesService.js";
+import HeroSection from '@/components/layout/HeroSection';
+import ExercisesCategories from '@/components/exercises/ExercisesCategories.jsx';
+import AddExerciseModal from '@/components/exercises/AddExerciseModal.jsx';
+import { getExerciseCategories } from "@/services/exerciseCategoriesService.js";
+import {getExerciseByCategory, createExercise, getExerciseById} from "@/services/exercisesService.js";
+import ExerciseDetailsModal from "@/components/exercises/ExerciseDetailsModal.jsx";
 
 const Exercises = () => {
     const [exerciseCategories, setExerciseCategories] = useState([]);
@@ -11,6 +12,7 @@ const Exercises = () => {
     const [exercises, setExercises] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [selectedExercise, setSelectedExercise] = useState(null);
 
     useEffect(() => {
         const loadExerciseCategories = async () => {
@@ -58,6 +60,16 @@ const Exercises = () => {
         }
     };
 
+    const handleViewDetails = async (exerciseId) => {
+        try {
+            const exercise = await getExerciseById(exerciseId);
+            setSelectedExercise(exercise);
+        } catch (error) {
+            console.error('Fehler beim Abrufen der Übung:', error);
+            alert('Die Übung konnte nicht abgerufen werden!');
+        }
+    }
+
     const renderExercises = () => {
         if (loading) {
             return <div className="text-center py-8">Übungen werden geladen...</div>;
@@ -91,8 +103,7 @@ const Exercises = () => {
                     Keine Übungen in dieser Kategorie gefunden.
                 </div>
                 </>
-        )
-            ;
+            );
         }
 
         const categoryName = exerciseCategories.find(cat => cat.id === selectedCategory)?.name || '';
@@ -119,9 +130,16 @@ const Exercises = () => {
 
                 <ul className="divide-y divide-gray-200">
                     {exercises.map(exercise => (
-                        <li key={exercise.id} className="py-4">
-                            <h3 className="font-semibold">{exercise.name}</h3>
-                            <p className="text-gray-600 text-sm">{exercise.description}</p>
+                        <li key={exercise.id} className="py-4 flex items-center justify-between">
+                            <div className="flex-grow">
+                                <h3 className="font-semibold">{exercise.name}</h3>
+                                <p className="text-gray-600 text-sm">{exercise.description}</p>
+                            </div>
+                            <button
+                                onClick={() => handleViewDetails(exercise.exercise_id)}
+                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ml-4">
+                                Details
+                            </button>
                         </li>
                     ))}
                 </ul>
@@ -161,6 +179,13 @@ const Exercises = () => {
                 exerciseCategories={exerciseCategories}
                 onAddExercise={handleAddExercise}
             />
+
+            {selectedExercise && (
+                <ExerciseDetailsModal
+                    exercise={selectedExercise}
+                    onClose={() => setSelectedExercise(null)}
+                />
+            )}
         </>
     );
 };

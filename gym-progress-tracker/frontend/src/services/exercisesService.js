@@ -12,6 +12,18 @@ export const getExerciseByCategory = async (category_id) => {
   }
 };
 
+export const getExerciseById = async (exercise_id) => {
+  try {
+    const response = await api.get('/api/exercises/' + exercise_id);
+
+    if (response) {
+      return response.data
+    }
+  } catch (error) {
+
+  }
+}
+
 export const createExercise = async (exerciseData) => {
   try {
     const response = await api.post('/api/exercises', exerciseData);

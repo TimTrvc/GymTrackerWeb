@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import { AuthContext } from '../context/AuthContext';
-import HeroSection from '../components/layout/HeroSection';
+import { AuthContext } from '@/context/AuthContext';
+import HeroSection from '@/components/layout/HeroSection';
 
 const Home = () => {
   const { isAuthenticated } = useContext(AuthContext);
