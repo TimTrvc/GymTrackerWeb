@@ -13,7 +13,7 @@ import Dashboard from '@/pages/Dashboard';
 // Layout
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import PrivateRoute from '@/components/auth/PrivateRoute';
+import PrivateRoute from '@/components/features/auth/PrivateRoute';
 
 const privateRoute = (Component) => (
   <PrivateRoute>

@@ -1,5 +1,5 @@
 import React from "react";
-import Hoverer from "../animation/Hoverer.jsx";
+import Hoverer from "../../animation/Hoverer.jsx";
 
 const WorkoutView = ({ workouts }) => {
   if (workouts.length === 0) {

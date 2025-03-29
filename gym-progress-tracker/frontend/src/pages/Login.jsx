@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AuthTabs from '@/components/auth/AuthTab.jsx';
+import AuthTabs from '@/components/features/auth/AuthTab.jsx';
 import { login, register } from '@/services/authService.js';
 
 const Login = () => {
