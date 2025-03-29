@@ -26,6 +26,23 @@ const ExerciseDetailsModal = ({ exercise, onClose }) => {
         }
     };
 
+    // Formatieren der Ausrüstungsliste
+    const formatEquipment = (equipment) => {
+        if (!equipment) return '';
+
+        // Wenn es bereits ein String ist
+        if (typeof equipment === 'string') {
+            return equipment;
+        }
+
+        // Wenn es ein Array ist
+        if (Array.isArray(equipment)) {
+            return equipment.join(', ');
+        }
+
+        return String(equipment);
+    };
+
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
@@ -57,7 +74,7 @@ const ExerciseDetailsModal = ({ exercise, onClose }) => {
                     {exercise.equipment_needed && (
                         <div>
                             <p className="font-semibold text-gray-700">Ausrüstung:</p>
-                            <p className="text-gray-600">{exercise.equipment_needed}</p>
+                            <p className="text-gray-600">{formatEquipment(exercise.equipment_needed)}</p>
                         </div>
                     )}
 
