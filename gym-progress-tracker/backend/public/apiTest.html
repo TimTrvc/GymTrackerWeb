@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        textarea, input, button, select {
+            display: block;
+            margin: 10px 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Testseite</h1>
+
+    <!-- Login für Token -->
+    <h2>Login</h2>
+    <form id="loginForm">
+        <label for="username">Benutzername:</label>
+        <input type="text" id="username" placeholder="Benutzername" required />
+
+        <label for="password">Passwort:</label>
+        <input type="password" id="password" placeholder="Passwort" required />
+
+        <button type="submit">Login</button>
+    </form>
+    <p id="loginMessage"></p>
+
+    <hr />
+
+    <!-- API Test -->
+    <h2>API Test</h2>
+    <label for="endpoint">API-Endpunkt:</label>
+    <input type="text" id="endpoint" placeholder="/api/users/me">
+
+    <label for="method">HTTP-Methode:</label>
+    <select id="method">
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+    </select>
+
+    <label for="body">Request-Body (JSON):</label>
+    <textarea id="body" rows="5" placeholder='{"key": "value"}'></textarea>
+
+    <button id="sendRequest">Request senden</button>
+
+    <h2>Antwort:</h2>
+    <pre id="response"></pre>
+
+    <script>
+        let token = null;
+
+        // Login-Formular-Handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('http:localhost:5000/api/users/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    token = data.token;
+                    document.getElementById('loginMessage').textContent = 'Login erfolgreich! Token gespeichert.';
+                    document.getElementById('loginMessage').style.color = 'green';
+                } else {
+                    throw new Error(data.error || 'Login fehlgeschlagen');
+                }
+            } catch (error) {
+                document.getElementById('loginMessage').textContent = error.message;
+                document.getElementById('loginMessage').style.color = 'red';
+            }
+        });
+
+        // API-Request-Handler
+        document.getElementById('sendRequest').addEventListener('click', async () => {
+            const endpoint = 'http:localhost:5000/api/' + document.getElementById('endpoint').value;
+            const method = document.getElementById('method').value;
+            const body = document.getElementById('body').value;
+
+            try {
+                const response = await fetch(endpoint, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: method !== 'GET' && method !== 'DELETE' ? body : undefined
+                });
+
+                const responseData = await response.text();
+                document.getElementById('response').textContent = responseData;
+            } catch (error) {
+                document.getElementById('response').textContent = `Fehler: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
