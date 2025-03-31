@@ -19,6 +19,8 @@ const userWeightLogsRoutes = require('./routes/user/userWeightLogsRoutes');
 const workoutRoutes = require('./routes/workouts/workoutRoutes');
 const workoutExercisesRoutes = require('./routes/workouts/workoutExercisesRoutes');
 const emailRoutes = require('./routes/emailRoutes');
+const adminRoutes = require('./routes/adminRoutes'); // Neue Admin-Routen importieren
+
 
 const app = express();
 app.use(cors());
@@ -70,6 +72,7 @@ app.use('/api/user-weight-logs', userWeightLogsRoutes);
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/workout-exercises', workoutExercisesRoutes);
 app.use('/api/emails', emailRoutes);
+app.use('/api/admin', authMiddleware, adminRoutes); // Admin-Routen hinzufügen
 
 // Einfache Home-Route
 app.get('/api', (req, res) => {
