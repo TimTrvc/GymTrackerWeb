@@ -9,6 +9,9 @@ import Workouts from '@/pages/Workouts';
 import Exercises from '@/pages/Exercises';
 import Statistics from '@/pages/Statistics';
 import Dashboard from '@/pages/Dashboard';
+import Contact from '@/pages/Contact';
+import Prices from '@/pages/Prices';
+import Features from '@/pages/Features';
 
 // Layout
 import Navbar from '@/components/layout/Navbar';
