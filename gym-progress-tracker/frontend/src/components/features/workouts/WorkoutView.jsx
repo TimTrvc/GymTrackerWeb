@@ -1,11 +1,11 @@
 import React from "react";
-import Hoverer from "../animation/Hoverer.jsx";
+import Hoverer from "../../animation/Hoverer.jsx";
 
 const WorkoutView = ({ workouts }) => {
   if (workouts.length === 0) {
     return (
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 text-center">
-        <p className="text-gray-500">Keine Workouts gefunden. Erstellen Sie ein neues Workout im "Erstellen"-Tab.</p>
+        <p className="text-gray-500">Keine Workouts gefunden. Erstellen Sie ein neues Workout im &quot;Erstellen&quot;-Tab.</p>
       </div>
     );
   }

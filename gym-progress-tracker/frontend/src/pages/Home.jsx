@@ -5,12 +5,6 @@ import HeroSection from '@/components/layout/HeroSection';
 
 const Home = () => {
   const { isAuthenticated } = useContext(AuthContext);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-    }
-  }, [isAuthenticated]);
 
   return (
     <>
