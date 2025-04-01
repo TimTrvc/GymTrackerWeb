@@ -1,5 +1,6 @@
 import ExerciseCategoryCard from "./ExerciseCategoryCard.jsx";
 import Hoverer from "@/components/animation/Hoverer.jsx";
+import React from "react";
 
 const ExercisesCategories = ({ categories, onCategoryClick }) => {
     return (

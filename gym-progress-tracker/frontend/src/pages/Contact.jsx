@@ -1,4 +1,5 @@
 import HeroSection from '../components/layout/HeroSection';
+import React from "react";
 
 const Contact = () => {
     return (

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router';
 import { getWorkouts, addWorkout } from '@/services/workoutService';
 import HeroSection from "@/components/layout/HeroSection.jsx";
 import WorkoutNav from "@/components/features/workouts/WorkoutNav.jsx";
@@ -10,7 +9,6 @@ import WorkoutEdit from "@/components/features/workouts/WorkoutEdit.jsx";
 const Workout = () => {
   const [activeTab, setActiveTab] = useState('create');
   const [workouts, setWorkouts] = useState([]);
-  const API_URL = import.meta.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
     // Prüfen, ob der Benutzer authentifiziert ist

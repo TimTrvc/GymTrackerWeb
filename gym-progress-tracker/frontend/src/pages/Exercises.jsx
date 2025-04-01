@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import HeroSection from '@/components/layout/HeroSection';
 import ExercisesCategories from '@/components/features/exercises/ExercisesCategories.jsx';
 import AddExerciseModal from '@/components/features/exercises/AddExerciseModal.jsx';

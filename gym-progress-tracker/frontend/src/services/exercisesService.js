@@ -20,7 +20,7 @@ export const getExerciseById = async (exercise_id) => {
       return response.data
     }
   } catch (error) {
-
+    console.error('Error getting exercises ' + e)
   }
 }
 
