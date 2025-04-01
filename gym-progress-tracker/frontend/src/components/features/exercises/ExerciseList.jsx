@@ -36,22 +36,22 @@ const ExerciseList = ({
             {error && <ErrorDisplay message={error} />}
 
             {!isLoading && !error && (
-                exercises.length > 0 ? (
+                !exercises || exercises.length === 0 ? (
+                        <div className="text-center py-8">
+                            Keine Übungen in dieser Kategorie gefunden.
+                        </div>
+                ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {exercises.map(exercise => (
                             <div
-                                key={exercise.id}
-                                onClick={() => onViewDetails(exercise.id)}
+                                key={exercise.exercise_id}
+                                onClick={() => onViewDetails(exercise.exercise_id)}
                                 className="bg-white p-4 rounded shadow cursor-pointer hover:shadow-lg transition-shadow"
                             >
                                 <h3 className="font-bold text-lg">{exercise.name}</h3>
                                 <p className="text-gray-600 truncate">{exercise.description}</p>
                             </div>
                         ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-8">
-                        Keine Übungen in dieser Kategorie gefunden.
                     </div>
                 )
             )}
