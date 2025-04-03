@@ -19,7 +19,8 @@ const userWeightLogsRoutes = require('./routes/user/userWeightLogsRoutes');
 const workoutRoutes = require('./routes/workouts/workoutRoutes');
 const workoutExercisesRoutes = require('./routes/workouts/workoutExercisesRoutes');
 const emailRoutes = require('./routes/emailRoutes');
-const adminRoutes = require('./routes/adminRoutes'); // Neue Admin-Routen importieren
+const adminRoutes = require('./routes/adminRoutes');
+const authMiddleware = require("./middleware/authMiddleware"); // Neue Admin-Routen importieren
 
 
 const app = express();
