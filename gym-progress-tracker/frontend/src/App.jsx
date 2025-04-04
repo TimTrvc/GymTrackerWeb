@@ -12,6 +12,8 @@ import Dashboard from '@/pages/Dashboard';
 import Contact from '@/pages/Contact';
 import Prices from '@/pages/Prices';
 import Features from '@/pages/Features';
+import Nutrition from '@/pages/Nutrition';
+import Body from '@/pages/Body';
 
 // Layout
 import Navbar from '@/components/layout/Navbar';
@@ -41,6 +43,8 @@ function App() {
               <Route path="/contact" element={privateRoute(Contact)} />
               <Route path="/prices" element={privateRoute(Prices)} />
               <Route path="/features" element={privateRoute(Features)} />
+              <Route path="/nutrition" element={privateRoute(Nutrition)} />
+              <Route path="/body" element={privateRoute(Body)} />
             </Routes>
           </main>
           <Footer />
