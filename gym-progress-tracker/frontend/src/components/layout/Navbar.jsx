@@ -1,21 +1,33 @@
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { AuthContext } from '../../context/AuthContext';
+import Dropdown from "@/components/layout/Dropdown.jsx";
+import { FaDumbbell } from "react-icons/fa6";
+import { FaChartArea } from "react-icons/fa";
+import { MdSportsGymnastics, MdSpaceDashboard } from "react-icons/md";
+import { PiBowlFoodFill } from "react-icons/pi";
+import { RiBodyScanFill } from "react-icons/ri";
+
+const training_dropdown = [
+  { name: 'Übungen', description: 'Schaue dir hier die Übungen an und füge deine eigenen hinzu!', href: '/exercises', icon: FaDumbbell }, // Remove the curly braces
+  { name: 'Workouts', description: 'Schaue dir hier die Workouts an und füge deine eigenen hinzu!', href: '/workouts', icon: MdSportsGymnastics },
+  { name: 'Dashboard', description: 'Schaue dir hier dein persönliches Dashboard an!', href: '/dashboard', icon: MdSpaceDashboard },
+  { name: 'Statistiken', description: 'Schaue dir hier deine persönliche Statistiken an!', href: '/statistics', icon: FaChartArea },
+];
+
+const body_dropdown = [
+  { name: 'Ernährung', description: 'Tracke hier deine Ernährung für den maximalen Trainigserfolg!', href: '/nutrition', icon: PiBowlFoodFill }, // Remove the curly braces
+  { name: 'Körpermaße', description: 'Tracke hier deine Maße um deinen Erfolg zu verfolgen!', href: '/body', icon: RiBodyScanFill },
+];
 
 const Navbar = () => {
   const { isAuthenticated, logoutUser } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [activeDropdown, setActiveDropdown] = useState(null);
 
   const handleLogout = () => {
     logoutUser();
     navigate('/');
   };
-
-  const toggleDropdown = (dropdown) => {
-    setActiveDropdown((prev) => (prev === dropdown ? null : dropdown));
-  };
-
   return (
     <nav className="bg-indigo-600 text-white shadow-lg overflow-visible">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -26,90 +38,11 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Right: Links */}
         <div className="flex items-center space-x-12">
           {isAuthenticated && (
             <>
-              {/* Training Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => toggleDropdown('training')}
-                  className="hover:text-indigo-200 flex items-center space-x-1 focus:outline-none"
-                >
-                  <span>Training</span>
-                  <span className="text-sm">▼</span>
-                </button>
-                {activeDropdown === 'training' && (
-                  <div
-                    className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20"
-                  >
-                    <div className="py-1">
-                      <Link
-                        to="/exercises"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100"
-                        onClick={() => setActiveDropdown(null)}
-                      >
-                        Übungen
-                      </Link>
-                      <Link
-                        to="/dashboard"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100"
-                        onClick={() => setActiveDropdown(null)}
-                      >
-                        Dashboard
-                      </Link>
-                      <Link
-                        to="/statistics"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100"
-                        onClick={() => setActiveDropdown(null)}
-                      >
-                        Statistiken
-                      </Link>
-                      <Link
-                        to="/workouts"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100"
-                        onClick={() => setActiveDropdown(null)}
-                      >
-                        Workouts
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Body Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => toggleDropdown('body')}
-                  className="hover:text-indigo-200 flex items-center space-x-1 focus:outline-none"
-                >
-                  <span>Body</span>
-                  <span className="text-sm">▼</span>
-                </button>
-                {activeDropdown === 'body' && (
-                  <div
-                    // Position to the left or right to avoid overflow:
-                    className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20"
-                  >
-                    <div className="py-1">
-                      <Link
-                        to="/nutrition"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100"
-                        onClick={() => setActiveDropdown(null)}
-                      >
-                        Ernährung
-                      </Link>
-                      <Link
-                        to="/body"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-100"
-                        onClick={() => setActiveDropdown(null)}
-                      >
-                        Körpermaße
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <Dropdown dropdown_title="Training" dropdown_items={training_dropdown} />
+              <Dropdown dropdown_title="Körper" dropdown_items={body_dropdown} />
 
               <button
                 onClick={handleLogout}
