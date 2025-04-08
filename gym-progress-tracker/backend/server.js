@@ -61,7 +61,7 @@ app.use('/api/workout-templates', workoutTemplateRoutes);
 app.use('/api/exercise-categories', exerciseCategoriesRoutes);
 app.use('/api/exercises', exerciseRoutes);
 app.use('/api/activity-stats', activityStatsRoutes);
-app.use('/api/body-measurement', bodyMeasurementRoutes);
+app.use('/api/body-measurements', bodyMeasurementRoutes);
 app.use('/api/exercise-performance', exercisePerformanceRoutes);
 app.use('/api/template-exercises', templateExercisesRoutes);
 app.use('/api/goals', goalsRoutes);
