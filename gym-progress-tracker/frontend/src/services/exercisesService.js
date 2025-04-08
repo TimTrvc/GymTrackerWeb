@@ -1,35 +1,48 @@
-import api from "./api.js";
+import BaseService from './BaseService';
+import { EXERCISE_ENDPOINTS } from '@/config/apiEndpoints';
 
-export const getExerciseByCategory = async (category_id) => {
-  try {
-    const response = await api.get('/api/exercises/category/' + category_id);
-
-    if (response) {
-      return response.data
-    }
-  } catch (error) {
-    console.error('Fehler beim Laden der Workouts:', error);
+/**
+ * Service für die Verwaltung von Übungen
+ * Verwendet zentrale API-Endpunkte (DRY-Prinzip)
+ */
+class ExercisesService extends BaseService {
+  constructor() {
+    super(EXERCISE_ENDPOINTS.BASE);
   }
-};
 
-export const getExerciseById = async (exercise_id) => {
-  try {
-    const response = await api.get('/api/exercises/' + exercise_id);
+  /**
+   * Holt Übungen nach Kategorie
+   * @param {number} categoryId - ID der Kategorie
+   * @returns {Promise<Array>} - Liste von Übungen
+   */
+  async getByCategory(categoryId) {
+    return this.get(`category/${categoryId}`);
+  }
 
-    if (response) {
-      return response.data
-    }
-  } catch (error) {
-    console.error('Error getting exercises ' + e)
+  /**
+   * Holt eine spezifische Übung nach ID
+   * @param {number} exerciseId - ID der Übung
+   * @returns {Promise<Object>} - Übungsdetails
+   */
+  async getById(exerciseId) {
+    return this.get(`${exerciseId}`);
+  }
+
+  /**
+   * Erstellt eine neue Übung
+   * @param {object} exerciseData - Daten der neuen Übung
+   * @returns {Promise<Object>} - Erstellte Übung
+   */
+  async create(exerciseData) {
+    return this.post('', exerciseData);
   }
 }
 
-export const createExercise = async (exerciseData) => {
-  try {
-    const response = await api.post('/api/exercises', exerciseData);
-    return response.data;
-  } catch (error) {
-    console.error('Error creating exercise:', error);
-    throw error;
-  }
-};
+// Singleton-Instanz des Services exportieren
+const exercisesService = new ExercisesService();
+export default exercisesService;
+
+// Kompatibilitätsexporte für alte Methoden (Legacy-Unterstützung)
+export const getExerciseByCategory = (categoryId) => exercisesService.getByCategory(categoryId);
+export const getExerciseById = (exerciseId) => exercisesService.getById(exerciseId);
+export const createExercise = (exerciseData) => exercisesService.create(exerciseData);
