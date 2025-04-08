@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/features/exercises/AddExerciseModal.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/features/exercises/AddExerciseModal.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+
+/**
+ * AddExerciseModal - Komponente zum Hinzufügen einer neuen Übung
+ * 
+ * SOLID-Prinzipien:
+ * - Single Responsibility: Komponente aufgeteilt in kleinere, fokussierte Unterkomponenten
+ * - Open/Closed: Erweiterbar für verschiedene Formularfelder ohne Kerncode zu ändern
+ * 
+ * KISS: Klare, verständliche Komponentenstruktur
+ * DRY: Wiederverwendung von Formularelementen durch gemeinsame Komponenten
+ * 
+ * @param {Object} props - Komponenten-Props
+ * @param {boolean} props.isOpen - Ist das Modal geöffnet?
+ * @param {Function} props.onClose - Callback zum Schließen des Modals 
+ * @param {Array} props.exerciseCategories - Liste der verfügbaren Übungskategorien
+ * @param {Function} props.onAddExercise - Callback zum Hinzufügen der Übung
+ */
+const AddExerciseModal = ({
+    isOpen,
+    onClose,
+    exerciseCategories,
+    onAddExercise
+}) => {
+    // Anfangszustand als Konstante extrahiert (DRY-Prinzip)
+    const INITIAL_EXERCISE_STATE = {
+        name: '',
+        description: '',
+        category_id: '',
+        instructions: '',
+        difficulty_level: '',
+        primary_muscle_group: '',
+        secondary_muscle_groups: [],
+        equipment_needed: [],
+        is_compound: false,
+        video_url: '',
+        image_url: ''
+    };
+
+    const [exercise, setExercise] = useState(INITIAL_EXERCISE_STATE);
+    const [validationErrors, setValidationErrors] = useState({});
+
+    /**
+     * Behandelt Änderungen an den Eingabefeldern
+     * Extrahiert in eigene Funktion (Single Responsibility)
+     */
+    const handleInputChange = (e) => {
+        const { name, value, type, checked } = e.target;
+
+        // Handle different input types
+        if (type === 'checkbox') {
+            setExercise(prev => ({
+                ...prev,
+                [name]: checked
+            }));
+        } else if (name === 'secondary_muscle_groups' || name === 'equipment_needed') {
+            // Split comma-separated values into array
+            setExercise(prev => ({
+                ...prev,
+                [name]: value.split(',').map(item => item.trim()).filter(item => item !== '')
+            }));
+        } else {
+            setExercise(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
+        
+        // Lösche Validierungsfehler für dieses Feld bei Eingabe
+        if (validationErrors[name]) {
+            setValidationErrors(prev => ({
+                ...prev,
+                [name]: null
+            }));
+        }
+    };
+
+    /**
+     * Validiert das Formular
+     * Extrahiert in eigene Funktion (Single Responsibility)
+     */
+    const validateForm = () => {
+        const errors = {};
+        
+        if (!exercise.name.trim()) {
+            errors.name = 'Name ist erforderlich';
+        }
+        
+        if (!exercise.category_id) {
+            errors.category_id = 'Kategorie ist erforderlich';
+        }
+        
+        setValidationErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
+    /**
+     * Behandelt das Absenden des Formulars
+     * Extrahiert in eigene Funktion (Single Responsibility)
+     */
+    const handleSubmit = () => {
+        if (!validateForm()) {
+            return;
+        }
+
+        onAddExercise(exercise);
+        resetForm();
+    };
+
+    /**
+     * Setzt das Formular zurück
+     * Extrahiert in eigene Funktion (Single Responsibility)
+     */
+    const resetForm = () => {
+        setExercise(INITIAL_EXERCISE_STATE);
+        setValidationErrors({});
+        onClose();
+    };
+
+    // Frühes Return, wenn das Modal nicht geöffnet ist (KISS-Prinzip)
+    if (!isOpen) return null;
+
+    // UI-Komponenten für Formularelemente
+    // Extrahiert für bessere Übersichtlichkeit (SRP)
+    
+    /**
+     * Textfeld-Komponente
+     */
+    const TextField = ({ id, label, required, ...props }) => (
+        &lt;div>
+            &lt;label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+                {label} {required &amp;&amp; &lt;span className="text-red-500">*&lt;/span>}
+            &lt;/label>
+            &lt;input
+                id={id}
+                name={id}
+                className={`w-full px-3 py-2 border ${validationErrors[id] ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                {...props}
+            />
+            {validationErrors[id] &amp;&amp; (
+                &lt;p className="text-red-500 text-xs mt-1">{validationErrors[id]}&lt;/p>
+            )}
+        &lt;/div>
+    );
+
+    /**
+     * Textbereich-Komponente
+     */
+    const TextArea = ({ id, label, rows = 3, ...props }) => (
+        &lt;div>
+            &lt;label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+                {label}
+            &lt;/label>
+            &lt;textarea
+                id={id}
+                name={id}
+                rows={rows}
+                className={`w-full px-3 py-2 border ${validationErrors[id] ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                {...props}
+            />
+            {validationErrors[id] &amp;&amp; (
+                &lt;p className="text-red-500 text-xs mt-1">{validationErrors[id]}&lt;/p>
+            )}
+        &lt;/div>
+    );
+
+    /**
+     * Dropdown-Komponente
+     */
+    const SelectField = ({ id, label, options, required, ...props }) => (
+        &lt;div>
+            &lt;label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+                {label} {required &amp;&amp; &lt;span className="text-red-500">*&lt;/span>}
+            &lt;/label>
+            &lt;select
+                id={id}
+                name={id}
+                className={`w-full px-3 py-2 border ${validationErrors[id] ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                {...props}
+            >
+                &lt;option value="">{`${label} wählen`}&lt;/option>
+                {options.map((option) => (
+                    &lt;option key={option.value} value={option.value}>
+                        {option.label}
+                    &lt;/option>
+                ))}
+            &lt;/select>
+            {validationErrors[id] &amp;&amp; (
+                &lt;p className="text-red-500 text-xs mt-1">{validationErrors[id]}&lt;/p>
+            )}
+        &lt;/div>
+    );
+
+    /**
+     * Checkbox-Komponente
+     */
+    const CheckboxField = ({ id, label, ...props }) => (
+        &lt;div className="flex items-center">
+            &lt;input
+                id={id}
+                name={id}
+                type="checkbox"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                {...props}
+            />
+            &lt;label htmlFor={id} className="ml-2 block text-sm text-gray-900">
+                {label}
+            &lt;/label>
+        &lt;/div>
+    );
+
+    /**
+     * Komponente für Arrays mit kommagetrennten Werten
+     */
+    const ArrayField = ({ id, label, helpText, ...props }) => (
+        &lt;div>
+            &lt;label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+                {label}
+            &lt;/label>
+            &lt;input
+                id={id}
+                name={id}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                {...props}
+            />
+            {helpText &amp;&amp; &lt;p className="text-xs text-gray-500 mt-1">{helpText}&lt;/p>}
+        &lt;/div>
+    );
+
+    // Optionen für Dropdown-Listen
+    const difficultyOptions = [
+        { value: 'beginner', label: 'Anfänger' },
+        { value: 'intermediate', label: 'Fortgeschritten' },
+        { value: 'advanced', label: 'Profi' }
+    ];
+
+    const categoryOptions = exerciseCategories.map(category => ({
+        value: category.category_id,
+        label: category.name
+    }));
+
+    return (
+        &lt;div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            &lt;div className="bg-white p-6 rounded-xl shadow-xl w-[600px] max-h-[90vh] overflow-y-auto">
+                &lt;div className="mb-4">
+                    &lt;h2 className="text-xl font-bold mb-2">Neue Übung hinzufügen&lt;/h2>
+                    &lt;p className="text-gray-500 text-sm">Erstellen Sie eine neue Übung für eine Kategorie&lt;/p>
+                &lt;/div>
+
+                &lt;div className="space-y-4">
+                    &lt;TextField 
+                        id="name"
+                        label="Name"
+                        type="text"
+                        value={exercise.name}
+                        onChange={handleInputChange}
+                        placeholder="Name der Übung"
+                        required
+                    />
+
+                    &lt;TextArea 
+                        id="description"
+                        label="Beschreibung"
+                        value={exercise.description}
+                        onChange={handleInputChange}
+                        placeholder="Beschreiben Sie die Übung"
+                    />
+
+                    &lt;SelectField 
+                        id="category_id"
+                        label="Kategorie"
+                        value={exercise.category_id}
+                        onChange={handleInputChange}
+                        options={categoryOptions}
+                        required
+                    />
+
+                    &lt;TextArea 
+                        id="instructions"
+                        label="Anweisungen"
+                        value={exercise.instructions}
+                        onChange={handleInputChange}
+                        placeholder="Detaillierte Ausführungsanweisungen"
+                    />
+
+                    &lt;SelectField 
+                        id="difficulty_level"
+                        label="Schwierigkeitsstufe"
+                        value={exercise.difficulty_level}
+                        onChange={handleInputChange}
+                        options={difficultyOptions}
+                    />
+
+                    &lt;TextField 
+                        id="primary_muscle_group"
+                        label="Primäre Muskelgruppe"
+                        type="text"
+                        value={exercise.primary_muscle_group}
+                        onChange={handleInputChange}
+                        placeholder="Z.B. Brust, Rücken, Beine"
+                    />
+
+                    &lt;ArrayField 
+                        id="secondary_muscle_groups"
+                        label="Sekundäre Muskelgruppen"
+                        type="text"
+                        value={exercise.secondary_muscle_groups.join(', ')}
+                        onChange={handleInputChange}
+                        placeholder="Komma-getrennte Liste, z.B. Schultern, Trizeps"
+                        helpText="Mehrere Muskelgruppen durch Komma trennen"
+                    />
+
+                    &lt;ArrayField 
+                        id="equipment_needed"
+                        label="Benötigte Ausrüstung"
+                        type="text"
+                        value={exercise.equipment_needed.join(', ')}
+                        onChange={handleInputChange}
+                        placeholder="Komma-getrennte Liste, z.B. Hantel, Langhantel"
+                        helpText="Mehrere Ausrüstungen durch Komma trennen"
+                    />
+
+                    &lt;CheckboxField 
+                        id="is_compound"
+                        label="Ist eine Verbundübung (Compound Exercise)"
+                        checked={exercise.is_compound}
+                        onChange={handleInputChange}
+                    />
+
+                    &lt;TextField 
+                        id="video_url"
+                        label="Video-URL"
+                        type="url"
+                        value={exercise.video_url}
+                        onChange={handleInputChange}
+                        placeholder="URL zum Übungsvideo"
+                    />
+
+                    &lt;TextField 
+                        id="image_url"
+                        label="Bild-URL"
+                        type="url"
+                        value={exercise.image_url}
+                        onChange={handleInputChange}
+                        placeholder="URL zum Übungsbild"
+                    />
+                &lt;/div>
+
+                &lt;div className="flex justify-end space-x-2 mt-6">
+                    &lt;button
+                        onClick={onClose}
+                        className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                        type="button"
+                    >
+                        Abbrechen
+                    &lt;/button>
+                    &lt;button
+                        onClick={handleSubmit}
+                        className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                        type="button"
+                    >
+                        Übung hinzufügen
+                    &lt;/button>
+                &lt;/div>
+            &lt;/div>
+        &lt;/div>
+    );
+};
+
+// PropTypes für bessere Entwicklerfreundlichkeit und Typsicherheit
+AddExerciseModal.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    exerciseCategories: PropTypes.arrayOf(
+        PropTypes.shape({
+            category_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+            name: PropTypes.string.isRequired
+        })
+    ).isRequired,
+    onAddExercise: PropTypes.func.isRequired
+};
+
+export default AddExerciseModal;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BaseService.html">BaseService</a></li><li><a href="ExercisesService.html">ExercisesService</a></li><li><a href="WorkoutService.html">WorkoutService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AUTH_KEYS">AUTH_KEYS</a></li><li><a href="global.html#AddExerciseModal">AddExerciseModal</a></li><li><a href="global.html#App">App</a></li><li><a href="global.html#AppRoutes">AppRoutes</a></li><li><a href="global.html#AuthContext">AuthContext</a></li><li><a href="global.html#AuthProvider">AuthProvider</a></li><li><a href="global.html#Dropdown">Dropdown</a></li><li><a href="global.html#DropdownItem">DropdownItem</a></li><li><a href="global.html#ErrorDisplay">ErrorDisplay</a></li><li><a href="global.html#ExerciseCategoryCard">ExerciseCategoryCard</a></li><li><a href="global.html#ExerciseDetailsModal">ExerciseDetailsModal</a></li><li><a href="global.html#ExerciseList">ExerciseList</a></li><li><a href="global.html#ExercisesCategories">ExercisesCategories</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#FormButton">FormButton</a></li><li><a href="global.html#FormCheckbox">FormCheckbox</a></li><li><a href="global.html#FormError">FormError</a></li><li><a href="global.html#FormInput">FormInput</a></li><li><a href="global.html#FormLabel">FormLabel</a></li><li><a href="global.html#FormMessage">FormMessage</a></li><li><a href="global.html#FormSelect">FormSelect</a></li><li><a href="global.html#FormSuccess">FormSuccess</a></li><li><a href="global.html#FormTextarea">FormTextarea</a></li><li><a href="global.html#HeroSection">HeroSection</a></li><li><a href="global.html#Hoverer">Hoverer</a></li><li><a href="global.html#LoadingDisplay">LoadingDisplay</a></li><li><a href="global.html#NAVIGATION_DATA">NAVIGATION_DATA</a></li><li><a href="global.html#Navbar">Navbar</a></li><li><a href="global.html#PrivateRoute">PrivateRoute</a></li><li><a href="global.html#WorkoutCreate">WorkoutCreate</a></li><li><a href="global.html#WorkoutNav">WorkoutNav</a></li><li><a href="global.html#WorkoutView">WorkoutView</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#checkAuth">checkAuth</a></li><li><a href="global.html#getErrorMessage">getErrorMessage</a></li><li><a href="global.html#getToken">getToken</a></li><li><a href="global.html#handleError">handleError</a></li><li><a href="global.html#isInRange">isInRange</a></li><li><a href="global.html#isLoggedIn">isLoggedIn</a></li><li><a href="global.html#isNotEmpty">isNotEmpty</a></li><li><a href="global.html#isStrongPassword">isStrongPassword</a></li><li><a href="global.html#isTokenValid">isTokenValid</a></li><li><a href="global.html#isValidEmail">isValidEmail</a></li><li><a href="global.html#isValidReps">isValidReps</a></li><li><a href="global.html#isValidUsername">isValidUsername</a></li><li><a href="global.html#isValidWeight">isValidWeight</a></li><li><a href="global.html#logError">logError</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#passwordsMatch">passwordsMatch</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#saveAuthData">saveAuthData</a></li><li><a href="global.html#updateProfile">updateProfile</a></li><li><a href="global.html#useAuth">useAuth</a></li><li><a href="global.html#useExerciseCategories">useExerciseCategories</a></li><li><a href="global.html#useForm">useForm</a></li><li><a href="global.html#validateLogin">validateLogin</a></li><li><a href="global.html#validateRegistration">validateRegistration</a></li><li><a href="global.html#validateRegistrationData">validateRegistrationData</a></li><li><a href="global.html#validateWorkout">validateWorkout</a></li><li><a href="global.html#withPrivateRoute">withPrivateRoute</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue Apr 08 2025 17:04:09 GMT+0200 (Mitteleuropäische Sommerzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
