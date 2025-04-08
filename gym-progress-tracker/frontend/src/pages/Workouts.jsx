@@ -5,7 +5,7 @@ import WorkoutNav from "@/components/features/workouts/WorkoutNav.jsx";
 import WorkoutCreate from "@/components/features/workouts/WorkoutCreate.jsx";
 import WorkoutView from "@/components/features/workouts/WorkoutView.jsx";
 import WorkoutEdit from "@/components/features/workouts/WorkoutEdit.jsx";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 // Constants
 const PAGE_TITLE = "Workouts";
