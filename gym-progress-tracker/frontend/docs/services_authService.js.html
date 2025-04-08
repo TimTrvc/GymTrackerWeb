@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: services/authService.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: services/authService.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import api from './api';
+import { USER_ENDPOINTS } from '@/config/apiEndpoints';
+import { handleError } from '@/utils/errorHandler';
+
+/**
+ * Konstanten für localStorage Keys, um DRY zu vermeiden
+ */
+export const AUTH_KEYS = {
+  TOKEN: 'token',
+  USER_ID: 'userId',
+  USERNAME: 'username',
+  REMEMBER_ME: 'rememberMe'
+};
+
+/**
+ * Helfer-Funktion zum Speichern von Auth-Daten (DRY-Prinzip)
+ * @param {object} authData - Authentifizierungsdaten mit token und user
+ * @param {boolean} rememberMe - Remember-Me-Flag
+ */
+const saveAuthData = (authData, rememberMe = false) => {
+  if (authData?.token) {
+    localStorage.setItem(AUTH_KEYS.TOKEN, authData.token);
+    localStorage.setItem(AUTH_KEYS.USER_ID, authData.user.id);
+    localStorage.setItem(AUTH_KEYS.USERNAME, authData.user.username);
+    
+    if (rememberMe) {
+      localStorage.setItem(AUTH_KEYS.REMEMBER_ME, 'true');
+    } else {
+      localStorage.removeItem(AUTH_KEYS.REMEMBER_ME);
+    }
+  }
+};
+
+/**
+ * Benutzeranmeldung
+ * @param {object} credentials - Anmeldedaten (username, password, rememberMe)
+ * @returns {Promise} - Nutzer und Token Daten
+ */
+export const login = async (credentials) => {
+  try {
+    const response = await api.post(USER_ENDPOINTS.LOGIN, {
+      username: credentials.username,
+      password: credentials.password
+    });
+
+    saveAuthData(response.data, credentials.rememberMe);
+    return response.data;
+  } catch (error) {
+    throw handleError(error, 'Anmeldung fehlgeschlagen').error;
+  }
+};
+
+/**
+ * Benutzerregistrierung
+ * @param {object} userData - Registrierungsdaten
+ * @returns {Promise} - Registrierungsantwort
+ */
+export const register = async (userData) => {
+  try {
+    validateRegistrationData(userData);
+    const response = await api.post(USER_ENDPOINTS.REGISTER, userData);
+    
+    saveAuthData(response.data);
+    return response.data;
+  } catch (error) {
+    throw handleError(error, 'Registrierung fehlgeschlagen').error;
+  }
+};
+
+/**
+ * Validiert die Registrierungsdaten (Single Responsibility)
+ * @param {object} userData - Die zu validierenden Benutzerdaten
+ * @throws {Error} Wenn die Validierung fehlschlägt
+ */
+const validateRegistrationData = (userData) => {
+  // Validierung der Pflichtfelder
+  const requiredFields = ['username', 'email', 'password'];
+  for (const field of requiredFields) {
+    if (!userData[field]) {
+      throw new Error(`Bitte fülle alle Pflichtfelder aus. ${field} fehlt.`);
+    }
+  }
+
+  // Überprüfung der Passwörter
+  if (userData.password !== userData.confirmPassword) {
+    throw new Error('Die Passwörter stimmen nicht überein.');
+  }
+};
+
+/**
+ * Prüft, ob der Benutzer angemeldet ist
+ * @returns {boolean}
+ */
+export const isLoggedIn = () => {
+  return !!localStorage.getItem(AUTH_KEYS.TOKEN);
+};
+
+/**
+ * Abmelden des aktuellen Benutzers
+ */
+export const logout = () => {
+  Object.values(AUTH_KEYS).forEach(key => {
+    localStorage.removeItem(key);
+  });
+};
+
+/**
+ * Holt den aktuellen authentifizierten Benutzer
+ * @returns {Promise} - Benutzerdaten
+ */
+export const checkAuth = async () => {
+  try {
+    const response = await api.get(USER_ENDPOINTS.ME);
+    return response.data;
+  } catch (error) {
+    throw handleError(error, 'Authentifizierung fehlgeschlagen').error;
+  }
+};
+
+/**
+ * Holt das JWT Token aus dem localStorage
+ * @returns {string|null} - Das Token oder null
+ */
+export const getToken = () => {
+  return localStorage.getItem(AUTH_KEYS.TOKEN);
+};
+
+/**
+ * Prüft, ob das Token noch gültig ist
+ * @returns {boolean}
+ */
+export const isTokenValid = () => {
+  const token = getToken();
+  if (!token) return false;
+
+  try {
+    // Token-Gültigkeit prüfen (vereinfacht)
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp > Date.now() / 1000;
+  } catch (e) {
+    console.error('Error while checking Token: ' + e);
+    return false;
+  }
+};
+
+/**
+ * Aktualisiert das Benutzerprofil
+ * @param {object} userData - Aktualisierte Benutzerdaten
+ * @returns {Promise}
+ */
+export const updateProfile = async (userData) => {
+  try {
+    const response = await api.put(USER_ENDPOINTS.PROFILE, userData);
+    return response.data;
+  } catch (error) {
+    throw handleError(error, 'Profilaktualisierung fehlgeschlagen').error;
+  }
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BaseService.html">BaseService</a></li><li><a href="ExercisesService.html">ExercisesService</a></li><li><a href="WorkoutService.html">WorkoutService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AUTH_KEYS">AUTH_KEYS</a></li><li><a href="global.html#AddExerciseModal">AddExerciseModal</a></li><li><a href="global.html#App">App</a></li><li><a href="global.html#AppRoutes">AppRoutes</a></li><li><a href="global.html#AuthContext">AuthContext</a></li><li><a href="global.html#AuthProvider">AuthProvider</a></li><li><a href="global.html#Dropdown">Dropdown</a></li><li><a href="global.html#DropdownItem">DropdownItem</a></li><li><a href="global.html#ErrorDisplay">ErrorDisplay</a></li><li><a href="global.html#ExerciseCategoryCard">ExerciseCategoryCard</a></li><li><a href="global.html#ExerciseDetailsModal">ExerciseDetailsModal</a></li><li><a href="global.html#ExerciseList">ExerciseList</a></li><li><a href="global.html#ExercisesCategories">ExercisesCategories</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#FormButton">FormButton</a></li><li><a href="global.html#FormCheckbox">FormCheckbox</a></li><li><a href="global.html#FormError">FormError</a></li><li><a href="global.html#FormInput">FormInput</a></li><li><a href="global.html#FormLabel">FormLabel</a></li><li><a href="global.html#FormMessage">FormMessage</a></li><li><a href="global.html#FormSelect">FormSelect</a></li><li><a href="global.html#FormSuccess">FormSuccess</a></li><li><a href="global.html#FormTextarea">FormTextarea</a></li><li><a href="global.html#HeroSection">HeroSection</a></li><li><a href="global.html#Hoverer">Hoverer</a></li><li><a href="global.html#LoadingDisplay">LoadingDisplay</a></li><li><a href="global.html#NAVIGATION_DATA">NAVIGATION_DATA</a></li><li><a href="global.html#Navbar">Navbar</a></li><li><a href="global.html#PrivateRoute">PrivateRoute</a></li><li><a href="global.html#WorkoutCreate">WorkoutCreate</a></li><li><a href="global.html#WorkoutNav">WorkoutNav</a></li><li><a href="global.html#WorkoutView">WorkoutView</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#checkAuth">checkAuth</a></li><li><a href="global.html#getErrorMessage">getErrorMessage</a></li><li><a href="global.html#getToken">getToken</a></li><li><a href="global.html#handleError">handleError</a></li><li><a href="global.html#isInRange">isInRange</a></li><li><a href="global.html#isLoggedIn">isLoggedIn</a></li><li><a href="global.html#isNotEmpty">isNotEmpty</a></li><li><a href="global.html#isStrongPassword">isStrongPassword</a></li><li><a href="global.html#isTokenValid">isTokenValid</a></li><li><a href="global.html#isValidEmail">isValidEmail</a></li><li><a href="global.html#isValidReps">isValidReps</a></li><li><a href="global.html#isValidUsername">isValidUsername</a></li><li><a href="global.html#isValidWeight">isValidWeight</a></li><li><a href="global.html#logError">logError</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#passwordsMatch">passwordsMatch</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#saveAuthData">saveAuthData</a></li><li><a href="global.html#updateProfile">updateProfile</a></li><li><a href="global.html#useAuth">useAuth</a></li><li><a href="global.html#useExerciseCategories">useExerciseCategories</a></li><li><a href="global.html#useForm">useForm</a></li><li><a href="global.html#validateLogin">validateLogin</a></li><li><a href="global.html#validateRegistration">validateRegistration</a></li><li><a href="global.html#validateRegistrationData">validateRegistrationData</a></li><li><a href="global.html#validateWorkout">validateWorkout</a></li><li><a href="global.html#withPrivateRoute">withPrivateRoute</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue Apr 08 2025 17:04:09 GMT+0200 (Mitteleuropäische Sommerzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
