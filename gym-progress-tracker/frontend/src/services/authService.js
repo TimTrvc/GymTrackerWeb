@@ -1,4 +1,35 @@
 import api from './api';
+import { USER_ENDPOINTS } from '@/config/apiEndpoints';
+import { handleError } from '@/utils/errorHandler';
+
+/**
+ * Konstanten für localStorage Keys, um DRY zu vermeiden
+ */
+export const AUTH_KEYS = {
+  TOKEN: 'token',
+  USER_ID: 'userId',
+  USERNAME: 'username',
+  REMEMBER_ME: 'rememberMe'
+};
+
+/**
+ * Helfer-Funktion zum Speichern von Auth-Daten (DRY-Prinzip)
+ * @param {object} authData - Authentifizierungsdaten mit token und user
+ * @param {boolean} rememberMe - Remember-Me-Flag
+ */
+const saveAuthData = (authData, rememberMe = false) => {
+  if (authData?.token) {
+    localStorage.setItem(AUTH_KEYS.TOKEN, authData.token);
+    localStorage.setItem(AUTH_KEYS.USER_ID, authData.user.id);
+    localStorage.setItem(AUTH_KEYS.USERNAME, authData.user.username);
+    
+    if (rememberMe) {
+      localStorage.setItem(AUTH_KEYS.REMEMBER_ME, 'true');
+    } else {
+      localStorage.removeItem(AUTH_KEYS.REMEMBER_ME);
+    }
+  }
+};
 
 /**
  * Benutzeranmeldung
@@ -7,30 +38,15 @@ import api from './api';
  */
 export const login = async (credentials) => {
   try {
-    const response = await api.post('/api/users/login', {
+    const response = await api.post(USER_ENDPOINTS.LOGIN, {
       username: credentials.username,
       password: credentials.password
     });
 
-    // Speichern der Authentifizierungsdaten im localStorage
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userId', response.data.user.id);
-      localStorage.setItem('username', response.data.user.username);
-
-      // Optional: Remember Me Funktionalität
-      if (credentials.rememberMe) {
-        localStorage.setItem('rememberMe', 'true');
-      } else {
-        localStorage.removeItem('rememberMe');
-      }
-    }
-
+    saveAuthData(response.data, credentials.rememberMe);
     return response.data;
   } catch (error) {
-    throw new Error(
-      error.response?.data?.error || 'Anmeldung fehlgeschlagen'
-    );
+    throw handleError(error, 'Anmeldung fehlgeschlagen').error;
   }
 };
 
@@ -41,33 +57,33 @@ export const login = async (credentials) => {
  */
 export const register = async (userData) => {
   try {
-    // Validierung der Pflichtfelder
-    const requiredFields = ['username', 'email', 'password'];
-    for (const field of requiredFields) {
-      if (!userData[field]) {
-        throw new Error(`Bitte fülle alle Pflichtfelder aus. ${field} fehlt.`);
-      }
-    }
-
-    // Überprüfung der Passwörter
-    if (userData.password !== userData.confirmPassword) {
-      throw new Error('Die Passwörter stimmen nicht überein.');
-    }
-
-    const response = await api.post('/api/users/register', userData);
-
-    // Automatische Anmeldung nach erfolgreicher Registrierung
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userId', response.data.user.id);
-      localStorage.setItem('username', response.data.user.username);
-    }
-
+    validateRegistrationData(userData);
+    const response = await api.post(USER_ENDPOINTS.REGISTER, userData);
+    
+    saveAuthData(response.data);
     return response.data;
   } catch (error) {
-    throw new Error(
-      error.response?.data?.error || 'Registrierung fehlgeschlagen'
-    );
+    throw handleError(error, 'Registrierung fehlgeschlagen').error;
+  }
+};
+
+/**
+ * Validiert die Registrierungsdaten (Single Responsibility)
+ * @param {object} userData - Die zu validierenden Benutzerdaten
+ * @throws {Error} Wenn die Validierung fehlschlägt
+ */
+const validateRegistrationData = (userData) => {
+  // Validierung der Pflichtfelder
+  const requiredFields = ['username', 'email', 'password'];
+  for (const field of requiredFields) {
+    if (!userData[field]) {
+      throw new Error(`Bitte fülle alle Pflichtfelder aus. ${field} fehlt.`);
+    }
+  }
+
+  // Überprüfung der Passwörter
+  if (userData.password !== userData.confirmPassword) {
+    throw new Error('Die Passwörter stimmen nicht überein.');
   }
 };
 
@@ -76,17 +92,16 @@ export const register = async (userData) => {
  * @returns {boolean}
  */
 export const isLoggedIn = () => {
-  return !!localStorage.getItem('token');
+  return !!localStorage.getItem(AUTH_KEYS.TOKEN);
 };
 
 /**
  * Abmelden des aktuellen Benutzers
  */
 export const logout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('userId');
-  localStorage.removeItem('username');
-  localStorage.removeItem('rememberMe');
+  Object.values(AUTH_KEYS).forEach(key => {
+    localStorage.removeItem(key);
+  });
 };
 
 /**
@@ -95,10 +110,10 @@ export const logout = () => {
  */
 export const checkAuth = async () => {
   try {
-    const response = await api.get('/api/users/me');
+    const response = await api.get(USER_ENDPOINTS.ME);
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.error || 'Authentifizierung fehlgeschlagen');
+    throw handleError(error, 'Authentifizierung fehlgeschlagen').error;
   }
 };
 
@@ -107,7 +122,7 @@ export const checkAuth = async () => {
  * @returns {string|null} - Das Token oder null
  */
 export const getToken = () => {
-  return localStorage.getItem('token');
+  return localStorage.getItem(AUTH_KEYS.TOKEN);
 };
 
 /**
@@ -135,11 +150,9 @@ export const isTokenValid = () => {
  */
 export const updateProfile = async (userData) => {
   try {
-    const response = await api.put('/api/users/profile', userData);
+    const response = await api.put(USER_ENDPOINTS.PROFILE, userData);
     return response.data;
   } catch (error) {
-    throw new Error(
-      error.response?.data?.error || 'Profilaktualisierung fehlgeschlagen'
-    );
+    throw handleError(error, 'Profilaktualisierung fehlgeschlagen').error;
   }
 };

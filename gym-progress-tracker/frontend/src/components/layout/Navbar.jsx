@@ -43,6 +43,9 @@ const Navbar = () => {
             <>
               <Dropdown dropdown_title="Training" dropdown_items={training_dropdown} />
               <Dropdown dropdown_title="Körper" dropdown_items={body_dropdown} />
+              <Link to="/avatar" className="inline-flex items-center gap-x-1 text-m font-semibold text-white-900 focus:outline-none">
+                Avatar
+              </Link>
 
               <button
                 onClick={handleLogout}
