@@ -5,21 +5,14 @@ import WorkoutNav from "@/components/features/workouts/WorkoutNav.jsx";
 import WorkoutCreate from "@/components/features/workouts/WorkoutCreate.jsx";
 import WorkoutView from "@/components/features/workouts/WorkoutView.jsx";
 import WorkoutEdit from "@/components/features/workouts/WorkoutEdit.jsx";
+import useAuthRedirect from "@/hooks/useAuthRedirect.jsx";
+import useWorkouts from "@/hooks/useWorkouts.jsx";
 
 const Workout = () => {
   const [activeTab, setActiveTab] = useState('create');
-  const [workouts, setWorkouts] = useState([]);
+  const { workouts, load, loading } = useWorkouts();
 
-  useEffect(() => {
-    // Prüfen, ob der Benutzer authentifiziert ist
-    const token = localStorage.getItem('token');
-
-    // Falls kein Token vorhanden ist, zur Login-Seite umleiten
-    if (!token) {
-      window.location.href = '/login';
-      return;
-    }
-  }, []);
+  useAuthRedirect();
 
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
@@ -65,18 +58,6 @@ const Workout = () => {
     }
   };
 
-  const loadWorkouts = async () => {
-    try {
-      const data = await getWorkouts();
-      setWorkouts(data.workouts.rows || []);
-    } catch (error) {
-      console.error('Fehler beim Laden der Workouts:', error);
-    }
-  };
-
-  const loadWorkoutsForEdit = async () => {
-    await loadWorkouts();
-  };
 
   return (
     <>
