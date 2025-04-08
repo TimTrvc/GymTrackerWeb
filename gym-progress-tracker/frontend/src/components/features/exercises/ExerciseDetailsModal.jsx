@@ -1,6 +1,22 @@
-import React, { useEffect } from 'react'
+import React, { useEffect } from 'react';
+import PropTypes from 'prop-types';
 
+/**
+ * ExerciseDetailsModal - Komponente zur Anzeige von Übungsdetails in einem Modal
+ * 
+ * SOLID-Prinzipien:
+ * - Single Responsibility: Fokussiert nur auf die Detailanzeige einer Übung
+ * - Open/Closed: Erweiterbar für verschiedene Anzeigebereiche ohne Kerncode zu ändern
+ * 
+ * KISS: Einfache, klare Strukturierung der Detailanzeige
+ * DRY: Wiederverwendung von UI-Elementen durch Detail-Komponenten
+ * 
+ * @param {Object} props - Komponenten-Props
+ * @param {Object} props.exercise - Die anzuzeigende Übung mit ihren Details
+ * @param {Function} props.onClose - Callback zum Schließen des Modals
+ */
 const ExerciseDetailsModal = ({ exercise, onClose }) => {
+    // Frühes Return, wenn keine Übung vorhanden ist (KISS-Prinzip)
     if (!exercise) return null;
 
     // Schließen mit ESC-Taste
@@ -26,62 +42,124 @@ const ExerciseDetailsModal = ({ exercise, onClose }) => {
         }
     };
 
-    // Formatieren der Ausrüstungsliste
-    const formatEquipment = (equipment) => {
-        if (!equipment) return '';
+    /**
+     * Helper-Funktion zum Format von Eigenschaften
+     * Verbessert nach DRY-Prinzip
+     */
+    const formatProperty = (property) => {
+        if (!property) return '';
 
         // Wenn es bereits ein String ist
-        if (typeof equipment === 'string') {
-            return equipment;
+        if (typeof property === 'string') {
+            return property;
         }
 
         // Wenn es ein Array ist
-        if (Array.isArray(equipment)) {
-            return equipment.join(', ');
+        if (Array.isArray(property)) {
+            return property.join(', ');
         }
 
-        return String(equipment);
+        return String(property);
+    };
+
+    /**
+     * Unterkomponente für einen Detailpunkt
+     * Extrahiert nach SRP (Single Responsibility Principle)
+     */
+    const DetailItem = ({ label, value }) => {
+        // Keine Anzeige wenn kein Wert vorhanden ist (KISS)
+        if (!value) return null;
+        
+        const formattedValue = formatProperty(value);
+        if (!formattedValue) return null;
+        
+        return (
+            <div>
+                <p className="font-semibold text-gray-700">{label}:</p>
+                <p className="text-gray-600">{formattedValue}</p>
+            </div>
+        );
+    };
+
+    /**
+     * Übersetzungsfunktion für Schwierigkeitsgrade
+     * Hilft bei der Nutzerfreundlichkeit
+     */
+    const translateDifficulty = (level) => {
+        const translations = {
+            'beginner': 'Anfänger',
+            'intermediate': 'Fortgeschritten',
+            'advanced': 'Profi'
+        };
+        
+        return translations[level] || level;
     };
 
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
             onClick={handleBackdropClick}
+            aria-modal="true"
+            role="dialog"
+            aria-labelledby="exercise-detail-title"
         >
-            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative">
+            <div 
+                className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative"
+                onClick={(e) => e.stopPropagation()} // Verhindert Bubble-Up
+            >
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                    aria-label="Schließen"
                 >
                     <span className="text-xl font-bold">&times;</span>
                 </button>
 
-                <h2 className="text-2xl font-bold mb-4">{exercise.name}</h2>
+                <h2 
+                    id="exercise-detail-title" 
+                    className="text-2xl font-bold mb-4"
+                >
+                    {exercise.name}
+                </h2>
 
                 <div className="space-y-4">
-                    <div>
-                        <p className="font-semibold text-gray-700">Beschreibung:</p>
-                        <p className="text-gray-600">{exercise.description}</p>
-                    </div>
+                    <DetailItem label="Beschreibung" value={exercise.description} />
+                    <DetailItem label="Primäre Muskelgruppe" value={exercise.primary_muscle_group} />
+                    <DetailItem label="Sekundäre Muskelgruppen" value={exercise.secondary_muscle_groups} />
+                    <DetailItem label="Ausrüstung" value={exercise.equipment_needed} />
+                    <DetailItem 
+                        label="Schwierigkeitsgrad" 
+                        value={translateDifficulty(exercise.difficulty_level)} 
+                    />
+                    <DetailItem label="Anweisungen" value={exercise.instructions} />
 
-                    {exercise.primary_muscle_group && (
-                        <div>
-                            <p className="font-semibold text-gray-700">Muskelgruppe:</p>
-                            <p className="text-gray-600">{exercise.primary_muscle_group}</p>
+                    {exercise.is_compound && (
+                        <div className="bg-blue-50 text-blue-700 p-2 rounded-md">
+                            <p className="text-sm">
+                                <span className="font-semibold">Verbundübung:</span> Diese Übung trainiert mehrere Muskelgruppen gleichzeitig.
+                            </p>
                         </div>
                     )}
 
-                    {exercise.equipment_needed && (
-                        <div>
-                            <p className="font-semibold text-gray-700">Ausrüstung:</p>
-                            <p className="text-gray-600">{formatEquipment(exercise.equipment_needed)}</p>
-                        </div>
-                    )}
-
-                    {exercise.difficulty_level && (
-                        <div>
-                            <p className="font-semibold text-gray-700">Schwierigkeitsgrad:</p>
-                            <p className="text-gray-600">{exercise.difficulty_level}</p>
+                    {(exercise.video_url || exercise.image_url) && (
+                        <div className="border-t pt-4 mt-4">
+                            {exercise.video_url && (
+                                <a 
+                                    href={exercise.video_url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 hover:underline block mb-2"
+                                >
+                                    Video zur Übung ansehen
+                                </a>
+                            )}
+                            {exercise.image_url && (
+                                <img 
+                                    src={exercise.image_url} 
+                                    alt={`Bild zur Übung ${exercise.name}`}
+                                    className="mt-2 max-w-full h-auto rounded"
+                                />
+                            )}
                         </div>
                     )}
 
@@ -96,7 +174,30 @@ const ExerciseDetailsModal = ({ exercise, onClose }) => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default ExerciseDetailsModal
+// PropTypes für bessere Entwicklerfreundlichkeit und Typsicherheit
+ExerciseDetailsModal.propTypes = {
+    exercise: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        description: PropTypes.string,
+        primary_muscle_group: PropTypes.string,
+        secondary_muscle_groups: PropTypes.oneOfType([
+            PropTypes.string,
+            PropTypes.array
+        ]),
+        equipment_needed: PropTypes.oneOfType([
+            PropTypes.string,
+            PropTypes.array
+        ]),
+        difficulty_level: PropTypes.string,
+        instructions: PropTypes.string,
+        is_compound: PropTypes.bool,
+        video_url: PropTypes.string,
+        image_url: PropTypes.string
+    }),
+    onClose: PropTypes.func.isRequired
+};
+
+export default ExerciseDetailsModal;
