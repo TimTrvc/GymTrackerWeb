@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Popover } from '@headlessui/react';
 import { Link } from "react-router";
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 
 /**
  * Dropdown-Komponente für Navigationsmenüs
