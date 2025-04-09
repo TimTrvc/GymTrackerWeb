@@ -2,29 +2,48 @@ import BaseService from './BaseService';
 import { WORKOUT_ENDPOINTS } from '@/config/apiEndpoints';
 
 /**
- * Service für die Verwaltung von Workout-Templates
+ * Service für die Verwaltung von Workouts
  * Verwendet zentrale API-Endpunkte (DRY-Prinzip)
  */
 class WorkoutService extends BaseService {
   constructor() {
-    super(WORKOUT_ENDPOINTS.TEMPLATES);
+    super(WORKOUT_ENDPOINTS.WORKOUTS);
   }
 
   /**
-   * Holt alle Workout-Templates
-   * @returns {Promise<Array>} - Liste von Workout-Templates
+   * Holt alle Workouts
+   * @returns {Promise<Array>} - Liste von Workouts
    */
   async getAllWorkouts() {
-    return this.get('get');
+    return this.get('/');
   }
 
   /**
-   * Fügt ein neues Workout-Template hinzu
+   * Fügt ein neues Workout hinzu
    * @param {object} workoutData - Workout-Daten
    * @returns {Promise<Object>} - Hinzugefügtes Workout
    */
   async addWorkout(workoutData) {
-    return this.post('add', workoutData);
+    return this.post('/', workoutData);
+  }
+
+  /**
+   * Aktualisiert ein bestehendes Workout
+   * @param {string|number} workoutId - ID des zu aktualisierenden Workouts
+   * @param {object} workoutData - Aktualisierte Workout-Daten
+   * @returns {Promise<Object>} - Aktualisiertes Workout
+   */
+  async updateWorkout(workoutId, workoutData) {
+    return this.put(`/${workoutId}`, workoutData);
+  }
+
+  /**
+   * Löscht ein Workout
+   * @param {string|number} workoutId - ID des zu löschenden Workouts
+   * @returns {Promise<Object>} - Bestätigungsnachricht
+   */
+  async deleteWorkout(workoutId) {
+    return this.delete(`/${workoutId}`);
   }
 }
 
