@@ -83,26 +83,14 @@ const WorkoutCreate = ({
       newErrors.name = 'Name ist erforderlich';
     }
     
-    if (!formData.estimated_duration_minutes) {
-      newErrors.estimated_duration_minutes = 'Dauer ist erforderlich';
-    } else if (formData.estimated_duration_minutes < 1) {
-      newErrors.estimated_duration_minutes = 'Dauer muss mindestens 1 Minute betragen';
+    if (!formData.duration_minutes) {
+      newErrors.duration_minutes = 'Dauer ist erforderlich';
+    } else if (formData.duration_minutes < 1) {
+      newErrors.duration_minutes = 'Dauer muss mindestens 1 Minute betragen';
     }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  /**
-   * Behandelt das Absenden des Formulars
-   * @param {Event} e - Das Event-Objekt
-   */
-  const onSubmit = (e) => {
-    e.preventDefault();
-    
-    if (validateForm()) {
-      handleWorkoutSubmit(formData);
-    }
   };
 
   // Wiederverwendbare Formularkomponenten (DRY-Prinzip)
