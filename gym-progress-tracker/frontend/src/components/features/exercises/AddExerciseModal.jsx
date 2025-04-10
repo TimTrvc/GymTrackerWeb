@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import exercisesService from '@/services/exercisesService';
+import { TextField, TextArea, SelectField, CheckboxField, ArrayField } from '@/components/common/FormElements';
 
 /**
  * AddExerciseModal - Komponente zum Hinzufügen einer neuen Übung
@@ -99,13 +101,25 @@ const AddExerciseModal = ({
      * Behandelt das Absenden des Formulars
      * Extrahiert in eigene Funktion (Single Responsibility)
      */
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!validateForm()) {
             return;
         }
 
-        onAddExercise(exercise);
-        resetForm();
+        try {
+            // exercisesService verwenden, anstatt direkt den onAddExercise-Callback aufzurufen
+            await exercisesService.create(exercise);
+            
+            // Informiere den Parent-Komponenten über den Erfolg
+            onAddExercise(exercise);
+            resetForm();
+        } catch (error) {
+            console.error("Fehler beim Erstellen der Übung:", error);
+            setValidationErrors(prev => ({
+                ...prev,
+                form: 'Fehler beim Speichern der Übung. Bitte versuchen Sie es erneut.'
+            }));
+        }
     };
 
     /**
@@ -120,113 +134,6 @@ const AddExerciseModal = ({
 
     // Frühes Return, wenn das Modal nicht geöffnet ist (KISS-Prinzip)
     if (!isOpen) return null;
-
-    // UI-Komponenten für Formularelemente
-    // Extrahiert für bessere Übersichtlichkeit (SRP)
-    
-    /**
-     * Textfeld-Komponente
-     */
-    const TextField = ({ id, label, required, ...props }) => (
-        <div>
-            <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
-                {label} {required && <span className="text-red-500">*</span>}
-            </label>
-            <input
-                id={id}
-                name={id}
-                className={`w-full px-3 py-2 border ${validationErrors[id] ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                {...props}
-            />
-            {validationErrors[id] && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors[id]}</p>
-            )}
-        </div>
-    );
-
-    /**
-     * Textbereich-Komponente
-     */
-    const TextArea = ({ id, label, rows = 3, ...props }) => (
-        <div>
-            <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
-                {label}
-            </label>
-            <textarea
-                id={id}
-                name={id}
-                rows={rows}
-                className={`w-full px-3 py-2 border ${validationErrors[id] ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                {...props}
-            />
-            {validationErrors[id] && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors[id]}</p>
-            )}
-        </div>
-    );
-
-    /**
-     * Dropdown-Komponente
-     */
-    const SelectField = ({ id, label, options, required, ...props }) => (
-        <div>
-            <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
-                {label} {required && <span className="text-red-500">*</span>}
-            </label>
-            <select
-                id={id}
-                name={id}
-                className={`w-full px-3 py-2 border ${validationErrors[id] ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                {...props}
-            >
-                <option value="">{`${label} wählen`}</option>
-                {options.map((option) => (
-                    <option key={option.value} value={option.value}>
-                        {option.label}
-                    </option>
-                ))}
-            </select>
-            {validationErrors[id] && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors[id]}</p>
-            )}
-        </div>
-    );
-
-    /**
-     * Checkbox-Komponente
-     */
-    const CheckboxField = ({ id, label, ...props }) => (
-        <div className="flex items-center">
-            <input
-                id={id}
-                name={id}
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                {...props}
-            />
-            <label htmlFor={id} className="ml-2 block text-sm text-gray-900">
-                {label}
-            </label>
-        </div>
-    );
-
-    /**
-     * Komponente für Arrays mit kommagetrennten Werten
-     */
-    const ArrayField = ({ id, label, helpText, ...props }) => (
-        <div>
-            <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
-                {label}
-            </label>
-            <input
-                id={id}
-                name={id}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                {...props}
-            />
-            {helpText && <p className="text-xs text-gray-500 mt-1">{helpText}</p>}
-        </div>
-    );
 
     // Optionen für Dropdown-Listen
     const difficultyOptions = [
@@ -248,6 +155,12 @@ const AddExerciseModal = ({
                     <p className="text-gray-500 text-sm">Erstellen Sie eine neue Übung für eine Kategorie</p>
                 </div>
 
+                {validationErrors.form && (
+                    <div className="mb-4 p-2 bg-red-50 border border-red-200 rounded-md">
+                        <p className="text-red-500 text-sm">{validationErrors.form}</p>
+                    </div>
+                )}
+
                 <div className="space-y-4">
                     <TextField 
                         id="name"
@@ -257,6 +170,7 @@ const AddExerciseModal = ({
                         onChange={handleInputChange}
                         placeholder="Name der Übung"
                         required
+                        error={validationErrors.name}
                     />
 
                     <TextArea 
@@ -265,6 +179,7 @@ const AddExerciseModal = ({
                         value={exercise.description}
                         onChange={handleInputChange}
                         placeholder="Beschreiben Sie die Übung"
+                        error={validationErrors.description}
                     />
 
                     <SelectField 
@@ -274,6 +189,7 @@ const AddExerciseModal = ({
                         onChange={handleInputChange}
                         options={categoryOptions}
                         required
+                        error={validationErrors.category_id}
                     />
 
                     <TextArea 
@@ -282,6 +198,7 @@ const AddExerciseModal = ({
                         value={exercise.instructions}
                         onChange={handleInputChange}
                         placeholder="Detaillierte Ausführungsanweisungen"
+                        error={validationErrors.instructions}
                     />
 
                     <SelectField 
@@ -290,6 +207,7 @@ const AddExerciseModal = ({
                         value={exercise.difficulty_level}
                         onChange={handleInputChange}
                         options={difficultyOptions}
+                        error={validationErrors.difficulty_level}
                     />
 
                     <TextField 
@@ -299,6 +217,7 @@ const AddExerciseModal = ({
                         value={exercise.primary_muscle_group}
                         onChange={handleInputChange}
                         placeholder="Z.B. Brust, Rücken, Beine"
+                        error={validationErrors.primary_muscle_group}
                     />
 
                     <ArrayField 
@@ -335,6 +254,7 @@ const AddExerciseModal = ({
                         value={exercise.video_url}
                         onChange={handleInputChange}
                         placeholder="URL zum Übungsvideo"
+                        error={validationErrors.video_url}
                     />
 
                     <TextField 
@@ -344,6 +264,7 @@ const AddExerciseModal = ({
                         value={exercise.image_url}
                         onChange={handleInputChange}
                         placeholder="URL zum Übungsbild"
+                        error={validationErrors.image_url}
                     />
                 </div>
 
@@ -368,7 +289,9 @@ const AddExerciseModal = ({
     );
 };
 
-// PropTypes für bessere Entwicklerfreundlichkeit und Typsicherheit
+/**
+ * PropTypes für bessere Entwicklerfreundlichkeit und Typsicherheit
+ */
 AddExerciseModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,

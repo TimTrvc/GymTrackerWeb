@@ -1,27 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { getWorkoutExercises, addExerciseToWorkout, removeExerciseFromWorkout } from '../../../services/workoutExercisesService';
+import React, { useState } from "react";
+import { getWorkoutExercises, addExerciseToWorkout, removeExerciseFromWorkout } from '@/services/workoutExercisesService';
+import exercisesService from '@/services/exercisesService';
+import workoutService from '@/services/workoutService';
+import useExercises from '@/hooks/useExercises';
+import { TextField, TextArea, SelectField, CheckboxField } from '@/components/common/FormElements';
 
 const WorkoutEdit = ({ workouts }) => {
   const [editingWorkoutId, setEditingWorkoutId] = useState(null);
   const [formData, setFormData] = useState({});
   const [workoutExercises, setWorkoutExercises] = useState({});
-  const [exercises, setExercises] = useState([]);
   const [errors, setErrors] = useState({});
   
-  // Übungsdaten laden
-  useEffect(() => {
-    const fetchExercises = async () => {
-      try {
-        const response = await fetch('/api/exercises');
-        const data = await response.json();
-        setExercises(data);
-      } catch (error) {
-        console.error('Fehler beim Laden der Übungen:', error);
-      }
-    };
-    
-    fetchExercises();
-  }, []);
+  // Übungsdaten über den useExercises Hook laden
+  const { exercises, isLoading } = useExercises();
 
   if (workouts.length === 0) {
     return (
@@ -148,19 +139,8 @@ const WorkoutEdit = ({ workouts }) => {
     }
     
     try {
-      // 1. Workout aktualisieren
-      const response = await fetch(`/api/workouts/${editingWorkoutId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(formData)
-      });
-      
-      if (!response.ok) {
-        throw new Error('Fehler beim Aktualisieren des Workouts');
-      }
+      // 1. Workout mit dem workoutService aktualisieren
+      await workoutService.updateWorkout(editingWorkoutId, formData);
       
       // 2. Übungen aktualisieren
       const exercises = workoutExercises[editingWorkoutId] || [];
@@ -195,6 +175,14 @@ const WorkoutEdit = ({ workouts }) => {
       alert('Fehler beim Aktualisieren des Workouts: ' + error.message);
     }
   };
+  
+  // Optionen für das Schwierigkeitsgrad-Dropdown
+  const difficultyOptions = [
+    { value: 'beginner', label: 'Anfänger' },
+    { value: 'intermediate', label: 'Fortgeschritten' },
+    { value: 'advanced', label: 'Profi' }
+  ];
+  
   return (
     <div className="max-w-3xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Workouts bearbeiten</h2>
@@ -203,77 +191,51 @@ const WorkoutEdit = ({ workouts }) => {
         <div key={workout.workout_id || index} className="bg-white rounded-lg shadow-md p-6 mb-4">
           {editingWorkoutId === workout.workout_id ? (
             <form onSubmit={handleUpdateWorkout}>
-              <div className="mb-4">
-                <label htmlFor="name" className="block text-gray-700 font-medium mb-2">Name des Workouts</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name || ''}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                  required
-                />
-                {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
-              </div>
+              <TextField 
+                id="name"
+                label="Name des Workouts"
+                type="text"
+                value={formData.name || ''}
+                onChange={handleInputChange}
+                required
+                error={errors.name}
+              />
 
-              <div className="mb-4">
-                <label htmlFor="description" className="block text-gray-700 font-medium mb-2">Beschreibung</label>
-                <textarea
-                  id="description"
-                  name="description"
-                  rows="4"
-                  value={formData.description || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                ></textarea>
-              </div>
+              <TextArea 
+                id="description"
+                label="Beschreibung"
+                value={formData.description || ''}
+                onChange={handleInputChange}
+                rows={4}
+              />
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label htmlFor="difficulty_level" className="block text-gray-700 font-medium mb-2">Schwierigkeitsgrad</label>
-                  <select
-                    id="difficulty_level"
-                    name="difficulty_level"
-                    value={formData.difficulty_level || 'beginner'}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <option value="beginner">Anfänger</option>
-                    <option value="intermediate">Fortgeschritten</option>
-                    <option value="advanced">Profi</option>
-                  </select>
-                </div>
+                <SelectField 
+                  id="difficulty_level"
+                  label="Schwierigkeitsgrad"
+                  options={difficultyOptions}
+                  value={formData.difficulty_level || 'beginner'}
+                  onChange={handleInputChange}
+                />
                 
-                <div>
-                  <label htmlFor="duration_minutes" className="block text-gray-700 font-medium mb-2">Dauer (Minuten)</label>
-                  <input
-                    type="number"
-                    id="duration_minutes"
-                    name="duration_minutes"
-                    value={formData.duration_minutes || ''}
-                    onChange={handleInputChange}
-                    min="1"
-                    className={`w-full px-4 py-2 border ${errors.duration_minutes ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                    required
-                  />
-                  {errors.duration_minutes && <p className="mt-1 text-sm text-red-500">{errors.duration_minutes}</p>}
-                </div>
+                <TextField 
+                  id="duration_minutes"
+                  label="Dauer (Minuten)"
+                  type="number"
+                  min="1"
+                  value={formData.duration_minutes || ''}
+                  onChange={handleInputChange}
+                  required
+                  error={errors.duration_minutes}
+                />
               </div>
               
-              <div className="mb-6">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="is_public"
-                    name="is_public"
-                    checked={formData.is_public || false}
-                    onChange={handleInputChange}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  />
-                  <span className="ml-2 text-gray-700">Workout öffentlich machen</span>
-                </label>
-              </div>
+              <CheckboxField 
+                id="is_public"
+                label="Workout öffentlich machen"
+                checked={formData.is_public || false}
+                onChange={handleInputChange}
+              />
               
               {/* Übungen-Sektion */}
               <div className="mt-8 mb-6 border-t pt-6">
@@ -372,6 +334,7 @@ const WorkoutEdit = ({ workouts }) => {
                         </div>
                       </div>
                     ))}
+
                   </div>
                 )}
                 
@@ -421,6 +384,7 @@ const WorkoutEdit = ({ workouts }) => {
           )}
         </div>
       ))}
+
     </div>
   );
 }

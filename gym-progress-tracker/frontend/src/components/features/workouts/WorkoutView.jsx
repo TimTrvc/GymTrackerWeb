@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
 import Hoverer from "../../animation/Hoverer.jsx";
-import { getWorkoutExercises } from "../../../services/workoutExercisesService";
+import { getWorkoutExercises } from "@/services/workoutExercisesService";
+import exercisesService from "@/services/exercisesService";
 
 /**
  * WorkoutView-Komponente zur Anzeige von Workouts
@@ -39,11 +40,10 @@ const WorkoutView = ({
         [workoutId]: exercises
       }));
       
-      // Für jede Übung die Details laden
+      // Für jede Übung die Details laden mit exercisesService
       exercises.forEach(async (exercise) => {
         try {
-          const response = await fetch(`/api/exercises/${exercise.exercise_id}`);
-          const exerciseData = await response.json();
+          const exerciseData = await exercisesService.getById(exercise.exercise_id);
           setExerciseDetails(prev => ({
             ...prev,
             [exercise.exercise_id]: exerciseData
