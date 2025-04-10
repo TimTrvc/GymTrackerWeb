@@ -5,9 +5,7 @@ const useExercises = () => {
     const [exercises, setExercises] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
-
-    // Fetch exercises when category changes
+    const [error, setError] = useState(null);    // Fetch exercises when category changes
     useEffect(() => {
         const fetchExercises = async () => {
             if (!selectedCategory) {
@@ -19,8 +17,14 @@ const useExercises = () => {
             setError(null);
 
             try {
-                const data = await getExerciseByCategory(selectedCategory);
-                setExercises(data);
+                // Sicherstellen, dass die Category-ID korrekt ist - falls es eine Zahl ist,
+                // verwenden wir sie direkt, falls es ein String ist, wandeln wir es in eine Zahl um
+                const categoryId = typeof selectedCategory === 'string' && !isNaN(parseInt(selectedCategory)) 
+                    ? parseInt(selectedCategory) 
+                    : selectedCategory;
+                
+                const data = await getExerciseByCategory(categoryId);
+                setExercises(data || []);
             } catch (err) {
                 console.error("Fehler beim Laden der Übungen:", err);
                 setError("Die Übungen konnten nicht geladen werden. Bitte versuchen Sie es später erneut.");

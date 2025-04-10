@@ -56,31 +56,27 @@ const useWorkoutData = () => {
   const loadWorkouts = async () => {
     try {
       const data = await getWorkouts();
-      setWorkouts(data.workouts.rows || []);
+      setWorkouts(data.workouts || []);
     } catch (error) {
       console.error('Fehler beim Laden der Workouts:', error);
     }
-  };
-
-  const handleWorkoutSubmit = async (e) => {
-    e.preventDefault();
-
-    const formData = {
-      name: e.target.name.value,
-      description: e.target.description.value,
-      difficulty_level: e.target.difficulty_level.value,
-      target_audience: e.target.target_audience.value,
-      goal: e.target.goal.value,
-      estimated_duration_minutes: parseInt(e.target.estimated_duration_minutes.value),
-      is_featured: e.target.is_featured.checked
+  };  const handleWorkoutSubmit = async (formData) => {
+    // Formdata wird jetzt direkt als Objekt übergeben
+    // Anpassung der benötigten Felder
+    const workoutData = {
+      name: formData.name,
+      description: formData.description,
+      difficulty_level: formData.difficulty_level,
+      duration_minutes: formData.duration_minutes,
+      is_public: formData.is_public
     };
-
+    
     try {
-      const isOK = await addWorkout(formData);
+      const isOK = await addWorkout(workoutData);
 
       if (isOK) {
         alert(SUCCESS_MESSAGE);
-        e.target.reset();
+        // Formular zurücksetzen oder zu View-Tab wechseln könnte hier ergänzt werden
       } else {
         alert(ERROR_MESSAGE);
       }
