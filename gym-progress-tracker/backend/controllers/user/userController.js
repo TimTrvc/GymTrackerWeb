@@ -106,31 +106,61 @@ const loginUser = async (req, res) => {
     }
 };
 
-// Benutzer nach ID abrufen
 const getUserById = async (req, res) => {
     const pool = req.app.get('db');
     const userId = req.params.id;
+  
+    try {
+      // Use DATE() function to cast the date_of_birth to a date without timezone
+      const result = await pool.query(
+        `SELECT user_id, username, email, first_name, last_name,
+          to_char(date_of_birth, 'YYYY-MM-DD') AS date_of_birth,
+          gender, height, profile_picture, created_at, last_login, is_active, is_admin
+         FROM users
+         WHERE user_id = $1`,
+        [userId]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+      }
+
+      const user = result.rows[0];
+      res.json({ user });
+    } catch (err) {
+      console.error('Fehler beim Abrufen des Benutzers:', err);
+      res.status(500).json({ error: 'Serverseiten-Fehler beim Abrufen des Benutzers' });
+    }
+  };
+
+
+const updateUserById = async (req, res) => {
+    const pool = req.app.get('db');
+    const userId = req.params.id;
+    const { username, email, height, first_name, last_name, date_of_birth, gender } = req.body;
 
     try {
         const result = await pool.query(
-            `SELECT user_id, username, email, first_name, last_name,
-            date_of_birth, gender, height, profile_picture,
-            created_at, last_login, is_active, is_admin
-            FROM users WHERE user_id = $1`,
-            [userId]
+            `UPDATE users 
+             SET username = $1, email = $2, height = $3, first_name = $4, last_name = $5, 
+                date_of_birth = $6, gender = $7
+             WHERE user_id = $8 
+             RETURNING user_id, username, email, height, first_name, last_name, date_of_birth, gender`,
+            [username, email, height, first_name, last_name, date_of_birth, gender, userId]
         );
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Benutzer nicht gefunden' });
         }
 
-        res.json({
-            user: result.rows[0]
+        res.status(200).json({
+            message: 'Benutzer erfolgreich aktualisiert',
+            user: result.rows[0],
         });
     } catch (err) {
-        console.error('Fehler beim Abrufen des Benutzers:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Abrufen des Benutzers' });
+        console.error('Fehler beim Aktualisieren des Benutzers:', err);
+        res.status(500).json({ error: 'Serverseiten-Fehler beim Aktualisieren des Benutzers' });
     }
 };
 
-module.exports = { registerUser, loginUser, getUserById };
+module.exports = { registerUser, loginUser, getUserById, updateUserById };

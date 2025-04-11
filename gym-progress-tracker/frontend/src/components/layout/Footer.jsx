@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Link } from "react-router";
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from "react-router";
+import { AuthContext } from '@/context/AuthContext';
 import PropTypes from 'prop-types';
 
 /**
@@ -20,6 +21,13 @@ const Footer = ({ apiBaseUrl = 'http://localhost:5000/api' }) => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // 'success' oder 'error'
+  const { isAuthenticated, logoutUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logoutUser();
+    navigate('/');
+  };
 
   /**
    * Validiert eine E-Mail-Adresse
@@ -107,6 +115,17 @@ const Footer = ({ apiBaseUrl = 'http://localhost:5000/api' }) => {
               </Link>
             </li>
           ))}
+          {isAuthenticated && (
+            <li>
+              <a 
+                onClick={handleLogout} 
+                className="text-gray-400 hover:text-white transition-colors cursor-pointer"
+                aria-label="Abmelden"
+              >
+                Logout
+              </a>
+            </li>
+          )}
         </ul>
       </div>
     );

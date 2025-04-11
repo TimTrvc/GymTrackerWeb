@@ -10,6 +10,7 @@ import { FaChartArea } from "react-icons/fa";
 import { MdSportsGymnastics, MdSpaceDashboard } from "react-icons/md";
 import { PiBowlFoodFill } from "react-icons/pi";
 import { RiBodyScanFill } from "react-icons/ri";
+import { UserCircleIcon } from '@heroicons/react/24/outline';
 
 /**
  * Navigationsdaten - ausgelagert nach SOLID (Single Responsibility)
@@ -97,7 +98,13 @@ const Navbar = () => {
       >
         Avatar
       </Link>
-
+      <Link 
+        to="/profile"
+        className="inline-flex items-center text-white hover:text-gray-200 transition-colors"
+        aria-label="Zum Profil"
+      >
+        <UserCircleIcon className="h-8 w-8" />
+      </Link>
       <button
         onClick={handleLogout}
         className="bg-white text-red-600 px-4 py-2 rounded-lg font-medium hover:bg-red-100 transition-colors"
