@@ -7,6 +7,7 @@ import { FaChartArea } from "react-icons/fa";
 import { MdSportsGymnastics, MdSpaceDashboard } from "react-icons/md";
 import { PiBowlFoodFill } from "react-icons/pi";
 import { RiBodyScanFill } from "react-icons/ri";
+import { UserCircleIcon } from '@heroicons/react/24/outline';
 
 const training_dropdown = [
   { name: 'Übungen', description: 'Schaue dir hier die Übungen an und füge deine eigenen hinzu!', href: '/exercises', icon: FaDumbbell }, // Remove the curly braces
@@ -21,7 +22,7 @@ const body_dropdown = [
 ];
 
 const Navbar = () => {
-  const { isAuthenticated, logoutUser } = useContext(AuthContext);
+  const { isAuthenticated} = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -46,13 +47,12 @@ const Navbar = () => {
               <Link to="/avatar" className="inline-flex items-center gap-x-1 text-m font-semibold text-white-900 focus:outline-none">
                 Avatar
               </Link>
-
-              <button
-                onClick={handleLogout}
-                className="bg-white text-red-600 px-4 py-2 rounded-lg font-medium hover:bg-red-100"
+              <Link 
+                to="/profile"
+                className="inline-flex items-center text-white hover:text-gray-200 transition-colors"
               >
-                Logout
-              </button>
+                <UserCircleIcon className="h-8 w-8" />
+              </Link>
             </>
           )}
 

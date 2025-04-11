@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
-import { Link } from "react-router";
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from "react-router";
+import { AuthContext } from '@/context/AuthContext';
 
 const Footer = () => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const { isAuthenticated, logoutUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logoutUser();
+    navigate('/');
+  };
 
   const handleSubscribe = async () => {
     if (!email.trim()) {
@@ -43,10 +51,15 @@ const Footer = () => {
           </div>
           <div>
             <h4 className="text-xl font-bold mb-4">Links</h4>
-            <div><Link to="/" className="text-gray-400">Home</Link></div>
-            <div><Link to="/features" className="text-gray-400">Features</Link></div>
-            <div><Link to="/prices" className="text-gray-400">Preise</Link></div>
-            <div><Link to="/contact" className="text-gray-400">Kontakt</Link></div>
+            <div><Link to="/" className="text-gray-400 hover:text-white">Home</Link></div>
+            <div><Link to="/features" className="text-gray-400 hover:text-white">Features</Link></div>
+            <div><Link to="/prices" className="text-gray-400 hover:text-white">Preise</Link></div>
+            <div><Link to="/contact" className="text-gray-400 hover:text-white">Kontakt</Link></div>
+            {isAuthenticated && (
+              <div>
+                <a onClick={handleLogout} className="text-gray-400 hover:text-white cursor-pointer">Logout</a>
+              </div>
+            )}
           </div>
           <div>
             <h4 className="text-xl font-bold mb-4">Newsletter</h4>
