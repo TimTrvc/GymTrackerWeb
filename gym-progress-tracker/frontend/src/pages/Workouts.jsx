@@ -5,40 +5,66 @@ import WorkoutNav from "@/components/features/workouts/WorkoutNav.jsx";
 import WorkoutCreate from "@/components/features/workouts/WorkoutCreate.jsx";
 import WorkoutView from "@/components/features/workouts/WorkoutView.jsx";
 import WorkoutEdit from "@/components/features/workouts/WorkoutEdit.jsx";
+import { useNavigate } from 'react-router';
 
-const Workout = () => {
-  const [activeTab, setActiveTab] = useState('create');
-  const [workouts, setWorkouts] = useState([]);
+// Constants
+const PAGE_TITLE = "Workouts";
+const PAGE_SUBTITLE = "Erstelle oder Bearbeite hier deine Workouts";
+const SUCCESS_MESSAGE = "Workout erfolgreich hinzugefügt!";
+const ERROR_MESSAGE = "Fehler beim Hinzufügen des Workouts. Bitte versuche es später erneut.";
+
+// Layout component for consistent structure
+const WorkoutLayout = ({ children }) => (
+  <>
+    <HeroSection title={PAGE_TITLE} subtitle={PAGE_SUBTITLE} />
+    <div className="container mx-auto px-4 py-8">
+      {children}
+    </div>
+  </>
+);
+
+// Tab content component to handle conditional rendering
+const TabContent = ({ activeTab, workouts, handleWorkoutSubmit }) => {
+  switch (activeTab) {
+    case 'create':
+      return <WorkoutCreate handleWorkoutSubmit={handleWorkoutSubmit} />;
+    case 'view':
+      return <WorkoutView workouts={workouts} />;
+    case 'edit':
+      return <WorkoutEdit workouts={workouts} />;
+    default:
+      return null;
+  }
+};
+
+// Custom hook for authentication check
+const useAuthCheck = () => {
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Prüfen, ob der Benutzer authentifiziert ist
     const token = localStorage.getItem('token');
-
-    // Falls kein Token vorhanden ist, zur Login-Seite umleiten
     if (!token) {
-      window.location.href = '/login';
-      return;
+      navigate('/login');
     }
-  }, []);
+  }, [navigate]);
+};
 
-  const handleTabClick = (tabId) => {
-    setActiveTab(tabId);
+// Custom hook for workout data management
+const useWorkoutData = () => {
+  const [workouts, setWorkouts] = useState([]);
 
-    // Bei Wechsel zum Anzeigen-Tab die Workouts laden
-    if (tabId === 'view') {
-      loadWorkouts();
-    }
-
-    // Bei Wechsel zum Bearbeiten-Tab die Workout-Liste laden
-    if (tabId === 'edit') {
-      loadWorkoutsForEdit();
+  const loadWorkouts = async () => {
+    try {
+      const data = await getWorkouts();
+      setWorkouts(data.workouts.rows || []);
+    } catch (error) {
+      console.error('Fehler beim Laden der Workouts:', error);
     }
   };
 
   const handleWorkoutSubmit = async (e) => {
     e.preventDefault();
 
-    // Formular-Daten sammeln
     const formData = {
       name: e.target.name.value,
       description: e.target.description.value,
@@ -53,47 +79,48 @@ const Workout = () => {
       const isOK = await addWorkout(formData);
 
       if (isOK) {
-        alert('Workout erfolgreich hinzugefügt!');
-        e.target.reset(); // Formular zurücksetzen
+        alert(SUCCESS_MESSAGE);
+        e.target.reset();
       } else {
-        // Fehlermeldung anzeigen
-        alert('Ein Fehler ist aufgetreten');
+        alert(ERROR_MESSAGE);
       }
     } catch (error) {
       console.error('Fehler beim Hinzufügen des Workouts:', error);
-      alert('Fehler beim Hinzufügen des Workouts. Bitte versuche es später erneut.');
+      alert(ERROR_MESSAGE);
     }
   };
 
-  const loadWorkouts = async () => {
-    try {
-      const data = await getWorkouts();
-      setWorkouts(data.workouts.rows || []);
-    } catch (error) {
-      console.error('Fehler beim Laden der Workouts:', error);
-    }
-  };
+  return { workouts, loadWorkouts, handleWorkoutSubmit };
+};
 
-  const loadWorkoutsForEdit = async () => {
-    await loadWorkouts();
+const Workout = () => {
+  const [activeTab, setActiveTab] = useState('create');
+  
+  // Use custom hooks
+  useAuthCheck();
+  const { workouts, loadWorkouts, handleWorkoutSubmit } = useWorkoutData();
+
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId);
+
+    // Load workouts when switching to view or edit tabs
+    if (tabId === 'view' || tabId === 'edit') {
+      loadWorkouts();
+    }
   };
 
   return (
-    <>
-      {/* Hero Section */}
-      <HeroSection title="Workouts" subtitle="Erstelle oder Bearbeite hier deine Workouts" />
+    <WorkoutLayout>
+      {/* Tab Navigation */}
+      <WorkoutNav activeTab={activeTab} handleTabClick={handleTabClick} />
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        {/* Tab Navigation */}
-        <WorkoutNav activeTab={activeTab} handleTabClick={handleTabClick} />
-
-        {/* Tab Content */}
-        {activeTab === 'create' && <WorkoutCreate handleWorkoutSubmit={handleWorkoutSubmit} />}
-        {activeTab === 'view' && <WorkoutView workouts={workouts} />}
-        {activeTab === 'edit' && <WorkoutEdit workouts={workouts} />}
-      </div>
-    </>
+      {/* Tab Content */}
+      <TabContent 
+        activeTab={activeTab} 
+        workouts={workouts} 
+        handleWorkoutSubmit={handleWorkoutSubmit} 
+      />
+    </WorkoutLayout>
   );
 };
 

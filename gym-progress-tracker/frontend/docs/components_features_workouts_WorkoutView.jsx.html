@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/features/workouts/WorkoutView.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/features/workouts/WorkoutView.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React from "react";
+import PropTypes from 'prop-types';
+import Hoverer from "../../animation/Hoverer.jsx";
+
+/**
+ * WorkoutView-Komponente zur Anzeige von Workouts
+ * 
+ * SOLID-Prinzipien:
+ * - Single Responsibility: Fokussiert sich nur auf die Anzeige von Workouts
+ * - Open/Closed: Erweiterbar für verschiedene Ansichtsmodi
+ * 
+ * KISS: Klare, verständliche Komponentenstruktur
+ * DRY: Wiederverwendbare UI-Komponenten für Workout-Karten
+ * 
+ * @param {Object} props - Komponenten-Props
+ * @param {Array} props.workouts - Liste der anzuzeigenden Workouts
+ * @param {Function} props.onView - Callback für "Ansehen"-Aktion
+ * @param {Function} props.onEdit - Callback für "Bearbeiten"-Aktion
+ * @param {Function} props.onDelete - Callback für "Löschen"-Aktion
+ */
+const WorkoutView = ({ 
+  workouts = [], 
+  onView = () => {}, 
+  onEdit = () => {}, 
+  onDelete = () => {} 
+}) => {
+  /**
+   * Komponente für den Leerzustand (keine Workouts)
+   * Extrahiert als separate Komponente (Single Responsibility)
+   */
+  const EmptyState = () => (
+    &lt;div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 text-center">
+      &lt;p className="text-gray-500">Keine Workouts gefunden. Erstellen Sie ein neues Workout im &amp;quot;Erstellen&amp;quot;-Tab.&lt;/p>
+    &lt;/div>
+  );
+
+  /**
+   * Komponente für die Workout-Details
+   * Zeigt die Metadaten eines Workouts an
+   */
+  const WorkoutDetails = ({ workout }) => (
+    &lt;div className="grid grid-cols-2 gap-4 text-sm">
+      {/* Workout-Detail-Felder */}
+      &lt;DetailField label="Schwierigkeit" value={workout.difficulty_level} />
+      &lt;DetailField label="Ziel" value={workout.goal} />
+      &lt;DetailField label="Dauer" value={`${workout.estimated_duration_minutes} Minuten`} />
+      &lt;DetailField label="Zielgruppe" value={workout.target_audience} />
+    &lt;/div>
+  );
+
+  /**
+   * Komponente für ein einzelnes Detailfeld
+   * Verbessert die Konsistenz und folgt dem DRY-Prinzip
+   */
+  const DetailField = ({ label, value }) => (
+    &lt;div>
+      &lt;span className="font-medium">{label}:&lt;/span> {value || 'Nicht angegeben'}
+    &lt;/div>
+  );
+
+  /**
+   * Komponente für die Aktionsschaltflächen
+   * Extrahiert als separate Komponente (Single Responsibility)
+   */
+  const ActionButtons = ({ workout }) => (
+    &lt;div className="mt-4 flex space-x-2">
+      &lt;button 
+        className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition-colors"
+        onClick={() => onView(workout)}
+        aria-label={`Workout "${workout.name}" ansehen`}
+      >
+        Ansehen
+      &lt;/button>
+      &lt;button 
+        className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 transition-colors"
+        onClick={() => onEdit(workout)}
+        aria-label={`Workout "${workout.name}" bearbeiten`}
+      >
+        Bearbeiten
+      &lt;/button>
+      &lt;button 
+        className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+        onClick={() => onDelete(workout)}
+        aria-label={`Workout "${workout.name}" löschen`}
+      >
+        Löschen
+      &lt;/button>
+    &lt;/div>
+  );
+
+  /**
+   * Komponente für ein Badge (z.B. "Featured")
+   * Wiederverwendbar für verschiedene Badge-Typen
+   */
+  const Badge = ({ type, text }) => {
+    const styles = {
+      featured: "bg-yellow-100 text-yellow-800",
+      new: "bg-green-100 text-green-800",
+      popular: "bg-blue-100 text-blue-800"
+    };
+    
+    return (
+      &lt;div className={`mt-4 inline-block ${styles[type] || styles.featured} text-xs font-semibold px-2.5 py-0.5 rounded`}>
+        {text}
+      &lt;/div>
+    );
+  };
+
+  /**
+   * Komponente für eine einzelne Workout-Karte
+   * Extrahiert als separate Komponente (Single Responsibility)
+   */
+  const WorkoutCard = ({ workout }) => (
+    &lt;Hoverer>
+      &lt;div className="bg-white rounded-lg shadow-md p-6">
+        &lt;h3 className="text-xl font-semibold mb-2">{workout.name}&lt;/h3>
+        &lt;div className="text-gray-500 mb-4">{workout.description}&lt;/div>
+        
+        &lt;WorkoutDetails workout={workout} />
+        &lt;ActionButtons workout={workout} />
+        
+        {workout.is_featured &amp;&amp; &lt;Badge type="featured" text="Featured" />}
+      &lt;/div>
+    &lt;/Hoverer>
+  );
+
+  // Wenn keine Workouts vorhanden sind, zeige den Leerzustand an
+  if (workouts.length === 0) {
+    return &lt;EmptyState />;
+  }
+
+  return (
+    &lt;div className="max-w-3xl mx-auto">
+      &lt;h2 className="text-2xl font-bold mb-6">Meine Workouts&lt;/h2>
+      &lt;div className="space-y-4">
+        {workouts.map((workout) => (
+          &lt;WorkoutCard 
+            key={workout.id || workout.template_id || Math.random().toString(36).substring(2, 9)} 
+            workout={workout} 
+          />
+        ))}
+      &lt;/div>
+    &lt;/div>
+  );
+};
+
+// PropTypes für bessere Typsicherheit und Dokumentation
+WorkoutView.propTypes = {
+  workouts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      template_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      name: PropTypes.string.isRequired,
+      description: PropTypes.string,
+      difficulty_level: PropTypes.string,
+      goal: PropTypes.string,
+      estimated_duration_minutes: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      target_audience: PropTypes.string,
+      is_featured: PropTypes.bool
+    })
+  ),
+  onView: PropTypes.func,
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func
+};
+
+export default WorkoutView;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BaseService.html">BaseService</a></li><li><a href="ExercisesService.html">ExercisesService</a></li><li><a href="WorkoutService.html">WorkoutService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AUTH_KEYS">AUTH_KEYS</a></li><li><a href="global.html#AddExerciseModal">AddExerciseModal</a></li><li><a href="global.html#App">App</a></li><li><a href="global.html#AppRoutes">AppRoutes</a></li><li><a href="global.html#AuthContext">AuthContext</a></li><li><a href="global.html#AuthProvider">AuthProvider</a></li><li><a href="global.html#Dropdown">Dropdown</a></li><li><a href="global.html#DropdownItem">DropdownItem</a></li><li><a href="global.html#ErrorDisplay">ErrorDisplay</a></li><li><a href="global.html#ExerciseCategoryCard">ExerciseCategoryCard</a></li><li><a href="global.html#ExerciseDetailsModal">ExerciseDetailsModal</a></li><li><a href="global.html#ExerciseList">ExerciseList</a></li><li><a href="global.html#ExercisesCategories">ExercisesCategories</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#FormButton">FormButton</a></li><li><a href="global.html#FormCheckbox">FormCheckbox</a></li><li><a href="global.html#FormError">FormError</a></li><li><a href="global.html#FormInput">FormInput</a></li><li><a href="global.html#FormLabel">FormLabel</a></li><li><a href="global.html#FormMessage">FormMessage</a></li><li><a href="global.html#FormSelect">FormSelect</a></li><li><a href="global.html#FormSuccess">FormSuccess</a></li><li><a href="global.html#FormTextarea">FormTextarea</a></li><li><a href="global.html#HeroSection">HeroSection</a></li><li><a href="global.html#Hoverer">Hoverer</a></li><li><a href="global.html#LoadingDisplay">LoadingDisplay</a></li><li><a href="global.html#NAVIGATION_DATA">NAVIGATION_DATA</a></li><li><a href="global.html#Navbar">Navbar</a></li><li><a href="global.html#PrivateRoute">PrivateRoute</a></li><li><a href="global.html#WorkoutCreate">WorkoutCreate</a></li><li><a href="global.html#WorkoutNav">WorkoutNav</a></li><li><a href="global.html#WorkoutView">WorkoutView</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#checkAuth">checkAuth</a></li><li><a href="global.html#getErrorMessage">getErrorMessage</a></li><li><a href="global.html#getToken">getToken</a></li><li><a href="global.html#handleError">handleError</a></li><li><a href="global.html#isInRange">isInRange</a></li><li><a href="global.html#isLoggedIn">isLoggedIn</a></li><li><a href="global.html#isNotEmpty">isNotEmpty</a></li><li><a href="global.html#isStrongPassword">isStrongPassword</a></li><li><a href="global.html#isTokenValid">isTokenValid</a></li><li><a href="global.html#isValidEmail">isValidEmail</a></li><li><a href="global.html#isValidReps">isValidReps</a></li><li><a href="global.html#isValidUsername">isValidUsername</a></li><li><a href="global.html#isValidWeight">isValidWeight</a></li><li><a href="global.html#logError">logError</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#passwordsMatch">passwordsMatch</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#saveAuthData">saveAuthData</a></li><li><a href="global.html#updateProfile">updateProfile</a></li><li><a href="global.html#useAuth">useAuth</a></li><li><a href="global.html#useExerciseCategories">useExerciseCategories</a></li><li><a href="global.html#useForm">useForm</a></li><li><a href="global.html#validateLogin">validateLogin</a></li><li><a href="global.html#validateRegistration">validateRegistration</a></li><li><a href="global.html#validateRegistrationData">validateRegistrationData</a></li><li><a href="global.html#validateWorkout">validateWorkout</a></li><li><a href="global.html#withPrivateRoute">withPrivateRoute</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue Apr 08 2025 17:04:09 GMT+0200 (Mitteleuropäische Sommerzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

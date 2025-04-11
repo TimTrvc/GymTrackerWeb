@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/features/exercises/ExerciseCategoryCard.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/features/exercises/ExerciseCategoryCard.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React from 'react';
+import PropTypes from 'prop-types';
+
+/**
+ * ExerciseCategoryCard - Zeigt eine Übungskategorie als Karte an
+ * 
+ * SOLID-Prinzipien:
+ * - Single Responsibility: Verantwortlich nur für die Anzeige einer Kategorie
+ * - Open/Closed: Erweiterbar durch verschiedene Icon-Varianten
+ * 
+ * KISS: Einfache, klar strukturierte Komponente
+ * 
+ * @param {Object} props - Komponenten-Props
+ * @param {string} props.name - Name der Kategorie
+ * @param {string} props.description - Beschreibung der Kategorie
+ * @param {number|string} props.category_id - ID der Kategorie
+ * @param {Function} props.onCategoryClick - Callback-Funktion für Klick-Events
+ * @param {string} props.iconVariant - Optional: Variante des Icons ('plus', 'dumbbell', 'running', 'swim')
+ */
+const ExerciseCategoryCard = ({ 
+    name, 
+    description, 
+    category_id, 
+    onCategoryClick,
+    iconVariant = 'plus'
+}) => {
+    // Icon-Komponente extrahiert nach SRP (Single Responsibility Principle)
+    const CategoryIcon = ({ variant }) => {
+        // Verschiedene Icons für verschiedene Kategorietypen
+        const icons = {
+            plus: (
+                &lt;svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    &lt;path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                &lt;/svg>
+            ),
+            dumbbell: (
+                &lt;svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    &lt;path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                          d="M18 5h-2a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2zM6 5H4a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2z"/>
+                    &lt;line x1="8" y1="12" x2="16" y2="12" strokeWidth="2" />
+                &lt;/svg>
+            ),
+            running: (
+                &lt;svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    &lt;path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                          d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                &lt;/svg>
+            ),
+            swim: (
+                &lt;svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    &lt;path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                &lt;/svg>
+            )
+        };
+
+        return icons[variant] || icons.plus;
+    };
+    
+    // Klick-Handler - verhindert Event-Bubbling
+    const handleClick = (e) => {
+        e.preventDefault();
+        onCategoryClick(category_id);
+    };
+
+    return (
+        &lt;div 
+            className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer" 
+            onClick={handleClick}
+            aria-label={`Kategorie ${name} öffnen`}
+        >
+            &lt;div className="bg-red-100 text-red-600 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                &lt;CategoryIcon variant={iconVariant} />
+            &lt;/div>
+            &lt;h3 className="text-lg font-semibold text-gray-800">{name}&lt;/h3>
+            &lt;p className="text-gray-500 text-sm">{description}&lt;/p>
+        &lt;/div>
+    );
+};
+
+// PropTypes für bessere Entwicklerfreundlichkeit und Typsicherheit
+ExerciseCategoryCard.propTypes = {
+    name: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    category_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    onCategoryClick: PropTypes.func.isRequired,
+    iconVariant: PropTypes.oneOf(['plus', 'dumbbell', 'running', 'swim'])
+};
+
+export default ExerciseCategoryCard;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BaseService.html">BaseService</a></li><li><a href="ExercisesService.html">ExercisesService</a></li><li><a href="WorkoutService.html">WorkoutService</a></li></ul><h3>Global</h3><ul><li><a href="global.html#AUTH_KEYS">AUTH_KEYS</a></li><li><a href="global.html#AddExerciseModal">AddExerciseModal</a></li><li><a href="global.html#App">App</a></li><li><a href="global.html#AppRoutes">AppRoutes</a></li><li><a href="global.html#AuthContext">AuthContext</a></li><li><a href="global.html#AuthProvider">AuthProvider</a></li><li><a href="global.html#Dropdown">Dropdown</a></li><li><a href="global.html#DropdownItem">DropdownItem</a></li><li><a href="global.html#ErrorDisplay">ErrorDisplay</a></li><li><a href="global.html#ExerciseCategoryCard">ExerciseCategoryCard</a></li><li><a href="global.html#ExerciseDetailsModal">ExerciseDetailsModal</a></li><li><a href="global.html#ExerciseList">ExerciseList</a></li><li><a href="global.html#ExercisesCategories">ExercisesCategories</a></li><li><a href="global.html#Footer">Footer</a></li><li><a href="global.html#FormButton">FormButton</a></li><li><a href="global.html#FormCheckbox">FormCheckbox</a></li><li><a href="global.html#FormError">FormError</a></li><li><a href="global.html#FormInput">FormInput</a></li><li><a href="global.html#FormLabel">FormLabel</a></li><li><a href="global.html#FormMessage">FormMessage</a></li><li><a href="global.html#FormSelect">FormSelect</a></li><li><a href="global.html#FormSuccess">FormSuccess</a></li><li><a href="global.html#FormTextarea">FormTextarea</a></li><li><a href="global.html#HeroSection">HeroSection</a></li><li><a href="global.html#Hoverer">Hoverer</a></li><li><a href="global.html#LoadingDisplay">LoadingDisplay</a></li><li><a href="global.html#NAVIGATION_DATA">NAVIGATION_DATA</a></li><li><a href="global.html#Navbar">Navbar</a></li><li><a href="global.html#PrivateRoute">PrivateRoute</a></li><li><a href="global.html#WorkoutCreate">WorkoutCreate</a></li><li><a href="global.html#WorkoutNav">WorkoutNav</a></li><li><a href="global.html#WorkoutView">WorkoutView</a></li><li><a href="global.html#api">api</a></li><li><a href="global.html#checkAuth">checkAuth</a></li><li><a href="global.html#getErrorMessage">getErrorMessage</a></li><li><a href="global.html#getToken">getToken</a></li><li><a href="global.html#handleError">handleError</a></li><li><a href="global.html#isInRange">isInRange</a></li><li><a href="global.html#isLoggedIn">isLoggedIn</a></li><li><a href="global.html#isNotEmpty">isNotEmpty</a></li><li><a href="global.html#isStrongPassword">isStrongPassword</a></li><li><a href="global.html#isTokenValid">isTokenValid</a></li><li><a href="global.html#isValidEmail">isValidEmail</a></li><li><a href="global.html#isValidReps">isValidReps</a></li><li><a href="global.html#isValidUsername">isValidUsername</a></li><li><a href="global.html#isValidWeight">isValidWeight</a></li><li><a href="global.html#logError">logError</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#passwordsMatch">passwordsMatch</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#saveAuthData">saveAuthData</a></li><li><a href="global.html#updateProfile">updateProfile</a></li><li><a href="global.html#useAuth">useAuth</a></li><li><a href="global.html#useExerciseCategories">useExerciseCategories</a></li><li><a href="global.html#useForm">useForm</a></li><li><a href="global.html#validateLogin">validateLogin</a></li><li><a href="global.html#validateRegistration">validateRegistration</a></li><li><a href="global.html#validateRegistrationData">validateRegistrationData</a></li><li><a href="global.html#validateWorkout">validateWorkout</a></li><li><a href="global.html#withPrivateRoute">withPrivateRoute</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue Apr 08 2025 17:04:09 GMT+0200 (Mitteleuropäische Sommerzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

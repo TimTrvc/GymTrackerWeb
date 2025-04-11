@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "lint:fix": "eslint --fix"
+    "lint:fix": "eslint --fix",
+    "docs": "jsdoc -c jsdoc.json"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
@@ -35,6 +36,7 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
+    "jsdoc": "^4.0.4",
     "vite": "^6.2.0"
   }
 }
