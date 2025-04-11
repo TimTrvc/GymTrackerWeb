@@ -12,6 +12,7 @@ import Features from '@/pages/Features';
 import Nutrition from '@/pages/Nutrition';
 import Body from '@/pages/Body';
 import Avatar from '@/pages/Avatar';
+import Profile from '@/pages/Profile';
 import { withPrivateRoute } from '@/components/features/auth/withPrivateRoute';
 
 /**
@@ -33,6 +34,7 @@ const AppRoutes = () => {
       <Route path="/nutrition" element={withPrivateRoute(Nutrition)} />
       <Route path="/body" element={withPrivateRoute(Body)} />
       <Route path="/avatar" element={withPrivateRoute(Avatar)} />
+      <Route path="/profile" element={withPrivateRoute(Profile)} />
     </Routes>
   );
 };
