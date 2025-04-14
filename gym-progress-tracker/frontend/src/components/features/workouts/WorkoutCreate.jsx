@@ -6,7 +6,6 @@ import useExerciseCategories from '@/hooks/useExerciseCategories';
 import LoadingDisplay from '@/components/common/LoadingDisplay';
 import ErrorDisplay from '@/components/common/ErrorDisplay';
 import { TextField, TextArea, SelectField, CheckboxField } from '@/components/common/FormElements';
-import { getExerciseByCategory } from '@/services/exercisesService';
 
 /**
  * WorkoutCreate - Komponente zum Erstellen eines neuen Workouts
@@ -59,9 +58,7 @@ const WorkoutCreate = ({
     if (selectedCategoryId) {
       selectCategory(selectedCategoryId);
     }
-  }, [selectedCategoryId, selectCategory]);
-
-  /**
+  }, [selectedCategoryId, selectCategory]);  /**
    * Fügt eine ausgewählte Übung zur Liste der Workout-Übungen hinzu
    */
   const handleAddExercise = () => {
@@ -69,22 +66,48 @@ const WorkoutCreate = ({
       return; // Keine Übung ausgewählt
     }
 
-    const exerciseToAdd = exercises.find(ex => ex.id === parseInt(selectedExerciseId));
+    console.log("Versuche Übung hinzuzufügen mit ID:", selectedExerciseId);
+    console.log("Verfügbare Übungen:", exercises);
+
+    // Versuch 1: Direkte ID-Übereinstimmung
+    let exerciseToAdd = exercises.find(ex => String(ex.id) === String(selectedExerciseId));
+
+    // Versuch 2: Falls es der Name statt der ID ist
+    if (!exerciseToAdd) {
+      exerciseToAdd = exercises.find(ex => ex.name === selectedExerciseId);
+    }
+
+    // Versuch 3: Nimm die Übung aus dem Select-Element
+    if (!exerciseToAdd) {
+      const selectedOption = document.querySelector(`select[name="exercise"] option:checked`);
+      if (selectedOption) {
+        const optionText = selectedOption.textContent;
+        console.log("Ausgewählter Option-Text:", optionText);
+        exerciseToAdd = exercises.find(ex => ex.name === optionText);
+      }
+    }
     
     if (!exerciseToAdd) {
-      return; // Übung nicht gefunden
+      console.error("Übung nicht gefunden. Manuelle Erstellung mit Name:", selectedExerciseId);
+      // Als letzte Möglichkeit: Manuell Übungsdaten erstellen
+      exerciseToAdd = {
+        id: Date.now(), // Verwende Timestamp als Ersatz-ID
+        name: typeof selectedExerciseId === 'string' ? selectedExerciseId : 'Unbekannte Übung',
+        description: ""
+      };
     }
 
     const newExercise = {
       exercise_id: exerciseToAdd.id,
       name: exerciseToAdd.name,
-      description: exerciseToAdd.description,
+      description: exerciseToAdd.description || "",
       sets: exerciseSets,
       reps: exerciseReps,
       rest_seconds: restSeconds,
       position: selectedExercises.length + 1
     };
-
+    
+    console.log("Hinzugefügte Übung:", newExercise);
     setSelectedExercises(prev => [...prev, newExercise]);
     
     // Formularfelder zurücksetzen
@@ -138,11 +161,11 @@ const WorkoutCreate = ({
     setSelectedCategoryId(categoryId);
     setSelectedExerciseId(''); // Übungsauswahl zurücksetzen
   };
-
   /**
    * Behandelt Änderungen der Übungsauswahl
    */
   const handleExerciseChange = (e) => {
+    // Speichere die ID der ausgewählten Übung, nicht den Namen
     setSelectedExerciseId(e.target.value);
   };
 
@@ -281,18 +304,15 @@ const WorkoutCreate = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-                Kategorie
-              </label>
-              <select
+                Kategorie              </label>              <select
                 id="category"
                 name="category"
                 value={selectedCategoryId}
                 onChange={handleCategoryChange}
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="">Kategorie wählen</option>
+              >                <option value="">Kategorie wählen</option>
                 {categories.map(category => (
-                  <option key={category.id} value={category.id}>{category.name}</option>
+                  <option key={category.category_id} value={category.category_id}>{category.name}</option>
                 ))}
               </select>
             </div>
@@ -300,8 +320,7 @@ const WorkoutCreate = ({
             <div>
               <label htmlFor="exercise" className="block text-sm font-medium text-gray-700 mb-1">
                 Übung
-              </label>
-              <select
+              </label>              <select
                 id="exercise"
                 name="exercise"
                 value={selectedExerciseId}
@@ -374,44 +393,45 @@ const WorkoutCreate = ({
               Übung hinzufügen
             </button>
           </div>
-        </div>
-
-        {selectedExercises.length > 0 && (
+        </div>        {selectedExercises.length > 0 && (
           <div className="border-t pt-6 mb-8">
             <h3 className="text-xl font-semibold mb-4">Ausgewählte Übungen</h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sätze</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wiederholungen</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pause (s)</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aktionen</th>
-                  </tr>
-                </thead>                <tbody className="bg-white divide-y divide-gray-200">
-                  {selectedExercises.map((exercise, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap">{exercise.position}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{exercise.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{exercise.sets}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{exercise.reps}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{exercise.rest_seconds}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveExercise(index)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Entfernen
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <ul className="space-y-3">
+              {selectedExercises.map((exercise, index) => (
+                <li 
+                  key={`exercise-${exercise.exercise_id || 'unknown'}-${index}`}
+                  className="bg-gray-50 rounded-lg p-4 shadow-sm border border-gray-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full px-2 py-1">
+                        #{exercise.position}
+                      </span>
+                      <h4 className="font-medium text-lg">{exercise.name}</h4>
+                    </div>                    <div className="mt-2 flex flex-wrap gap-4">
+                      <span key={`set-${index}`} className="inline-flex items-center text-sm">
+                        <span className="font-medium mr-1">Sätze:</span> {exercise.sets}
+                      </span>
+                      <span key={`rep-${index}`} className="inline-flex items-center text-sm">
+                        <span className="font-medium mr-1">Wiederholungen:</span> {exercise.reps}
+                      </span>
+                      <span key={`rest-${index}`} className="inline-flex items-center text-sm">
+                        <span className="font-medium mr-1">Pause:</span> {exercise.rest_seconds}s
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveExercise(index)}
+                      className="bg-red-50 text-red-600 px-3 py-1 rounded-md hover:bg-red-100 transition-colors text-sm"
+                    >
+                      Entfernen
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
         

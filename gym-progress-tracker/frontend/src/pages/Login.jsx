@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AuthTabs from '@/components/features/auth/AuthTab.jsx';
-import { login, register } from '@/services/authService.js';
+import authService from '@/services/authService.js';
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -10,8 +10,7 @@ const Login = () => {
     setError('');
     setIsLoading(true);
 
-    try {
-      await login(formData);
+    try {      await authService.login(formData);
       setIsLoading(false);
       window.location.href = '/';
     } catch (error) {

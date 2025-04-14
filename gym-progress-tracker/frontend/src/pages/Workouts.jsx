@@ -62,13 +62,14 @@ const useWorkoutData = () => {
     }
   };  const handleWorkoutSubmit = async (formData) => {
     // Formdata wird jetzt direkt als Objekt übergeben
-    // Anpassung der benötigten Felder
+    // Alle Daten inklusive Übungen in workoutData übernehmen
     const workoutData = {
       name: formData.name,
       description: formData.description,
       difficulty_level: formData.difficulty_level,
       duration_minutes: formData.duration_minutes,
-      is_public: formData.is_public
+      is_public: formData.is_public,
+      exercises: formData.exercises // Übungen aus formData übernehmen
     };
     
     try {

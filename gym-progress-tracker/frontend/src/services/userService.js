@@ -1,33 +1,51 @@
-import api from './api';
+import BaseService from './BaseService';
+import { USER_ENDPOINTS } from '@/config/apiEndpoints';
 
 /**
- * Get user details by ID
- * @param {number} userId - The user ID
- * @returns {Promise<Object>} User details
+ * Service für die Verwaltung von Benutzerdaten
+ * Verwendet zentrale API-Endpunkte (DRY-Prinzip)
  */
-export const getUserDetails = async (userId) => {
-  try {
-    const response = await api.get(`/api/users/${userId}`);
-    return response.data.user;
-  } catch (error) {
-    console.error('Error in getUserDetails:', error);
-    throw error;
+class UserService extends BaseService {
+  /**
+   * Konstruktor für den User Service
+   */
+  constructor() {
+    super(USER_ENDPOINTS.BASE);
   }
-};
 
-/**
- * Update user details
- * @param {number} userId - The user ID
- * @param {Object} userData - Updated user data
- * @returns {Promise<Object>} Updated user details
- */
-export const updateUserDetails = async (userId, userData) => {
-  try {
-    // Fix the URL path to include /api prefix
-    const response = await api.put(`/api/users/${userId}`, userData);
-    return response.data;
-  } catch (error) {
-    console.error('Error in updateUserDetails:', error);
-    throw error;
+  /**
+   * Holt Benutzerdetails nach ID
+   * @param {number} userId - Die Benutzer-ID
+   * @returns {Promise<Object>} - Benutzerdetails
+   */
+  async getUserDetails(userId) {
+    try {
+      const data = await this.get(`${userId}`);
+      return data.user;
+    } catch (error) {
+      this.handleError(error, `Fehler beim Abrufen der Benutzerdetails für ID ${userId}`);
+    }
   }
-};
+
+  /**
+   * Aktualisiert Benutzerdetails
+   * @param {number} userId - Die Benutzer-ID
+   * @param {Object} userData - Aktualisierte Benutzerdaten
+   * @returns {Promise<Object>} - Aktualisierte Benutzerdetails
+   */
+  async updateUserDetails(userId, userData) {
+    try {
+      return await this.put(`${userId}`, userData);
+    } catch (error) {
+      this.handleError(error, `Fehler beim Aktualisieren der Benutzerdetails für ID ${userId}`);
+    }
+  }
+}
+
+// Singleton-Instanz des Services exportieren
+const userService = new UserService();
+export default userService;
+
+// Kompatibilitätsexporte für bisherige direkte Funktionsaufrufe
+export const getUserDetails = (userId) => userService.getUserDetails(userId);
+export const updateUserDetails = (userId, userData) => userService.updateUserDetails(userId, userData);

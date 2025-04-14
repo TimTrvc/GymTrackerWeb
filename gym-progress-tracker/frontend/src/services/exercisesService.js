@@ -8,15 +8,30 @@ import { EXERCISE_ENDPOINTS } from '@/config/apiEndpoints';
 class ExercisesService extends BaseService {
   constructor() {
     super(EXERCISE_ENDPOINTS.BASE);
-  }
-
-  /**
+  }  /**
    * Holt Übungen nach Kategorie
-   * @param {number} categoryId - ID der Kategorie
+   * @param {number|string} categoryIdentifier - ID oder Name der Kategorie
    * @returns {Promise<Array>} - Liste von Übungen
    */
-  async getByCategory(categoryId) {
-    return this.get(`category/${categoryId}`);
+  async getByCategory(categoryIdentifier) {
+    // Stelle sicher, dass wir immer eine numerische ID verwenden
+    let categoryParam;
+    
+    if (typeof categoryIdentifier === 'string') {
+      // Versuchen, den String in eine Zahl umzuwandeln
+      if (!isNaN(parseInt(categoryIdentifier))) {
+        categoryParam = parseInt(categoryIdentifier);
+      } else {
+        // Wenn es sich um einen Kategorienamen handelt, loggen und einen Fehler werfen
+        console.error("Kategorie-ID muss numerisch sein, erhielt:", categoryIdentifier);
+        throw new Error("Kategorie-ID muss numerisch sein");
+      }
+    } else {
+      // Wenn es bereits eine Zahl ist, verwenden wir sie direkt
+      categoryParam = categoryIdentifier;
+    }
+    
+    return this.get(`category/${categoryParam}`);
   }
 
   /**
