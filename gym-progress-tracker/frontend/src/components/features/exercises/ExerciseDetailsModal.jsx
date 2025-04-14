@@ -1,5 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import exercisesService from '@/services/exercisesService';
+import LoadingDisplay from '@/components/common/LoadingDisplay';
+import ErrorDisplay from '@/components/common/ErrorDisplay';
 
 /**
  * ExerciseDetailsModal - Komponente zur Anzeige von Übungsdetails in einem Modal
@@ -12,12 +15,40 @@ import PropTypes from 'prop-types';
  * DRY: Wiederverwendung von UI-Elementen durch Detail-Komponenten
  * 
  * @param {Object} props - Komponenten-Props
- * @param {Object} props.exercise - Die anzuzeigende Übung mit ihren Details
+ * @param {number|string} props.exerciseId - Die ID der anzuzeigenden Übung
+ * @param {Object} props.exerciseData - Optional: Bereits geladene Übungsdaten
  * @param {Function} props.onClose - Callback zum Schließen des Modals
  */
-const ExerciseDetailsModal = ({ exercise, onClose }) => {
+const ExerciseDetailsModal = ({ exerciseId, exerciseData, onClose }) => {
+    // State für das Laden der Übungsdaten
+    const [exercise, setExercise] = useState(exerciseData || null);
+    const [isLoading, setIsLoading] = useState(!exerciseData);
+    const [error, setError] = useState(null);
+    
+    // Übungsdetails laden, wenn nur die ID übergeben wurde
+    useEffect(() => {
+        const fetchExerciseDetails = async () => {
+            if (!exerciseId || exerciseData) return;
+            
+            setIsLoading(true);
+            setError(null);
+            
+            try {
+                const data = await exercisesService.getById(exerciseId);
+                setExercise(data);
+            } catch (err) {
+                console.error("Fehler beim Laden der Übungsdetails:", err);
+                setError("Die Übungsdetails konnten nicht geladen werden. Bitte versuchen Sie es später erneut.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
+        fetchExerciseDetails();
+    }, [exerciseId, exerciseData]);
+
     // Frühes Return, wenn keine Übung vorhanden ist (KISS-Prinzip)
-    if (!exercise) return null;
+    if (!exercise && !isLoading) return null;
 
     // Schließen mit ESC-Taste
     useEffect(() => {
@@ -47,8 +78,6 @@ const ExerciseDetailsModal = ({ exercise, onClose }) => {
      * Verbessert nach DRY-Prinzip
      */
     const formatProperty = (property) => {
-        if (!property) return '';
-
         // Wenn es bereits ein String ist
         if (typeof property === 'string') {
             return property;

@@ -1,5 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
+import { addExerciseToWorkout } from '@/services/workoutExercisesService';
+import useExercises from '@/hooks/useExercises';
+import useExerciseCategories from '@/hooks/useExerciseCategories';
+import LoadingDisplay from '@/components/common/LoadingDisplay';
+import ErrorDisplay from '@/components/common/ErrorDisplay';
+import { TextField, TextArea, SelectField, CheckboxField } from '@/components/common/FormElements';
 
 /**
  * WorkoutCreate - Komponente zum Erstellen eines neuen Workouts
@@ -21,15 +27,147 @@ const WorkoutCreate = ({
     name: '',
     description: '',
     difficulty_level: 'beginner',
-    target_audience: 'all',
-    goal: 'strength',
-    estimated_duration_minutes: 30,
-    is_featured: false
+    duration_minutes: 30,
+    is_public: false
   }
-}) => {
-  // Formular-State mit initialValues
+}) => {  // Formular-State mit initialValues
   const [formData, setFormData] = useState(initialValues);
   const [errors, setErrors] = useState({});
+  const [selectedExercises, setSelectedExercises] = useState([]);
+  // Neue States für Übungen und Kategorien
+  const [selectedExerciseId, setSelectedExerciseId] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [exerciseReps, setExerciseReps] = useState(10);
+  const [exerciseSets, setExerciseSets] = useState(3);
+  const [restSeconds, setRestSeconds] = useState(60);
+    // Übungskategorien abrufen
+  const { categories, isLoading: categoriesLoading, error: categoriesError } = useExerciseCategories();
+  
+  // Übungen über den useExercises Hook laden
+  const { 
+    exercises, 
+    isLoading: exercisesLoading, 
+    error: exercisesError,
+    selectCategory,
+    selectedCategory,
+    clearSelectedCategory 
+  } = useExercises();
+  
+  // Übungen für ausgewählte Kategorie laden
+  useEffect(() => {
+    if (selectedCategoryId) {
+      selectCategory(selectedCategoryId);
+    }
+  }, [selectedCategoryId, selectCategory]);  /**
+   * Fügt eine ausgewählte Übung zur Liste der Workout-Übungen hinzu
+   */
+  const handleAddExercise = () => {
+    if (!selectedExerciseId) {
+      return; // Keine Übung ausgewählt
+    }
+
+    console.log("Versuche Übung hinzuzufügen mit ID:", selectedExerciseId);
+    console.log("Verfügbare Übungen:", exercises);
+
+    // Versuch 1: Direkte ID-Übereinstimmung
+    let exerciseToAdd = exercises.find(ex => String(ex.id) === String(selectedExerciseId));
+
+    // Versuch 2: Falls es der Name statt der ID ist
+    if (!exerciseToAdd) {
+      exerciseToAdd = exercises.find(ex => ex.name === selectedExerciseId);
+    }
+
+    // Versuch 3: Nimm die Übung aus dem Select-Element
+    if (!exerciseToAdd) {
+      const selectedOption = document.querySelector(`select[name="exercise"] option:checked`);
+      if (selectedOption) {
+        const optionText = selectedOption.textContent;
+        console.log("Ausgewählter Option-Text:", optionText);
+        exerciseToAdd = exercises.find(ex => ex.name === optionText);
+      }
+    }
+    
+    if (!exerciseToAdd) {
+      console.error("Übung nicht gefunden. Manuelle Erstellung mit Name:", selectedExerciseId);
+      // Als letzte Möglichkeit: Manuell Übungsdaten erstellen
+      exerciseToAdd = {
+        id: Date.now(), // Verwende Timestamp als Ersatz-ID
+        name: typeof selectedExerciseId === 'string' ? selectedExerciseId : 'Unbekannte Übung',
+        description: ""
+      };
+    }
+
+    const newExercise = {
+      exercise_id: exerciseToAdd.id,
+      name: exerciseToAdd.name,
+      description: exerciseToAdd.description || "",
+      sets: exerciseSets,
+      reps: exerciseReps,
+      rest_seconds: restSeconds,
+      position: selectedExercises.length + 1
+    };
+    
+    console.log("Hinzugefügte Übung:", newExercise);
+    setSelectedExercises(prev => [...prev, newExercise]);
+    
+    // Formularfelder zurücksetzen
+    setExerciseSets(3);
+    setExerciseReps(10);
+    setRestSeconds(60);
+    setSelectedExerciseId('');
+  };
+
+  /**
+   * Entfernt eine Übung aus der Liste der ausgewählten Übungen
+   * @param {number} index - Index der zu entfernenden Übung
+   */
+  const handleRemoveExercise = (index) => {
+    setSelectedExercises(prev => {
+      const updated = [...prev];
+      updated.splice(index, 1);
+      // Positionen aktualisieren
+      return updated.map((ex, idx) => ({
+        ...ex,
+        position: idx + 1
+      }));
+    });
+  };
+
+  /**
+   * Aktualisiert das Formular bei Änderungen der Übungsparameter
+   */
+  const handleExerciseParamChange = (e) => {
+    const { name, value } = e.target;
+    switch (name) {
+      case 'exerciseSets':
+        setExerciseSets(parseInt(value) || 0);
+        break;
+      case 'exerciseReps':
+        setExerciseReps(parseInt(value) || 0);
+        break;
+      case 'restSeconds':
+        setRestSeconds(parseInt(value) || 0);
+        break;
+      default:
+        break;
+    }
+  };
+
+  /**
+   * Behandelt Änderungen der Kategorie-Auswahl
+   */
+  const handleCategoryChange = (e) => {
+    const categoryId = e.target.value;
+    setSelectedCategoryId(categoryId);
+    setSelectedExerciseId(''); // Übungsauswahl zurücksetzen
+  };
+  /**
+   * Behandelt Änderungen der Übungsauswahl
+   */
+  const handleExerciseChange = (e) => {
+    // Speichere die ID der ausgewählten Übung, nicht den Namen
+    setSelectedExerciseId(e.target.value);
+  };
 
   /**
    * Behandelt Änderungen an Formularfeldern
@@ -67,195 +205,240 @@ const WorkoutCreate = ({
       newErrors.name = 'Name ist erforderlich';
     }
     
-    if (!formData.estimated_duration_minutes) {
-      newErrors.estimated_duration_minutes = 'Dauer ist erforderlich';
-    } else if (formData.estimated_duration_minutes < 1) {
-      newErrors.estimated_duration_minutes = 'Dauer muss mindestens 1 Minute betragen';
+    if (!formData.duration_minutes) {
+      newErrors.duration_minutes = 'Dauer ist erforderlich';
+    } else if (formData.duration_minutes < 1) {
+      newErrors.duration_minutes = 'Dauer muss mindestens 1 Minute betragen';
     }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   /**
    * Behandelt das Absenden des Formulars
    * @param {Event} e - Das Event-Objekt
    */
-  const onSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (validateForm()) {
-      handleWorkoutSubmit(formData);
+    if (!validateForm()) {
+      return;
     }
+    
+    // Workout-Daten mit ausgewählten Übungen zusammenführen
+    const completeFormData = {
+      ...formData,
+      exercises: selectedExercises
+    };
+    
+    handleWorkoutSubmit(completeFormData);
   };
+  // Rendert ein Lade- oder Fehler-Display bei Bedarf
+  if (categoriesLoading || exercisesLoading) return <LoadingDisplay message="Übungsdaten werden geladen..." />;
+  if (categoriesError) return <ErrorDisplay message={categoriesError} />;
+  if (exercisesError) return <ErrorDisplay message={exercisesError} />;
 
-  // Wiederverwendbare Formularkomponenten (DRY-Prinzip)
-
-  /**
-   * TextField-Komponente
-   */
-  const TextField = ({ id, label, required = false, ...rest }) => (
-    <div className="mb-4">
-      <label htmlFor={id} className="block text-gray-700 font-medium mb-2">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <input
-        id={id}
-        name={id}
-        className={`w-full px-4 py-2 border ${errors[id] ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-        onChange={handleInputChange}
-        value={formData[id] || ''}
-        {...rest}
-      />
-      {errors[id] && <p className="mt-1 text-sm text-red-500">{errors[id]}</p>}
-    </div>
-  );
-
-  /**
-   * TextArea-Komponente
-   */
-  const TextArea = ({ id, label, rows = 4, ...rest }) => (
-    <div className="mb-4">
-      <label htmlFor={id} className="block text-gray-700 font-medium mb-2">
-        {label}
-      </label>
-      <textarea
-        id={id}
-        name={id}
-        rows={rows}
-        className={`w-full px-4 py-2 border ${errors[id] ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-        onChange={handleInputChange}
-        value={formData[id] || ''}
-        {...rest}
-      ></textarea>
-      {errors[id] && <p className="mt-1 text-sm text-red-500">{errors[id]}</p>}
-    </div>
-  );
-
-  /**
-   * Select-Komponente
-   */
-  const SelectField = ({ id, label, options, ...rest }) => (
-    <div>
-      <label htmlFor={id} className="block text-gray-700 font-medium mb-2">
-        {label}
-      </label>
-      <select
-        id={id}
-        name={id}
-        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        onChange={handleInputChange}
-        value={formData[id] || ''}
-        {...rest}
-      >
-        {options.map(option => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      {errors[id] && <p className="mt-1 text-sm text-red-500">{errors[id]}</p>}
-    </div>
-  );
-
-  /**
-   * Checkbox-Komponente
-   */
-  const CheckboxField = ({ id, label, ...rest }) => (
-    <div className="mb-6">
-      <label className="flex items-center">
-        <input
-          type="checkbox"
-          id={id}
-          name={id}
-          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-          onChange={handleInputChange}
-          checked={formData[id] || false}
-          {...rest}
-        />
-        <span className="ml-2 text-gray-700">{label}</span>
-      </label>
-    </div>
-  );
-
-  // Dropdown-Optionen (warten auf Änderungen außerhalb der Komponente)
+  // Optionen für das Schwierigkeitsgrad-Dropdown
   const difficultyOptions = [
     { value: 'beginner', label: 'Anfänger' },
     { value: 'intermediate', label: 'Fortgeschritten' },
-    { value: 'advanced', label: 'Profi' }
+    { value: 'advanced', label: 'Profi' },
   ];
-
-  const targetAudienceOptions = [
-    { value: 'all', label: 'Alle' },
-    { value: 'beginners', label: 'Anfänger' },
-    { value: 'weight_loss', label: 'Gewichtsabnahme' },
-    { value: 'muscle_gain', label: 'Muskelaufbau' }
-  ];
-
-  const goalOptions = [
-    { value: 'strength', label: 'Kraft' },
-    { value: 'endurance', label: 'Ausdauer' },
-    { value: 'flexibility', label: 'Flexibilität' },
-    { value: 'weight_loss', label: 'Gewichtsabnahme' },
-    { value: 'muscle_gain', label: 'Muskelaufbau' }
-  ];
-
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6">
       <h2 className="text-2xl font-bold mb-6">Neues Workout erstellen</h2>
-
-      <form onSubmit={onSubmit}>
-        <TextField
-          id="name"
-          label="Name des Workouts"
-          type="text"
-          required
-        />
-
-        <TextArea
-          id="description"
-          label="Beschreibung"
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <SelectField
+      
+      <form onSubmit={handleSubmit}>
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold mb-4">Workout-Details</h3>
+          <TextField 
+            id="name"
+            label="Name des Workouts"
+            type="text"
+            value={formData.name}
+            onChange={handleInputChange}
+            required
+            error={errors.name}
+          />
+          
+          <TextArea 
+            id="description"
+            label="Beschreibung"
+            value={formData.description}
+            onChange={handleInputChange}
+            rows={4}
+            error={errors.description}
+          />
+          
+          <SelectField 
             id="difficulty_level"
             label="Schwierigkeitsgrad"
             options={difficultyOptions}
+            value={formData.difficulty_level}
+            onChange={handleInputChange}
+            error={errors.difficulty_level}
           />
-
-          <SelectField
-            id="target_audience"
-            label="Zielgruppe"
-            options={targetAudienceOptions}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <SelectField
-            id="goal"
-            label="Ziel des Workouts"
-            options={goalOptions}
-          />
-
-          <TextField
-            id="estimated_duration_minutes"
+          
+          <TextField 
+            id="duration_minutes"
             label="Dauer (Minuten)"
             type="number"
             min="1"
+            value={formData.duration_minutes}
+            onChange={handleInputChange}
             required
+            error={errors.duration_minutes}
+          />
+          
+          <CheckboxField 
+            id="is_public"
+            label="Workout öffentlich machen"
+            checked={formData.is_public}
+            onChange={handleInputChange}
           />
         </div>
 
-        <CheckboxField
-          id="is_featured"
-          label="Als Featured Workout markieren"
-        />
+        <div className="border-t pt-6 mb-8">
+          <h3 className="text-xl font-semibold mb-4">Übungen hinzufügen</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+                Kategorie              </label>              <select
+                id="category"
+                name="category"
+                value={selectedCategoryId}
+                onChange={handleCategoryChange}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >                <option value="">Kategorie wählen</option>
+                {categories.map(category => (
+                  <option key={category.category_id} value={category.category_id}>{category.name}</option>
+                ))}
+              </select>
+            </div>
 
-        <div className="flex justify-end">
+            <div>
+              <label htmlFor="exercise" className="block text-sm font-medium text-gray-700 mb-1">
+                Übung
+              </label>              <select
+                id="exercise"
+                name="exercise"
+                value={selectedExerciseId}
+                onChange={handleExerciseChange}
+                disabled={!selectedCategoryId || exercises.length === 0}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">Übung wählen</option>
+                {exercises.map(exercise => (
+                  <option key={exercise.id} value={exercise.id}>{exercise.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+              <label htmlFor="exerciseSets" className="block text-sm font-medium text-gray-700 mb-1">
+                Sätze
+              </label>
+              <input
+                id="exerciseSets"
+                name="exerciseSets"
+                type="number"
+                min="1"
+                value={exerciseSets}
+                onChange={handleExerciseParamChange}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="exerciseReps" className="block text-sm font-medium text-gray-700 mb-1">
+                Wiederholungen
+              </label>
+              <input
+                id="exerciseReps"
+                name="exerciseReps"
+                type="number"
+                min="1"
+                value={exerciseReps}
+                onChange={handleExerciseParamChange}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="restSeconds" className="block text-sm font-medium text-gray-700 mb-1">
+                Pause (Sekunden)
+              </label>
+              <input
+                id="restSeconds"
+                name="restSeconds"
+                type="number"
+                min="0"
+                value={restSeconds}
+                onChange={handleExerciseParamChange}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+          
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={handleAddExercise}
+              disabled={!selectedExerciseId}
+              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              Übung hinzufügen
+            </button>
+          </div>
+        </div>        {selectedExercises.length > 0 && (
+          <div className="border-t pt-6 mb-8">
+            <h3 className="text-xl font-semibold mb-4">Ausgewählte Übungen</h3>
+            <ul className="space-y-3">
+              {selectedExercises.map((exercise, index) => (
+                <li 
+                  key={`exercise-${exercise.exercise_id || 'unknown'}-${index}`}
+                  className="bg-gray-50 rounded-lg p-4 shadow-sm border border-gray-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full px-2 py-1">
+                        #{exercise.position}
+                      </span>
+                      <h4 className="font-medium text-lg">{exercise.name}</h4>
+                    </div>                    <div className="mt-2 flex flex-wrap gap-4">
+                      <span key={`set-${index}`} className="inline-flex items-center text-sm">
+                        <span className="font-medium mr-1">Sätze:</span> {exercise.sets}
+                      </span>
+                      <span key={`rep-${index}`} className="inline-flex items-center text-sm">
+                        <span className="font-medium mr-1">Wiederholungen:</span> {exercise.reps}
+                      </span>
+                      <span key={`rest-${index}`} className="inline-flex items-center text-sm">
+                        <span className="font-medium mr-1">Pause:</span> {exercise.rest_seconds}s
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveExercise(index)}
+                      className="bg-red-50 text-red-600 px-3 py-1 rounded-md hover:bg-red-100 transition-colors text-sm"
+                    >
+                      Entfernen
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        <div className="mt-8">
           <button
             type="submit"
-            className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+            className="w-full bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 transition-colors"
           >
             Workout erstellen
           </button>
@@ -265,7 +448,9 @@ const WorkoutCreate = ({
   );
 };
 
-// PropTypes für bessere Typsicherheit und Dokumentation
+/**
+ * PropTypes für bessere Typsicherheit und Dokumentation
+ */
 WorkoutCreate.propTypes = {
   handleWorkoutSubmit: PropTypes.func.isRequired,
   initialValues: PropTypes.shape({

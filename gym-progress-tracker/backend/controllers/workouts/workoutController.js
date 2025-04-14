@@ -23,24 +23,66 @@ const addWorkout = async (req, res) => {
         description,
         duration_minutes,
         difficulty_level,
-        is_public
+        is_public,
+        exercises // Übungen aus der Anfrage holen
     } = req.body;
 
+    // Transaktion starten, um sicherzustellen, dass das Workout und seine Übungen zusammen gespeichert oder zusammen abgebrochen werden
+    const client = await pool.connect();
+    
     try {
-        const result = await pool.query(
+        await client.query('BEGIN');
+        
+        // Workout erstellen
+        const workoutResult = await client.query(
             `INSERT INTO workouts (user_id, name, description, duration_minutes, difficulty_level, is_public)
              VALUES ($1, $2, $3, $4, $5, $6)
              RETURNING *`,
             [userId, name, description, duration_minutes, difficulty_level, is_public]
         );
-
+        
+        const newWorkout = workoutResult.rows[0];
+        const workoutId = newWorkout.workout_id;
+        
+        // Übungen hinzufügen, wenn welche vorhanden sind
+        if (exercises && exercises.length > 0) {
+            for (const exercise of exercises) {
+                await client.query(
+                    `INSERT INTO workout_exercises (
+                        workout_id, 
+                        exercise_id, 
+                        position, 
+                        sets, 
+                        reps, 
+                        rest_seconds
+                    ) VALUES ($1, $2, $3, $4, $5, $6)`,
+                    [
+                        workoutId,
+                        exercise.exercise_id,
+                        exercise.position,
+                        exercise.sets,
+                        exercise.reps,
+                        exercise.rest_seconds
+                    ]
+                );
+            }
+        }
+        
+        // Transaktion abschließen
+        await client.query('COMMIT');
+        
         res.status(201).json({
             message: 'Workout erfolgreich hinzugefügt',
-            workout: result.rows[0]
+            workout: newWorkout
         });
     } catch (err) {
+        // Bei Fehlern Transaktion zurückrollen
+        await client.query('ROLLBACK');
         console.error('Fehler beim Hinzufügen des Workouts:', err);
         res.status(500).json({ error: 'Serverseiten-Fehler beim Hinzufügen des Workouts' });
+    } finally {
+        // Client-Verbindung freigeben
+        client.release();
     }
 };
 

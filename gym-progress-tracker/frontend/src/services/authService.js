@@ -1,4 +1,4 @@
-import api from './api';
+import BaseService from './BaseService';
 import { USER_ENDPOINTS } from '@/config/apiEndpoints';
 import { handleError } from '@/utils/errorHandler';
 
@@ -32,127 +32,105 @@ const saveAuthData = (authData, rememberMe = false) => {
 };
 
 /**
- * Benutzeranmeldung
- * @param {object} credentials - Anmeldedaten (username, password, rememberMe)
- * @returns {Promise} - Nutzer und Token Daten
+ * Service für die Benutzerauthentifizierung
+ * Implementiert zentrale Authentifizierungslogik
  */
-export const login = async (credentials) => {
-  try {
-    const response = await api.post(USER_ENDPOINTS.LOGIN, {
-      username: credentials.username,
-      password: credentials.password
-    });
-
-    saveAuthData(response.data, credentials.rememberMe);
-    return response.data;
-  } catch (error) {
-    throw handleError(error, 'Anmeldung fehlgeschlagen').error;
+class AuthService extends BaseService {
+  /**
+   * Konstruktor für den Auth Service
+   */
+  constructor() {
+    super(USER_ENDPOINTS.BASE);
   }
-};
 
-/**
- * Benutzerregistrierung
- * @param {object} userData - Registrierungsdaten
- * @returns {Promise} - Registrierungsantwort
- */
-export const register = async (userData) => {
-  try {
-    validateRegistrationData(userData);
-    const response = await api.post(USER_ENDPOINTS.REGISTER, userData);
-    
-    saveAuthData(response.data);
-    return response.data;
-  } catch (error) {
-    throw handleError(error, 'Registrierung fehlgeschlagen').error;
-  }
-};
-
-/**
- * Validiert die Registrierungsdaten (Single Responsibility)
- * @param {object} userData - Die zu validierenden Benutzerdaten
- * @throws {Error} Wenn die Validierung fehlschlägt
- */
-const validateRegistrationData = (userData) => {
-  // Validierung der Pflichtfelder
-  const requiredFields = ['username', 'email', 'password'];
-  for (const field of requiredFields) {
-    if (!userData[field]) {
-      throw new Error(`Bitte fülle alle Pflichtfelder aus. ${field} fehlt.`);
+  /**
+   * Benutzer-Login mit Credentials
+   * @param {object} credentials - Anmeldedaten (Email und Passwort)
+   * @param {boolean} rememberMe - Remember-Me-Flag
+   * @returns {Promise<object>} - Benutzer-Objekt
+   */
+  async login(credentials, rememberMe = false) {
+    try {
+      const data = await this.post('login', credentials);
+      saveAuthData(data, rememberMe);
+      return data.user;
+    } catch (error) {
+      this.handleError(error, 'Login fehlgeschlagen');
     }
   }
 
-  // Überprüfung der Passwörter
-  if (userData.password !== userData.confirmPassword) {
-    throw new Error('Die Passwörter stimmen nicht überein.');
+  /**
+   * Registrierung eines neuen Benutzers
+   * @param {object} userData - Registrierungsdaten
+   * @returns {Promise<object>} - Benutzer-Objekt
+   */
+  async register(userData) {
+    try {
+      const data = await this.post('register', userData);
+      saveAuthData(data);
+      return data.user;
+    } catch (error) {
+      this.handleError(error, 'Registrierung fehlgeschlagen');
+    }
   }
-};
 
-/**
- * Prüft, ob der Benutzer angemeldet ist
- * @returns {boolean}
- */
-export const isLoggedIn = () => {
-  return !!localStorage.getItem(AUTH_KEYS.TOKEN);
-};
-
-/**
- * Abmelden des aktuellen Benutzers
- */
-export const logout = () => {
-  Object.values(AUTH_KEYS).forEach(key => {
-    localStorage.removeItem(key);
-  });
-};
-
-/**
- * Holt den aktuellen authentifizierten Benutzer
- * @returns {Promise} - Benutzerdaten
- */
-export const checkAuth = async () => {
-  try {
-    const response = await api.get(USER_ENDPOINTS.ME);
-    return response.data;
-  } catch (error) {
-    throw handleError(error, 'Authentifizierung fehlgeschlagen').error;
+  /**
+   * Benutzer-Logout
+   */
+  logout() {
+    localStorage.removeItem(AUTH_KEYS.TOKEN);
+    localStorage.removeItem(AUTH_KEYS.USER_ID);
+    localStorage.removeItem(AUTH_KEYS.USERNAME);
+    localStorage.removeItem(AUTH_KEYS.REMEMBER_ME);
   }
-};
 
-/**
- * Holt das JWT Token aus dem localStorage
- * @returns {string|null} - Das Token oder null
- */
-export const getToken = () => {
-  return localStorage.getItem(AUTH_KEYS.TOKEN);
-};
-
-/**
- * Prüft, ob das Token noch gültig ist
- * @returns {boolean}
- */
-export const isTokenValid = () => {
-  const token = getToken();
-  if (!token) return false;
-
-  try {
-    // Token-Gültigkeit prüfen (vereinfacht)
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.exp > Date.now() / 1000;
-  } catch (e) {
-    console.error('Error while checking Token: ' + e);
-    return false;
+  /**
+   * Prüft, ob der Benutzer angemeldet ist
+   * @returns {boolean} - Authentication status
+   */
+  isAuthenticated() {
+    return !!localStorage.getItem(AUTH_KEYS.TOKEN);
   }
-};
 
-/**
- * Aktualisiert das Benutzerprofil
- * @param {object} userData - Aktualisierte Benutzerdaten
- * @returns {Promise}
- */
-export const updateProfile = async (userData) => {
-  try {
-    const response = await api.put(USER_ENDPOINTS.PROFILE, userData);
-    return response.data;
-  } catch (error) {
-    throw handleError(error, 'Profilaktualisierung fehlgeschlagen').error;
+  /**
+   * Aktuelle Benutzerinformationen abrufen
+   * @returns {Promise<object>} - Benutzer-Objekt
+   */
+  async getCurrentUser() {
+    try {
+      if (!this.isAuthenticated()) {
+        return null;
+      }
+      return await this.get('me');
+    } catch (error) {
+      this.handleError(error, 'Fehler beim Abrufen des aktuellen Benutzers');
+      return null;
+    }
   }
-};
+
+  /**
+   * Aktualisiert das Benutzerprofil
+   * @param {object} profileData - Aktualisierte Profildaten
+   * @returns {Promise<object>} - Aktualisiertes Benutzer-Objekt
+   */
+  async updateProfile(profileData) {
+    try {
+      return await this.put('profile', profileData);
+    } catch (error) {
+      this.handleError(error, 'Fehler beim Aktualisieren des Profils');
+    }
+  }
+}
+
+// Singleton-Instanz des Services exportieren
+const authService = new AuthService();
+
+export default authService;
+
+// Kompatibilitätsexporte für bisherige direkte Funktionsaufrufe
+export const login = (credentials, rememberMe) => authService.login(credentials, rememberMe);
+export const register = (userData) => authService.register(userData);
+export const logout = () => authService.logout();
+export const isAuthenticated = () => authService.isAuthenticated();
+export const getCurrentUser = () => authService.getCurrentUser();
+export const updateProfile = (profileData) => authService.updateProfile(profileData);

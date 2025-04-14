@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from "react-router";
 import { AuthContext } from '@/context/AuthContext';
+import { subscribeToNewsletter } from '@/services/emailService';
 import PropTypes from 'prop-types';
 
 /**
@@ -12,11 +13,8 @@ import PropTypes from 'prop-types';
  * 
  * KISS: Klare, fokussierte Komponenten mit expliziten Aufgaben
  * DRY: Wiederverwendbare UI-Komponenten und gemeinsame Styling-Logik
- * 
- * @param {Object} props - Komponenten-Props
- * @param {string} props.apiBaseUrl - API-Basis-URL für Newsletter-Anmeldungen
  */
-const Footer = ({ apiBaseUrl = 'http://localhost:5000/api' }) => {
+const Footer = () => {
   // State-Verwaltung für Newsletter-Anmeldung
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -37,7 +35,6 @@ const Footer = ({ apiBaseUrl = 'http://localhost:5000/api' }) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
-
   /**
    * Behandelt die Newsletter-Anmeldung
    * Extrahiert in eine separate Funktion (SRP)
@@ -51,26 +48,14 @@ const Footer = ({ apiBaseUrl = 'http://localhost:5000/api' }) => {
     }
   
     try {
-      const response = await fetch(`${apiBaseUrl}/emails`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await subscribeToNewsletter(email);
   
-      if (response.ok) {
-        setMessage('Erfolgreich abonniert! Vielen Dank für dein Interesse.');
-        setMessageType('success');
-        setEmail(''); // Eingabefeld leeren
-      } else {
-        const errorData = await response.json();
-        setMessage(errorData.error || 'Fehler beim Abonnieren.');
-        setMessageType('error');
-      }
+      setMessage('Erfolgreich abonniert! Vielen Dank für dein Interesse.');
+      setMessageType('success');
+      setEmail(''); // Eingabefeld leeren
     } catch (error) {
       console.error('Fehler beim Abonnieren:', error);
-      setMessage('Serverfehler. Bitte versuche es später erneut.');
+      setMessage(error.message || 'Fehler beim Abonnieren. Bitte versuche es später erneut.');
       setMessageType('error');
     }
   };
