@@ -10,7 +10,8 @@ const Login = () => {
     setError('');
     setIsLoading(true);
 
-    try {      await authService.login(formData);
+    try {      
+      await authService.login(formData);
       setIsLoading(false);
       window.location.href = '/';
     } catch (error) {
@@ -24,7 +25,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      await register(formData);
+      await authService.register(formData);
       setIsLoading(false);
       window.location.href = '/';
     } catch (error) {
