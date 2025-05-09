@@ -7,7 +7,7 @@ import { OTHER_ENDPOINTS } from '@/config/apiEndpoints';
  */
 class EmailService extends BaseService {
   constructor() {
-    super(OTHER_ENDPOINTS.email);
+    super(OTHER_ENDPOINTS.EMAIL);
   }
 
   /**

@@ -44,7 +44,7 @@ export const STATS_ENDPOINTS = {
 
 // Sonstige Endpunkte
 export const OTHER_ENDPOINTS = {
-  EMAIL: `${API_BASE}/email`,
+  EMAIL: `${API_BASE}/emails`,
   ADMIN: `${API_BASE}/admin`
 };
 

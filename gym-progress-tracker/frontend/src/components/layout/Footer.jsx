@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import { Link, useNavigate } from "react-router";
 import { AuthContext } from '@/context/AuthContext';
 import { subscribeToNewsletter } from '@/services/emailService';
@@ -6,19 +6,11 @@ import PropTypes from 'prop-types';
 
 /**
  * Footer-Komponente für die gesamte Anwendung
- * 
- * SOLID-Prinzipien:
- * - Single Responsibility: Komponenten in logische Abschnitte aufgeteilt
- * - Open/Closed: Erweiterbar für zusätzliche Abschnitte und Funktionen
- * 
- * KISS: Klare, fokussierte Komponenten mit expliziten Aufgaben
- * DRY: Wiederverwendbare UI-Komponenten und gemeinsame Styling-Logik
  */
 const Footer = () => {
-  // State-Verwaltung für Newsletter-Anmeldung
-  const [email, setEmail] = useState('');
+  // Nur für Statusmeldungen, nicht für das Input-Feld
   const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState(''); // 'success' oder 'error'
+  const [messageType, setMessageType] = useState('');
   const { isAuthenticated, logoutUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -29,35 +21,74 @@ const Footer = () => {
 
   /**
    * Validiert eine E-Mail-Adresse
-   * Extrahiert in eine separate Funktion (SRP - Single Responsibility)
    */
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
   /**
-   * Behandelt die Newsletter-Anmeldung
-   * Extrahiert in eine separate Funktion (SRP)
+   * Newsletter-Anmeldung
    */
-  const handleSubscribe = async () => {
-    // Validierung
-    if (!email.trim() || !isValidEmail(email)) {
-      setMessage('Bitte gib eine gültige E-Mail-Adresse ein.');
-      setMessageType('error');
-      return;
-    }
-  
-    try {
-      const response = await subscribeToNewsletter(email);
-  
-      setMessage('Erfolgreich abonniert! Vielen Dank für dein Interesse.');
-      setMessageType('success');
-      setEmail(''); // Eingabefeld leeren
-    } catch (error) {
-      console.error('Fehler beim Abonnieren:', error);
-      setMessage(error.message || 'Fehler beim Abonnieren. Bitte versuche es später erneut.');
-      setMessageType('error');
-    }
+  const NewsletterSection = () => {
+    // Formular-Verarbeitung
+    const handleSubmit = async (e) => {
+      // Verhindert das Neuladen der Seite
+      e.preventDefault();
+      
+      // Formulardaten abrufen
+      const formData = new FormData(e.target);
+      const formJson = Object.fromEntries(formData.entries());
+      const email = formJson.email;
+      
+      // Validierung
+      if (!email.trim() || !isValidEmail(email)) {
+        setMessage('Bitte gib eine gültige E-Mail-Adresse ein.');
+        setMessageType('error');
+        return;
+      }
+      
+      try {
+        await subscribeToNewsletter(email);
+        setMessage('Erfolgreich abonniert! Vielen Dank für dein Interesse.');
+        setMessageType('success');
+        // Formular zurücksetzen
+        e.target.reset();
+      } catch (error) {
+        console.error('Fehler beim Abonnieren:', error);
+        setMessage(error.message || 'Fehler beim Abonnieren. Bitte versuche es später erneut.');
+        setMessageType('error');
+      }
+    };
+
+    return (
+      <div>
+        <h4 className="text-xl font-bold mb-4">Newsletter</h4>
+        <p className="text-gray-400 mb-4">Erhalte Fitness-Tipps und Updates.</p>
+        <form onSubmit={handleSubmit} className="flex mb-2">
+          <input
+            type="email"
+            name="email"
+            placeholder="Deine Email"
+            defaultValue=""
+            className="py-2 px-4 rounded-l outline-none text-gray-800 flex-grow bg-white"
+            aria-label="E-Mail-Adresse für Newsletter"
+          />
+          <button
+            type="submit"
+            className="bg-indigo-600 py-2 px-4 rounded-r hover:bg-indigo-700 transition-colors"
+            aria-label="Newsletter abonnieren"
+          >
+            Abonnieren
+          </button>
+        </form>
+        {message && (
+          <p className={`text-sm ${messageType === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+            {message}
+          </p>
+        )}
+      </div>
+    );
   };
 
   // Extrahierte Footer-Komponenten für bessere Lesbarkeit (SRP)
@@ -116,37 +147,6 @@ const Footer = () => {
     );
   };
 
-  /**
-   * Newsletter-Anmeldung
-   */
-  const NewsletterSection = () => (
-    <div>
-      <h4 className="text-xl font-bold mb-4">Newsletter</h4>
-      <p className="text-gray-400 mb-4">Erhalte Fitness-Tipps und Updates.</p>
-      <div className="flex mb-2">
-        <input
-          type="email"
-          placeholder="Deine Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="py-2 px-4 rounded-l outline-none text-gray-800 flex-grow bg-white"
-          aria-label="E-Mail-Adresse für Newsletter"
-        />
-        <button
-          onClick={handleSubscribe}
-          className="bg-indigo-600 py-2 px-4 rounded-r hover:bg-indigo-700 transition-colors"
-          aria-label="Newsletter abonnieren"
-        >
-          Abonnieren
-        </button>
-      </div>
-      {message && (
-        <p className={`text-sm ${messageType === 'success' ? 'text-green-400' : 'text-red-400'}`}>
-          {message}
-        </p>
-      )}
-    </div>
-  );
 
   /**
    * Copyright-Bereich
