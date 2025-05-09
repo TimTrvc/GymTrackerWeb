@@ -12,6 +12,9 @@ const MeasurementForm = ({
   loading = false 
 }) => {
   const [value, setValue] = useState(initialValue);
+  const [measurementDate, setMeasurementDate] = useState(
+    new Date().toISOString().split('T')[0]
+  );
   
   const bodyPartLabels = {
     chest: 'Brustumfang',
@@ -36,7 +39,7 @@ const MeasurementForm = ({
     
     onSubmit({
       [selectedPart]: Number(value),
-      measurement_date: new Date().toISOString().split('T')[0]
+      measurement_date: measurementDate
     });
   };
 
@@ -47,6 +50,23 @@ const MeasurementForm = ({
       </h3>
       
       <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label 
+            htmlFor="measurement-date" 
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Datum
+          </label>
+          <input
+              type="date"
+              id="measurement-date"
+              value={measurementDate}
+              onChange={(e) => setMeasurementDate(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              required
+          />
+        </div>
+        
         <div className="mb-4">
           <label 
             htmlFor="measurement-value" 
