@@ -6,8 +6,7 @@ import Dropdown from "@/components/layout/Dropdown.jsx";
 
 // Icons importieren
 import { FaDumbbell } from "react-icons/fa6";
-import { FaChartArea } from "react-icons/fa";
-import { MdSportsGymnastics, MdSpaceDashboard } from "react-icons/md";
+import { MdSportsGymnastics } from "react-icons/md";
 import { PiBowlFoodFill } from "react-icons/pi";
 import { RiBodyScanFill } from "react-icons/ri";
 import { UserCircleIcon } from '@heroicons/react/24/outline';
@@ -29,18 +28,6 @@ const NAVIGATION_DATA = {
       description: 'Schaue dir hier die Workouts an und füge deine eigenen hinzu!', 
       href: '/workouts', 
       icon: MdSportsGymnastics 
-    },
-    { 
-      name: 'Dashboard', 
-      description: 'Schaue dir hier dein persönliches Dashboard an!', 
-      href: '/dashboard', 
-      icon: MdSpaceDashboard 
-    },
-    { 
-      name: 'Statistiken', 
-      description: 'Schaue dir hier deine persönliche Statistiken an!', 
-      href: '/statistics', 
-      icon: FaChartArea 
     },
   ],
   body: [

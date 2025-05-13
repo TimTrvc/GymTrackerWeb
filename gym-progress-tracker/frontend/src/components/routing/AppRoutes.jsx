@@ -4,8 +4,6 @@ import Home from '@/pages/Home';
 import Login from '@/pages/Login';
 import Workouts from '@/pages/Workouts';
 import Exercises from '@/pages/Exercises';
-import Statistics from '@/pages/Statistics';
-import Dashboard from '@/pages/Dashboard';
 import Contact from '@/pages/Contact';
 import Prices from '@/pages/Prices';
 import Features from '@/pages/Features';
@@ -24,10 +22,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/workouts" element={withPrivateRoute(Workouts)} />
-      <Route path="/exercises" element={withPrivateRoute(Exercises)} />
-      <Route path="/dashboard" element={withPrivateRoute(Dashboard)} />
-      <Route path="/statistics" element={withPrivateRoute(Statistics)} />
+      <Route path="/workouts" element={withPrivateRoute(Workouts)} />      <Route path="/exercises" element={withPrivateRoute(Exercises)} />
       <Route path="/contact" element={withPrivateRoute(Contact)} />
       <Route path="/prices" element={withPrivateRoute(Prices)} />
       <Route path="/features" element={withPrivateRoute(Features)} />
