@@ -7,23 +7,29 @@ function getBossStats(level = 1) {
   let hp = 50;
   let attack = 5;
   let defense = 1; // percent
+  let crit = 2; // percent
   if (level > 1) {
     // HP and attack scale exponentially
-    hp = Math.round(hp * Math.pow(1.15, level - 1));
-    attack = Math.round(attack * Math.pow(1.12, level - 1));
+    hp = +(hp * Math.pow(1.15, level - 1)).toFixed(2);
+    attack = +(attack * Math.pow(1.12, level - 1)).toFixed(2);
     // Defense scales: each level, defense += 1 + 0.1 * defense (recursive)
     let def = 1;
+    let critChance = 2;
     for (let i = 2; i <= level; i++) {
       def = def + 1 + 0.1 * def;
-      if (def > 90) { def = 90; break; }
+      critChance = critChance + 1 + 0.05 * critChance;
+      if (def > 90) { def = 90; }
+      if (critChance > 100) { critChance = 100; }
     }
-    defense = Math.min(90, def);
+    defense = +Math.min(90, def).toFixed(2);
+    crit = Math.min(100, critChance);
   }
   return {
     name: "Gym Boss",
-    hp,
-    attack,
-    defense: Math.min(90, defense),
+    hp: +hp.toFixed(2),
+    attack: +attack.toFixed(2),
+    defense: +defense.toFixed(2),
+    crit: +crit.toFixed(2),
   };
 }
 
@@ -56,7 +62,6 @@ const Minigame = ({ playerStats }) => {
     defense: Number(playerStats.defense || 0),
     agility: Number(playerStats.agility || 0),
     currentHp: Number(playerStats.hp || 10),
-    currentMp: Number(playerStats.mp || 5),
   });
   const [boss, setBoss] = useState(() => {
     const stats = getBossStats(playerStats.boss_level || 1);
@@ -68,10 +73,13 @@ const Minigame = ({ playerStats }) => {
   const [canUseAbility, setCanUseAbility] = useState(false);
   const [bossLevelUpMsg, setBossLevelUpMsg] = useState("");
   const [result, setResult] = useState(null); // 'win' | 'lose' | null
+  const [abilityCooldown, setAbilityCooldown] = useState(0);
+
+  const logRef = React.useRef(null);
 
   React.useEffect(() => {
-    setCanUseAbility(turn % 2 === 0);
-  }, [turn]);
+    setCanUseAbility(turn % 2 === 0 && abilityCooldown === 0);
+  }, [turn, abilityCooldown]);
 
   // Always update boss stats when playerStats.boss_level changes
   React.useEffect(() => {
@@ -88,9 +96,14 @@ const Minigame = ({ playerStats }) => {
       defense: Number(playerStats.defense || 0),
       agility: Number(playerStats.agility || 0),
       currentHp: Number(playerStats.hp || 10),
-      currentMp: Number(playerStats.mp || 5),
     });
   }, [playerStats.hp, playerStats.mp, playerStats.attack, playerStats.defense, playerStats.mp, playerStats.agility]);
+
+  React.useEffect(() => {
+    if (logRef.current) {
+      logRef.current.scrollTop = logRef.current.scrollHeight;
+    }
+  }, [log]);
 
   const handleBossDefeat = async () => {
     setLog((l) => [...l, "You defeated the boss!"]);
@@ -119,8 +132,9 @@ const Minigame = ({ playerStats }) => {
     setBoss((b) => ({ ...b, currentHp: newBossHp }));
     setLog((l) => [
       ...l,
-      `Player attacks for ${dmg} damage! Boss HP: ${newBossHp}/${boss.hp}`,
+      `Player attacks for ${dmg} damage! Boss HP: ${newBossHp.toFixed(2)}/${boss.hp.toFixed(2)}`,
     ]);
+    if (abilityCooldown > 0) setAbilityCooldown(abilityCooldown - 1); // reduce cooldown
     if (newBossHp <= 0) {
       handleBossDefeat();
       return;
@@ -130,14 +144,14 @@ const Minigame = ({ playerStats }) => {
   };
 
   const handleAbility = () => {
-    if (gameOver || !canUseAbility || player.currentMp < 5) return;
+    if (gameOver || !canUseAbility) return;
     const dmg = calculateAbilityDamage(player.mp, boss.defense);
     const newBossHp = Math.max(0, boss.currentHp - dmg);
     setBoss((b) => ({ ...b, currentHp: newBossHp }));
-    setPlayer((p) => ({ ...p, currentMp: p.currentMp - 5 }));
+    setAbilityCooldown(1); // set cooldown for 1 turn
     setLog((l) => [
       ...l,
-      `Player uses ability for ${dmg} damage! Boss HP: ${newBossHp}/${boss.hp}`,
+      `Player uses ability for ${dmg} damage! Boss HP: ${newBossHp.toFixed(2)}/${boss.hp.toFixed(2)}`,
     ]);
     if (newBossHp <= 0) {
       handleBossDefeat();
@@ -149,15 +163,21 @@ const Minigame = ({ playerStats }) => {
 
   const bossTurn = () => {
     if (gameOver) return;
+    // Boss crit logic
+    const isCrit = Math.random() < (boss.crit || 0) / 100;
+    let dmg = calculateDamage(boss.attack, player.defense);
+    if (isCrit) {
+      dmg = Math.round(dmg * 1.5);
+      setLog((l) => [...l, `Boss lands a CRITICAL HIT! (${boss.crit.toFixed(1)}% chance)`]);
+    }
     if (didDodge(player.agility)) {
       setLog((l) => [...l, "You dodged the boss's attack!"]);
     } else {
-      const dmg = calculateDamage(boss.attack, player.defense);
       const newPlayerHp = Math.max(0, player.currentHp - dmg);
       setPlayer((p) => ({ ...p, currentHp: newPlayerHp }));
       setLog((l) => [
         ...l,
-        `Boss attacks for ${dmg} damage! Player HP: ${newPlayerHp}/${player.hp}`,
+        `Boss attacks for ${dmg} damage! Player HP: ${newPlayerHp.toFixed(2)}/${player.hp.toFixed(2)}`,
       ]);
       if (newPlayerHp <= 0) {
         handlePlayerDefeat();
@@ -168,7 +188,7 @@ const Minigame = ({ playerStats }) => {
 
   const handleRestart = async () => {
     await refreshAvatar && refreshAvatar();
-    setPlayer({ ...playerStats, currentHp: playerStats.hp, currentMp: playerStats.mp });
+    setPlayer({ ...playerStats, currentHp: playerStats.hp });
     const stats = getBossStats(playerStats.boss_level || 1);
     setBoss({ ...stats, currentHp: stats.hp });
     setTurn(1);
@@ -182,35 +202,34 @@ const Minigame = ({ playerStats }) => {
   };
 
   // --- UI ---
-  // Preview screen before fight
   if (mode === 'preview') {
     const bossStats = getBossStats(playerStats.boss_level || 1);
     return (
-      <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl shadow-lg p-8 max-w-xl mx-auto flex flex-col items-center">
-        <h2 className="text-2xl font-bold mb-6 text-center text-indigo-800">Boss Battle Preview</h2>
-        <div className="flex flex-col md:flex-row gap-8 w-full justify-center mb-6">
-          <div className="bg-white rounded-lg shadow p-4 flex-1 min-w-[150px]">
-            <h3 className="text-lg font-bold text-green-700 mb-2 text-center">Your Stats</h3>
-            <div className="space-y-1 text-sm">
-              <div><b>HP:</b> {playerStats.hp}</div>
-              <div><b>MP:</b> {playerStats.mp}</div>
-              <div><b>Attack:</b> {playerStats.attack}</div>
-              <div><b>Defense:</b> {playerStats.defense}%</div>
-              <div><b>Magic:</b> {playerStats.mp}</div>
-              <div><b>Dodge:</b> {playerStats.agility}%</div>
+      <div className="bg-gradient-to-br from-indigo-200 to-purple-300 rounded-3xl shadow-2xl p-10 max-w-2xl mx-auto flex flex-col items-center border-4 border-indigo-400">
+        <h2 className="text-3xl font-extrabold mb-8 text-center text-indigo-900 tracking-wide drop-shadow-lg">Boss Battle Preview</h2>
+        <div className="flex flex-col md:flex-row gap-10 w-full justify-center mb-8">
+          <div className="bg-white/80 rounded-2xl shadow-lg p-6 flex-1 min-w-[180px] border-2 border-green-300">
+            <h3 className="text-xl font-bold text-green-700 mb-3 text-center">Your Stats</h3>
+            <div className="space-y-2 text-base">
+              <div><b>HP:</b> <span className="text-green-800 font-bold">{playerStats.hp}</span></div>
+              <div><b>MP:</b> <span className="text-blue-700 font-bold">{playerStats.mp}</span></div>
+              <div><b>Attack:</b> <span className="text-red-700 font-bold">{playerStats.attack}</span></div>
+              <div><b>Defense:</b> <span className="text-yellow-700 font-bold">{playerStats.defense}%</span></div>
+              <div><b>Dodge:</b> <span className="text-purple-700 font-bold">{playerStats.agility}%</span></div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4 flex-1 min-w-[150px]">
-            <h3 className="text-lg font-bold text-red-700 mb-2 text-center">Boss (Lv. {playerStats.boss_level || 1})</h3>
-            <div className="space-y-1 text-sm">
-              <div><b>HP:</b> {bossStats.hp}</div>
-              <div><b>Attack:</b> {bossStats.attack}</div>
-              <div><b>Defense:</b> {bossStats.defense}</div>
+          <div className="bg-white/80 rounded-2xl shadow-lg p-6 flex-1 min-w-[180px] border-2 border-red-300">
+            <h3 className="text-xl font-bold text-red-700 mb-3 text-center">Boss (Lv. {playerStats.boss_level || 1})</h3>
+            <div className="space-y-2 text-base">
+              <div><b>HP:</b> <span className="text-green-800 font-bold">{bossStats.hp.toFixed(2)}</span></div>
+              <div><b>Attack:</b> <span className="text-red-700 font-bold">{bossStats.attack.toFixed(2)}</span></div>
+              <div><b>Defense:</b> <span className="text-yellow-700 font-bold">{bossStats.defense.toFixed(2)}%</span></div>
+              <div><b>Crit Chance:</b> <span className="text-pink-700 font-bold">{bossStats.crit ? bossStats.crit.toFixed(1) : 0}%</span></div>
             </div>
           </div>
         </div>
         <button
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg shadow-lg transition mb-2"
+          className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-12 rounded-2xl text-xl shadow-xl transition mb-2 mt-4 drop-shadow-lg"
           onClick={() => setMode('fight')}
         >
           Fight Boss
@@ -219,19 +238,18 @@ const Minigame = ({ playerStats }) => {
     );
   }
 
-  // Result screen after win/lose
   if (mode === 'result') {
     return (
-      <div className="bg-gradient-to-br from-green-100 to-purple-100 rounded-xl shadow-lg p-8 max-w-xl mx-auto flex flex-col items-center">
-        <h2 className="text-2xl font-bold mb-6 text-center text-indigo-800">{result === 'win' ? 'Victory!' : 'Defeat!'}</h2>
+      <div className="bg-gradient-to-br from-green-100 to-purple-200 rounded-3xl shadow-2xl p-10 max-w-2xl mx-auto flex flex-col items-center border-4 border-green-400">
+        <h2 className="text-3xl font-extrabold mb-8 text-center text-indigo-900 tracking-wide drop-shadow-lg">{result === 'win' ? 'Victory!' : 'Defeat!'}</h2>
         {bossLevelUpMsg && result === 'win' && (
-          <div className="mb-4 text-center text-green-700 font-bold">{bossLevelUpMsg}</div>
+          <div className="mb-6 text-center text-green-700 font-bold text-xl animate-bounce">{bossLevelUpMsg}</div>
         )}
-        <div className="mb-6 text-center text-gray-700">
+        <div className="mb-8 text-center text-gray-700 text-lg">
           {result === 'win' ? 'You have defeated the boss and advanced to the next level!' : 'You were defeated by the boss. Try again!'}
         </div>
         <button
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg shadow-lg transition"
+          className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-12 rounded-2xl text-xl shadow-xl transition drop-shadow-lg"
           onClick={handleRestart}
         >
           Return
@@ -242,50 +260,68 @@ const Minigame = ({ playerStats }) => {
 
   // Fight screen
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mt-8 max-w-xl mx-auto">
-      <h2 className="text-xl font-bold mb-4 text-center">Minigame: Boss Battle</h2>
-      <div className="flex justify-between mb-4">
-        <div>
-          <h3 className="font-bold">Player</h3>
-          <div>HP: {player.currentHp} / {player.hp}</div>
-          <div>MP: {player.currentMp} / {player.mp}</div>
-          <div>Attack: {player.attack}</div>
-          <div>Defense: {player.defense}%</div>
-          <div>Magic: {player.mp}</div>
-          <div>Dodge: {player.agility}%</div>
+    <div className="bg-gradient-to-br from-indigo-100 to-purple-200 rounded-3xl shadow-2xl p-8 mt-8 max-w-3xl mx-auto border-4 border-indigo-400 flex flex-col items-center justify-center min-h-[600px]">
+      <h2 className="text-4xl font-extrabold mb-8 text-center text-indigo-900 tracking-wide drop-shadow-lg flex items-center gap-3">⚔️ Minigame: Boss Battle 🏆</h2>
+      <div className="flex flex-col md:flex-row justify-between mb-8 gap-8 w-full items-center">
+        <div className="bg-white/90 rounded-2xl shadow-xl p-8 flex-1 border-2 border-green-300 flex flex-col items-center min-w-[320px]">
+          <h3 className="font-bold text-green-700 text-2xl mb-4 flex items-center gap-2">🧑‍🎤 Player</h3>
+          <div className="space-y-3 text-xl w-full">
+            <div>❤️ HP: <span className="text-green-800 font-extrabold">{player.currentHp.toFixed(2)} / {player.hp.toFixed(2)}</span></div>
+            <div>🔮 MP: <span className="text-blue-700 font-extrabold">{player.mp}</span></div>
+            <div>⚔️ Attack: <span className="text-red-700 font-extrabold">{player.attack}</span></div>
+            <div>🛡️ Defense: <span className="text-yellow-700 font-extrabold">{player.defense}%</span></div>
+            <div>💨 Dodge: <span className="text-purple-700 font-extrabold">{player.agility}%</span></div>
+          </div>
         </div>
-        <div>
-          <h3 className="font-bold">Boss (Lv. {playerStats.boss_level || 1})</h3>
-          <div>HP: {boss.currentHp} / {boss.hp}</div>
-          <div>Attack: {boss.attack}</div>
-          <div>Defense: {boss.defense}</div>
+        <div className="bg-white/90 rounded-2xl shadow-xl p-8 flex-1 border-2 border-red-300 flex flex-col items-center min-w-[320px]">
+          <h3 className="font-bold text-red-700 text-2xl mb-4 flex items-center gap-2">👹 Boss (Lv. {playerStats.boss_level || 1})</h3>
+          <div className="space-y-3 text-xl w-full">
+            <div>❤️ HP: <span className="text-green-800 font-extrabold">{boss.currentHp.toFixed(2)} / {boss.hp.toFixed(2)}</span></div>
+            <div>⚔️ Attack: <span className="text-red-700 font-extrabold">{boss.attack.toFixed(2)}</span></div>
+            <div>🛡️ Defense: <span className="text-yellow-700 font-extrabold">{boss.defense.toFixed(2)}%</span></div>
+            <div>💥 Crit: <span className="text-pink-700 font-extrabold">{boss.crit ? boss.crit.toFixed(1) : 0}%</span></div>
+          </div>
         </div>
       </div>
-      <div className="flex gap-4 mb-4">
+      <div className="flex gap-8 mb-8 justify-center w-full">
         <button
-          className="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50"
+          className="bg-green-600 hover:bg-green-700 text-white px-10 py-5 rounded-2xl text-2xl font-extrabold shadow-xl disabled:opacity-50 transition flex items-center gap-2"
           onClick={handleAttack}
           disabled={gameOver}
         >
-          Attack
+          🗡️ Attack
         </button>
         <button
-          className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-2xl text-2xl font-extrabold shadow-xl disabled:opacity-50 transition flex items-center gap-2"
           onClick={handleAbility}
-          disabled={gameOver || !canUseAbility || player.currentMp < 5}
+          disabled={gameOver || !canUseAbility}
         >
-          Use Ability
+          {abilityCooldown > 0 ? `⏳ Ability Cooldown (${abilityCooldown})` : '✨ Use Ability'}
         </button>
         <button
-          className="bg-gray-400 text-white px-4 py-2 rounded"
+          className="bg-gray-400 hover:bg-gray-500 text-white px-10 py-5 rounded-2xl text-2xl font-extrabold shadow-xl transition flex items-center gap-2"
           onClick={handleRestart}
         >
-          Return
+          🔄 Return
         </button>
       </div>
-      <div className="bg-gray-100 rounded p-2 h-40 overflow-y-auto text-sm">
+      <div ref={logRef} className="bg-gray-100 rounded-2xl p-4 h-64 overflow-y-auto text-xl shadow-inner border border-gray-300 mt-2 w-full max-w-2xl">
         {log.map((entry, idx) => (
-          <div key={idx}>{entry}</div>
+          entry.includes('CRITICAL HIT') ? (
+            <div key={idx} className="text-red-700 font-extrabold animate-pulse drop-shadow-lg flex items-center gap-2">💥 {entry}</div>
+          ) : entry.includes('dodged') ? (
+            <div key={idx} className="text-purple-700 font-bold flex items-center gap-2">💨 {entry}</div>
+          ) : entry.includes('defeated the boss') ? (
+            <div key={idx} className="text-green-700 font-extrabold flex items-center gap-2">🏆 {entry}</div>
+          ) : entry.includes('were defeated') ? (
+            <div key={idx} className="text-red-700 font-extrabold flex items-center gap-2">💀 {entry}</div>
+          ) : entry.includes('uses ability') ? (
+            <div key={idx} className="text-blue-700 font-bold flex items-center gap-2">✨ {entry}</div>
+          ) : entry.includes('attacks for') ? (
+            <div key={idx} className="text-gray-800 font-semibold flex items-center gap-2">⚔️ {entry}</div>
+          ) : (
+            <div key={idx}>{entry}</div>
+          )
         ))}
       </div>
     </div>

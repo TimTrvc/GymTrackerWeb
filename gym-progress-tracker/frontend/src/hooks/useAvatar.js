@@ -60,11 +60,11 @@ const useAvatar = () => {
       if (!avatar) return;
       const updatedStats = { ...avatar };
       if (statType === 'hp') {
-        updatedStats.hp = Math.round((updatedStats.hp || 10) * 1.2);
+        updatedStats.hp = (updatedStats.hp || 10) * 1.2;
       } else if (statType === 'mp') {
-        updatedStats.mp = Math.round((updatedStats.mp || 5) * 1.1);
+        updatedStats.mp = (updatedStats.mp || 5) * 1.1;
       } else if (statType === 'attack') {
-        updatedStats.attack = Math.round((updatedStats.attack || 5) * 1.1);
+        updatedStats.attack = (updatedStats.attack || 5) * 1.1;
       } else if (statType === 'defense') {
         updatedStats.defense = Math.min(90, (updatedStats.defense || 0) + 2);
       } else if (statType === 'agility') {
