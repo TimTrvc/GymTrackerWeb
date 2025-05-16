@@ -16,6 +16,7 @@ const personalRecordsRoutes = require('./routes/stats/personalRecordsRoutes');
 const trainingSessionsRoutes = require('./routes/stats/trainingSessionsRoutes');
 const userConnectionsRoutes = require('./routes/user/userConnectionsRoutes');
 const userWeightLogsRoutes = require('./routes/user/userWeightLogsRoutes');
+const avatarRoutes = require('./routes/user/avatarRoutes'); // Import avatar routes
 const workoutRoutes = require('./routes/workouts/workoutRoutes');
 const workoutExercisesRoutes = require('./routes/workouts/workoutExercisesRoutes');
 const emailRoutes = require('./routes/emailRoutes');
@@ -70,6 +71,7 @@ app.use('/api/personal-records', personalRecordsRoutes);
 app.use('/api/training-sessions', trainingSessionsRoutes);
 app.use('/api/user-connections', userConnectionsRoutes);
 app.use('/api/user-weight-logs', userWeightLogsRoutes);
+app.use('/api/avatar', avatarRoutes); // Avatar routes added
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/workout-exercises', workoutExercisesRoutes);
 app.use('/api/emails', emailRoutes);

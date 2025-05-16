@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import Hoverer from "../../animation/Hoverer.jsx";
 import { getWorkoutExercises } from "@/services/workoutExercisesService";
 import exercisesService from "@/services/exercisesService";
+import XpRewardNotification from "@/components/features/avatar/XpRewardNotification";
+import useActivityTracker from "@/hooks/useActivityTracker";
 
 /**
  * WorkoutView-Komponente zur Anzeige von Workouts
@@ -30,6 +32,9 @@ const WorkoutView = ({
   const [workoutExercises, setWorkoutExercises] = useState({});
   const [expandedWorkout, setExpandedWorkout] = useState(null);
   const [exerciseDetails, setExerciseDetails] = useState({});
+    // Activity tracking and XP rewards
+  const { xpReward, trackWorkoutCompletion, clearXpReward } = useActivityTracker();
+  const [completedWorkouts, setCompletedWorkouts] = useState([]);
   
   // Funktion zum Laden der Übungen für ein Workout
   const loadExercisesForWorkout = async (workoutId) => {
@@ -56,14 +61,32 @@ const WorkoutView = ({
       console.error('Fehler beim Laden der Übungen:', error);
     }
   };
-  
-  // Funktion zum Ein-/Ausklappen eines Workouts
+    // Funktion zum Ein-/Ausklappen eines Workouts
   const toggleWorkoutExpand = (workoutId) => {
     if (expandedWorkout === workoutId) {
       setExpandedWorkout(null);
     } else {
       setExpandedWorkout(workoutId);
       loadExercisesForWorkout(workoutId);
+    }
+  };
+    // Funktion zum Markieren eines Workouts als abgeschlossen und XP erhalten
+  const markWorkoutCompleted = async (workout) => {
+    if (completedWorkouts.includes(workout.workout_id)) return;
+    
+    try {
+      // Anzahl der Übungen im Workout ermitteln
+      const exercises = workoutExercises[workout.workout_id] || [];
+      const exerciseCount = exercises.length;
+      
+      // Workout-Abschluss tracken und XP erhalten über den Hook
+      await trackWorkoutCompletion(workout, exerciseCount);
+      
+      // Workout als abgeschlossen markieren
+      setCompletedWorkouts([...completedWorkouts, workout.workout_id]);
+      
+    } catch (error) {
+      console.error('Fehler beim Tracken des Workouts:', error);
     }
   };
   
@@ -135,34 +158,62 @@ const WorkoutView = ({
       <span className="font-medium">{label}:</span> {value || 'Nicht angegeben'}
     </div>
   );
-
   /**
    * Komponente für die Aktionsschaltflächen
    * Extrahiert als separate Komponente (Single Responsibility)
    */
   const ActionButtons = ({ workout }) => (
-    <div className="mt-4 flex space-x-2">
+    <div className="mt-4 flex flex-wrap gap-2 justify-between">
       <button 
-        className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition-colors"
-        onClick={() => onView(workout)}
-        aria-label={`Workout "${workout.name}" ansehen`}
+        onClick={() => markWorkoutCompleted(workout)}
+        className={`px-3 py-1 ${
+          completedWorkouts.includes(workout.workout_id) 
+            ? 'bg-green-200 text-green-800' 
+            : 'bg-green-100 text-green-700 hover:bg-green-200'
+        } rounded transition-colors flex items-center`}
+        disabled={completedWorkouts.includes(workout.workout_id)}
+        aria-label={`Workout "${workout.name}" abschließen`}
       >
-        Ansehen
+        {completedWorkouts.includes(workout.workout_id) ? (
+          <>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            Abgeschlossen
+          </>
+        ) : (
+          <>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            Abschließen
+          </>
+        )}
       </button>
-      <button 
-        className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 transition-colors"
-        onClick={() => onEdit(workout)}
-        aria-label={`Workout "${workout.name}" bearbeiten`}
-      >
-        Bearbeiten
-      </button>
-      <button 
-        className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
-        onClick={() => onDelete(workout)}
-        aria-label={`Workout "${workout.name}" löschen`}
-      >
-        Löschen
-      </button>
+      
+      <div className="flex space-x-2">
+        <button 
+          className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition-colors"
+          onClick={() => onView(workout)}
+          aria-label={`Workout "${workout.name}" ansehen`}
+        >
+          Ansehen
+        </button>
+        <button 
+          className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 transition-colors"
+          onClick={() => onEdit(workout)}
+          aria-label={`Workout "${workout.name}" bearbeiten`}
+        >
+          Bearbeiten
+        </button>
+        <button 
+          className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+          onClick={() => onDelete(workout)}
+          aria-label={`Workout "${workout.name}" löschen`}
+        >
+          Löschen
+        </button>
+      </div>
     </div>
   );
 
@@ -231,9 +282,16 @@ const WorkoutView = ({
   if (workouts.length === 0) {
     return <EmptyState />;
   }
-
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto">      {xpReward && (
+        <XpRewardNotification
+          xpAmount={xpReward.amount}
+          message={xpReward.message}
+          isLevelUp={xpReward.isLevelUp}
+          onAnimationComplete={clearXpReward}
+        />
+      )}
+    
       <h2 className="text-2xl font-bold mb-6">Meine Workouts</h2>
       <div className="space-y-4">
         {workouts.map((workout) => (

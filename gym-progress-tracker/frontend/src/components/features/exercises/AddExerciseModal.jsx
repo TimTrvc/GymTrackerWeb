@@ -100,17 +100,14 @@ const AddExerciseModal = ({
     /**
      * Behandelt das Absenden des Formulars
      * Extrahiert in eigene Funktion (Single Responsibility)
-     */
-    const handleSubmit = async () => {
+     */    const handleSubmit = async () => {
         if (!validateForm()) {
             return;
         }
 
         try {
-            // exercisesService verwenden, anstatt direkt den onAddExercise-Callback aufzurufen
-            await exercisesService.create(exercise);
-            
-            // Informiere den Parent-Komponenten über den Erfolg
+            // Lasse den Parent-Komponenten die Erstellung der Übung durchführen
+            // und vermeidet doppelte API-Aufrufe
             onAddExercise(exercise);
             resetForm();
         } catch (error) {

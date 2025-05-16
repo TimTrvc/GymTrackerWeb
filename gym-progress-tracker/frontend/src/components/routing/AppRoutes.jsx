@@ -26,8 +26,7 @@ const AppRoutes = () => {
       <Route path="/contact" element={withPrivateRoute(Contact)} />
       <Route path="/prices" element={withPrivateRoute(Prices)} />
       <Route path="/features" element={withPrivateRoute(Features)} />
-      <Route path="/nutrition" element={withPrivateRoute(Nutrition)} />
-      <Route path="/body" element={withPrivateRoute(Body)} />
+      <Route path="/nutrition" element={withPrivateRoute(Nutrition)} />      <Route path="/body" element={withPrivateRoute(Body)} />
       <Route path="/avatar" element={withPrivateRoute(Avatar)} />
       <Route path="/profile" element={withPrivateRoute(Profile)} />
     </Routes>

@@ -41,7 +41,6 @@ const ExerciseContent = ({
   selectedCategoryName,
   handleCategoryClick,
   handleOpenAddModal,
-  handleViewDetails,
   clearSelectedCategory 
 }) => {
   if (!selectedCategory) {
@@ -60,7 +59,6 @@ const ExerciseContent = ({
       isLoading={exercisesLoading}
       error={exercisesError}
       categoryName={selectedCategoryName}
-      onViewDetails={handleViewDetails}
       onAddExerciseClick={handleOpenAddModal}
       onBackToCategoriesClick={clearSelectedCategory}
     />
@@ -87,11 +85,8 @@ const Exercises = () => {
 
   const {
     addModal,
-    detailsModal,
     handleOpenAddModal,
-    handleAddExercise,
-    handleViewDetails,
-    handleCloseDetailsModal
+    handleAddExercise
   } = useExerciseModals({ addExerciseToList });
 
   // Find the name of the selected category
@@ -115,14 +110,12 @@ const Exercises = () => {
           selectedCategoryName={selectedCategoryName}
           handleCategoryClick={handleCategoryClick}
           handleOpenAddModal={handleOpenAddModal}
-          handleViewDetails={handleViewDetails}
           clearSelectedCategory={clearSelectedCategory}
         />
       </ContentStateHandler>
 
-      {/* Render modals using the modal state from our custom hook */}
+      {/* Only render addModal */}
       {addModal.render(exerciseCategories)}
-      {detailsModal.render()}
     </ExercisesLayout>
   );
 };

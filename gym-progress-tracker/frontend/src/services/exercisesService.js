@@ -33,14 +33,24 @@ class ExercisesService extends BaseService {
     
     return this.get(`category/${categoryParam}`);
   }
-
   /**
    * Holt eine spezifische Übung nach ID
    * @param {number} exerciseId - ID der Übung
    * @returns {Promise<Object>} - Übungsdetails
    */
   async getById(exerciseId) {
-    return this.get(`${exerciseId}`);
+    console.log("Fetching exercise by ID:", exerciseId);
+    if (!exerciseId) {
+      throw new Error("Invalid exercise ID provided");
+    }
+    try {
+      const result = await this.get(`${exerciseId}`);
+      console.log("Fetch result:", result);
+      return result;
+    } catch (error) {
+      console.error("Error in getById:", error);
+      throw error;
+    }
   }
 
   /**

@@ -1,14 +1,18 @@
 import HeroSection from '@/components/layout/HeroSection';
-import GymAvatar from "@/components/features/avatar/GymAvatar.jsx";
+import AvatarGame from '@/components/features/avatar/AvatarGame';
 
 const Avatar = () => {
     return (
         <>
             <div>
-                <HeroSection title="Avatar" subtitle="Dein Avatar"/>
+                <HeroSection 
+                    title="RPG Avatar" 
+                    subtitle="Level up your avatar by completing workouts and exercises"
+                    size="medium"
+                />
             </div>
             <div>
-                <GymAvatar userId={1} />
+                <AvatarGame />
             </div>
         </>
     );

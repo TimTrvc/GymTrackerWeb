@@ -32,13 +32,9 @@ const getExerciseByCategoryId = async (req, res) => {
     const pool = req.app.get('db');
     const { category_id } = req.params;
 
-    try {
-        const result = await pool.query('SELECT * FROM exercises WHERE category_id = $1', [category_id]);
+    try {        const result = await pool.query('SELECT * FROM exercises WHERE category_id = $1', [category_id]);
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Übung nicht gefunden' });
-        }
-
+        // Return an empty array instead of a 404 error when no exercises are found
         res.status(200).json(result.rows);
     } catch (err) {
         console.error('Fehler beim Abrufen der Übungen:', err);

@@ -16,9 +16,7 @@ const useExercises = () => {
             }
 
             setIsLoading(true);
-            setError(null);
-
-            try {
+            setError(null);            try {
                 // Verwenden des Service, der jetzt die gesamte Logik zur 
                 // Verarbeitung der Kategorie-ID/Name übernimmt
                 const data = await getExerciseByCategory(selectedCategory);
