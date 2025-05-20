@@ -114,62 +114,55 @@ const AvatarGame = () => {
       )}
       {avatar && !loading && (
         <div className="w-full max-w-6xl mx-auto flex flex-col gap-10 items-center">
-          {/* Top section: Avatar card, XP, and Stats, Boss Level at bottom */}
-          <div className="w-full bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl flex flex-col items-center border-4 border-indigo-300 px-10 pt-10 pb-6 relative">
-            {/* Avatar and XP at top */}
-            <div className="flex flex-col items-center justify-center w-full mb-2">
-              <div className="w-36 h-36 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full flex items-center justify-center border-8 border-indigo-500 shadow-xl mb-4">
-                <span className="text-6xl">💪</span>
+          <div className="w-full space-y-0">
+            <div className="w-full bg-white/80 backdrop-blur-md rounded-t-3xl shadow-2xl flex flex-col items-center border-4 border-indigo-300 border-b-0 px-10 pt-10 pb-6 relative">
+              {/* Top header with Avatar on left and Boss on right */}
+              <div className="w-full flex flex-row justify-between items-center mb-10 gap-6">
+                {/* Avatar level and XP on left */}
+                <div className="flex flex-col items-start bg-white/50 p-4 rounded-xl shadow-sm border border-indigo-100 flex-grow">
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className="w-20 h-20 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full flex items-center justify-center border-4 border-indigo-500 shadow-lg">
+                      <span className="text-3xl">💪</span>
+                    </div>
+                    <h2 className="text-2xl font-extrabold text-indigo-900 tracking-wide drop-shadow-lg">Lv. {avatar.level} Avatar</h2>
+                  </div>
+                  {/* Experience Bar on left */}
+                  <div className="w-full">
+                    <div className="flex justify-between mb-1 text-sm font-semibold">
+                      <span className="flex items-center text-indigo-700"><GiLevelEndFlag className="mr-1" /> Experience</span>
+                      <span className="text-indigo-800 font-bold">{avatar.experience}/100 XP</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500 rounded-full"
+                        style={{ width: `${avatar.experience}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+                {/* Boss Progress on right */}
+                <div className="flex flex-col items-center bg-indigo-50/70 px-6 py-4 rounded-xl shadow-md border-2 border-indigo-200">
+                  <h3 className="text-xl font-bold mb-2 text-indigo-800">Boss Progress</h3>
+                  <div className="flex flex-col items-center">
+                    <span className="text-sm font-semibold mb-2 text-gray-700">Current Boss Level</span>
+                    <span className="text-indigo-700 font-extrabold text-3xl bg-indigo-100 px-6 py-2 rounded-full border-2 border-indigo-400 shadow-md">
+                      {avatar.boss_level}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <h2 className="text-3xl font-extrabold text-indigo-900 mb-1 tracking-wide drop-shadow-lg">Lv. {avatar.level} Avatar</h2>
-              <p className="text-gray-600 text-lg mb-4 text-center">Your game character powered by your real-world workouts</p>
-              {/* Experience Bar INSIDE the card, slightly higher */}
-              <div className="w-full max-w-xs mb-2 mt-2">
-                <div className="flex justify-between mb-1 text-base font-semibold">
-                  <span className="flex items-center text-indigo-700"><GiLevelEndFlag className="mr-2" /> Experience</span>
-                  <span className="text-indigo-800 font-bold">{avatar.experience}/100 XP</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-4 relative overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500 rounded-full"
-                    style={{ width: `${avatar.experience}%` }}
-                  ></div>
-                </div>
-              </div>
-              {/* Test Controls */}
-              {!levelUpMode && (
-                <div className="flex flex-col sm:flex-row items-center mt-4 space-y-2 sm:space-y-0 sm:space-x-4 w-full">
-                  <input
-                    id="expPoints"
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={testExp}
-                    onChange={(e) => setTestExp(e.target.value)}
-                    className="shadow appearance-none border rounded-lg w-24 py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-lg"
-                  />
-                  <button
-                    onClick={handleAddExperience}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-xl text-lg shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105"
-                  >
-                    Gain XP
-                  </button>
-                </div>
-              )}
+              
+              {/* Level Up notification */}
               {levelUpMode && (
-                <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mt-4 rounded-xl flex items-center shadow-md w-full">
+                <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6 rounded-xl flex items-center shadow-md w-full">
                   <svg className="h-7 w-7 text-yellow-500 mr-3" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
                   <span className="text-lg text-yellow-700 font-semibold">You leveled up! Choose one stat to upgrade.</span>
                 </div>
               )}
-            </div>
-            {/* Boss Level and Stats at bottom */}
-            <div className="w-full flex flex-col items-center justify-center mt-6">
-              <h3 className="text-2xl font-bold mb-2 text-gray-800 text-center">Boss Progress</h3>
-              <span className="text-lg font-semibold mb-1">Current Boss Level</span>
-              <span className="text-indigo-700 font-extrabold text-3xl bg-indigo-100 px-6 py-2 rounded-full border-2 border-indigo-400 shadow-md mb-4">{avatar.boss_level}</span>
+              
+              {/* Stats grid */}
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-8 w-full items-center justify-center mb-2">
                 {renderStatCard("HP", Number(avatar.hp || 0).toFixed(2), <FaHeart size={32} />, "red", "Health Points", "hp")}
                 {renderStatCard("MP", Number(avatar.mp || 0).toFixed(2), <FaMagic size={32} />, "blue", "Magic Points", "mp")}
@@ -181,18 +174,17 @@ const AvatarGame = () => {
                 Defeat gym bosses by completing challenges and workout routines!
               </p>
             </div>
-          </div>
-          {/* Minigame Section */}
-          <div className="w-full max-w-3xl flex flex-col items-center justify-center mt-2">
-            <Minigame playerStats={{
-              hp: Number(avatar.hp || 0),
-              mp: Number(avatar.mp || 0),
-              attack: Number(avatar.attack || 0),
-              defense: Number(avatar.defense || 0),
-              magic: Number(avatar.magic || 0),
-              agility: Number(avatar.agility || 0),
-              boss_level: avatar.boss_level
-            }} />
+            <div className="w-full bg-white/80 backdrop-blur-md rounded-b-3xl shadow-2xl border-4 border-indigo-300 border-t-0">
+              <Minigame playerStats={{
+                hp: Number(avatar.hp || 0),
+                mp: Number(avatar.mp || 0),
+                attack: Number(avatar.attack || 0),
+                defense: Number(avatar.defense || 0),
+                magic: Number(avatar.magic || 0),
+                agility: Number(avatar.agility || 0),
+                boss_level: avatar.boss_level
+              }} />
+            </div>
           </div>
         </div>
       )}
