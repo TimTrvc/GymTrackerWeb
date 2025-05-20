@@ -82,6 +82,7 @@ const Minigame = ({ playerStats }) => {
   const [showBossDmg, setShowBossDmg] = useState(0);
   const [waitingForPlayerAction, setWaitingForPlayerAction] = useState(true);
   const [bossAttackMessage, setBossAttackMessage] = useState('');
+  const [swordGlow, setSwordGlow] = useState(false);
   
   const logRef = useRef(null);
   const logEndRef = useRef(null);
@@ -216,15 +217,52 @@ const Minigame = ({ playerStats }) => {
     let dmg = calculateDamage(boss.attack, player.defense);
     
     if (isCrit) {
-      dmg = Math.round(dmg * 1.5);
-      setCritAnim(true);
-      setTimeout(() => setCritAnim(false), 1000);
-      setBossAttackMessage(`Boss lands a CRITICAL HIT! (${boss.crit.toFixed(1)}% chance)`);
-      setLog((l) => [...l, `Boss lands a CRITICAL HIT! (${boss.crit.toFixed(1)}% chance)`]);
-    } else {
-      setBossAttackMessage('Boss prepares to attack!');
+      setSwordGlow(true);
+      setBossAttackMessage('Boss is preparing a CRITICAL HIT!');
+      setTimeout(() => {
+        setSwordGlow(false);
+        setCritAnim(true);
+        setTimeout(() => setCritAnim(false), 1000);
+        setBossAttackMessage(`Boss lands a CRITICAL HIT! (${boss.crit.toFixed(1)}% chance)`);
+        setLog((l) => [...l, `Boss lands a CRITICAL HIT! (${boss.crit.toFixed(1)}% chance)`]);
+        if (didDodge(player.agility)) {
+          setDodgeAnim(true);
+          setTimeout(() => setDodgeAnim(false), 800);
+          setBossAttackMessage("You dodged the boss's attack!");
+          setLog((l) => [...l, "You dodged the boss's attack!"]);
+          setTimeout(() => {
+            setBossAttackMessage('');
+            setWaitingForPlayerAction(true);
+          }, 2000);
+        } else {
+          setTimeout(() => {
+            setShowBossDmg(dmg);
+            setTimeout(() => setShowBossDmg(0), 1500);
+            
+            const newPlayerHp = Math.max(0, player.currentHp - dmg);
+            setPlayer((p) => ({ ...p, currentHp: newPlayerHp }));
+            setBossAttackMessage(`Boss attacks for ${dmg} damage!`);
+            setLog((l) => [
+              ...l,
+              `Boss attacks for ${dmg} damage! Player HP: ${newPlayerHp.toFixed(2)}/${player.hp.toFixed(2)}`,
+            ]);
+            
+            if (newPlayerHp <= 0) {
+              handlePlayerDefeat();
+              return;
+            }
+            
+            setTimeout(() => {
+              setBossAttackMessage('');
+              setWaitingForPlayerAction(true);
+            }, 1500);
+          }, 1000);
+        }
+      }, 1000); // Glow duration
+      return;
     }
     
+    setBossAttackMessage('Boss prepares to attack!');
     if (didDodge(player.agility)) {
       setDodgeAnim(true);
       setTimeout(() => setDodgeAnim(false), 800);
@@ -252,7 +290,6 @@ const Minigame = ({ playerStats }) => {
           return;
         }
         
-        // Return control to player
         setTimeout(() => {
           setBossAttackMessage('');
           setWaitingForPlayerAction(true);
@@ -284,12 +321,11 @@ const Minigame = ({ playerStats }) => {
     setBossAttackMessage('');
     setMode('preview');
     setTimeout(() => window.location.reload(), 100); // Force reload to get fresh props
-  };
-  // --- UI ---  
+  };  // --- UI ---    
   if (mode === 'preview') {
     const bossStats = getBossStats(playerStats.boss_level || 1);
     return (
-      <div className="bg-gradient-to-br from-indigo-200 to-purple-300 rounded-3xl shadow-2xl p-10 max-w-6xl mx-auto flex flex-col items-center border-4 border-indigo-400">
+       <div className="p-10 w-full flex flex-col items-center">
         <h2 className="text-3xl font-extrabold mb-8 text-center text-indigo-900 tracking-wide drop-shadow-lg">Boss Battle Preview</h2>
         
         <div className="w-full flex justify-around items-center mb-12 relative">
@@ -297,7 +333,7 @@ const Minigame = ({ playerStats }) => {
           <div className="character-container">
             <div className="character-model player-model flex justify-center items-center text-8xl">
               🦸
-              <span className="sword absolute right-25 bottom-15 text-5xl transform rotate-90">🗡️   </span>
+              <span className="sword absolute right-55 bottom-15 text-5xl transform rotate-90">🗡️   </span>
             </div>
             <div className="hp-bar mt-4 w-48">
               <div className="flex justify-between mb-1">
@@ -316,10 +352,9 @@ const Minigame = ({ playerStats }) => {
           </div>
           
           {/* Boss Character */}
-          <div className="character-container">
-            <div className="character-model boss-model flex justify-center items-center text-8xl">
+          <div className="character-container">          <div className="character-model boss-model flex justify-center items-center text-8xl">
               👹
-              <span className="sword absolute left-25 bottom-13 text-5xl transform rotate-180">🗡️</span>
+              <span className={`sword absolute left-53 bottom-13 text-5xl transform rotate-180 ${critAnim ? 'glow-effect' : ''} ${swordGlow ? 'glow-red' : ''}`}>🗡️</span>
             </div>
             <div className="hp-bar mt-4 w-48">
               <div className="flex justify-between mb-1">
@@ -335,19 +370,19 @@ const Minigame = ({ playerStats }) => {
         
         <details className="w-full mb-8">
           <summary className="cursor-pointer font-bold text-gray-700 mb-3 text-lg">Show Character Stats</summary>
-          <div className="flex flex-col md:flex-row gap-10 w-full justify-center">
-            <div className="bg-white/80 rounded-2xl shadow-lg p-6 flex-1 min-w-[300px] border-2 border-green-300">
+          <div className="flex flex-col md:flex-row gap-10 w-full justify-center">            <div className="bg-white/80 rounded-2xl shadow-lg p-6 flex-1 min-w-[300px] border-2 border-green-300">
               <h3 className="text-xl font-bold text-green-700 mb-3 text-center">Your Stats</h3>
               <div className="space-y-2 text-base">
+                <div><b>❤️ HP:</b> <span className="text-red-700 font-bold">{playerStats.hp}</span></div>
                 <div><b>🔮 MP:</b> <span className="text-blue-700 font-bold">{playerStats.mp}</span></div>
                 <div><b>⚔️ Attack:</b> <span className="text-red-700 font-bold">{playerStats.attack}</span></div>
                 <div><b>🛡️ Defense:</b> <span className="text-yellow-700 font-bold">{playerStats.defense}%</span></div>
                 <div><b>💨 Dodge:</b> <span className="text-purple-700 font-bold">{playerStats.agility}%</span></div>
               </div>
-            </div>
-            <div className="bg-white/80 rounded-2xl shadow-lg p-6 flex-1 min-w-[300px] border-2 border-red-300">
+            </div>            <div className="bg-white/80 rounded-2xl shadow-lg p-6 flex-1 min-w-[300px] border-2 border-red-300">
               <h3 className="text-xl font-bold text-red-700 mb-3 text-center">Boss (Lv. {playerStats.boss_level || 1})</h3>
               <div className="space-y-2 text-base">
+                <div><b>❤️ HP:</b> <span className="text-red-700 font-bold">{bossStats.hp.toFixed(2)}</span></div>
                 <div><b>⚔️ Attack:</b> <span className="text-red-700 font-bold">{bossStats.attack.toFixed(2)}</span></div>
                 <div><b>🛡️ Defense:</b> <span className="text-yellow-700 font-bold">{bossStats.defense.toFixed(2)}%</span></div>
                 <div><b>💥 Crit Chance:</b> <span className="text-pink-700 font-bold">{bossStats.crit ? bossStats.crit.toFixed(1) : 0}%</span></div>
@@ -364,10 +399,10 @@ const Minigame = ({ playerStats }) => {
         </button>
       </div>
     );
-  }
+  }  
   if (mode === 'result') {
     return (
-      <div className="bg-gradient-to-br from-green-100 to-purple-200 rounded-3xl shadow-2xl p-10 max-w-6xl mx-auto flex flex-col items-center border-4 border-green-400">
+      <div className="p-10 w-full flex flex-col items-center">
         <h2 className="text-3xl font-extrabold mb-8 text-center text-indigo-900 tracking-wide drop-shadow-lg">
           {result === 'win' ? '🏆 Victory! 🏆' : '😵 Defeat! 😵'}
         </h2>
@@ -400,11 +435,9 @@ const Minigame = ({ playerStats }) => {
       </div>
     );
   }
-
   // Fight screen
-  return (
-    <div className="bg-gradient-to-br from-indigo-100 to-purple-200 rounded-3xl shadow-2xl p-8 mt-8 max-w-6xl mx-auto border-4 border-indigo-400 flex flex-col items-center justify-center min-h-[600px] relative overflow-hidden">
-      <h2 className="text-4xl font-extrabold mb-6 text-center text-indigo-900 tracking-wide drop-shadow-lg flex items-center gap-3">⚔️ Minigame: Boss Battle 🏆</h2>
+  return (    <div className="p-8 w-full flex flex-col items-center justify-center min-h-[600px] relative overflow-hidden">
+      <h2 className="text-3xl font-extrabold mb-6 text-center text-indigo-900 tracking-wide drop-shadow-lg flex items-center gap-3">⚔️ Minigame: Boss Battle 🏆</h2>
         {/* Battle Arena with Characters */}
       <div className="w-full flex justify-around items-center mb-12 relative">
         {/* Player Character with HP bar */}
@@ -455,7 +488,7 @@ const Minigame = ({ playerStats }) => {
           <div className={`relative ${critAnim ? 'animate-crit-attack' : ''}`}>
             <div className="character-model boss-model flex justify-center items-center text-8xl">
               👹
-              <span className="sword absolute -left-6 bottom-0 text-5xl transform rotate-90">🗡️</span>
+              <span className={`sword absolute -left-6 bottom-0 text-5xl transform rotate-90 ${swordGlow ? 'glow-red' : ''}`}>🗡️</span>
             </div>
             {showPlayerDmg > 0 && (
               <div className="damage-number text-red-600 font-extrabold text-3xl animate-float-up absolute -top-6 left-0 right-0 text-center">
@@ -463,41 +496,19 @@ const Minigame = ({ playerStats }) => {
               </div>
             )}
           </div>
-        </div>
+        </div>      </div>
+      
+      {/* Fixed height area for battle message */}
+      <div className="min-h-[80px] flex items-center justify-center mb-6">
+        {bossAttackMessage && (
+          <div className="battle-message bg-gray-800/80 text-white p-4 rounded-xl text-xl font-bold animate-pulse">
+            {bossAttackMessage}
+          </div>
+        )}
       </div>
       
-      {/* Battle message area */}
-      {bossAttackMessage && (
-        <div className="battle-message bg-gray-800/80 text-white p-4 rounded-xl mb-6 text-xl font-bold animate-pulse">
-          {bossAttackMessage}
-        </div>
-      )}
-      
-      {/* Only show stats in collapsible section */}
-      <details className="w-full mb-6">
-        <summary className="cursor-pointer font-bold text-gray-700 mb-3 text-lg">Show Character Stats</summary>
-        <div className="flex flex-col md:flex-row justify-between gap-8 w-full">
-          <div className="bg-white/90 rounded-2xl shadow-xl p-5 flex-1 border-2 border-green-300">
-            <h3 className="font-bold text-green-700 text-xl mb-3 flex items-center gap-2">🧑‍🎤 Player</h3>
-            <div className="space-y-2 text-base">
-              <div><b>🔮 MP:</b> <span className="text-blue-700 font-bold">{playerStats.mp}</span></div>
-              <div><b>⚔️ Attack:</b> <span className="text-red-700 font-bold">{player.attack}</span></div>
-              <div><b>🛡️ Defense:</b> <span className="text-yellow-700 font-bold">{player.defense}%</span></div>
-              <div><b>💨 Dodge:</b> <span className="text-purple-700 font-bold">{player.agility}%</span></div>
-            </div>
-          </div>
-          <div className="bg-white/90 rounded-2xl shadow-xl p-5 flex-1 border-2 border-red-300">
-            <h3 className="font-bold text-red-700 text-xl mb-3 flex items-center gap-2">👹 Boss (Lv. {playerStats.boss_level || 1})</h3>
-            <div className="space-y-2 text-base">
-              <div><b>⚔️ Attack:</b> <span className="text-red-700 font-bold">{boss.attack.toFixed(2)}</span></div>
-              <div><b>🛡️ Defense:</b> <span className="text-yellow-700 font-bold">{boss.defense.toFixed(2)}%</span></div>
-              <div><b>💥 Crit:</b> <span className="text-pink-700 font-bold">{boss.crit ? boss.crit.toFixed(1) : 0}%</span></div>
-            </div>
-          </div>
-        </div>
-      </details>
-      
-      <div className="flex flex-wrap gap-4 justify-center w-full mb-6">
+      {/* Action buttons moved higher up */}
+      <div className="flex flex-wrap gap-4 justify-center w-full mb-8">
         <button
           className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-xl text-xl font-extrabold shadow-lg disabled:opacity-50 transition flex items-center gap-2"
           onClick={handleAttack}
@@ -518,6 +529,32 @@ const Minigame = ({ playerStats }) => {
         >
           🔄 Return
         </button>
+      </div>
+      
+      {/* Character stats now below buttons and centered */}
+      <div className="flex justify-center w-full mb-6">
+        <details className="w-full max-w-3xl">
+          <summary className="cursor-pointer font-bold text-gray-700 mb-3 text-lg text-center">
+            Show Character Stats
+          </summary>
+          <div className="flex flex-col md:flex-row justify-between gap-8 w-full">            <div className="bg-white/90 rounded-2xl shadow-xl p-5 flex-1 border-2 border-green-300">
+              <h3 className="font-bold text-green-700 text-xl mb-3 flex items-center gap-2">🧑‍🎤 Player</h3>              <div className="space-y-2 text-base">
+                <div><b>❤️ HP:</b> <span className="text-red-700 font-bold">{player.hp.toFixed(2)}</span></div>
+                <div><b>🔮 MP:</b> <span className="text-blue-700 font-bold">{playerStats.mp}</span></div>
+                <div><b>⚔️ Attack:</b> <span className="text-red-700 font-bold">{player.attack}</span></div>
+                <div><b>🛡️ Defense:</b> <span className="text-yellow-700 font-bold">{player.defense}%</span></div>
+                <div><b>💨 Dodge:</b> <span className="text-purple-700 font-bold">{player.agility}%</span></div>
+              </div>
+            </div>            <div className="bg-white/90 rounded-2xl shadow-xl p-5 flex-1 border-2 border-red-300">              <h3 className="font-bold text-red-700 text-xl mb-3 flex items-center gap-2">👹 Boss (Lv. {playerStats.boss_level || 1})</h3>
+              <div className="space-y-2 text-base">
+                <div><b>❤️ HP:</b> <span className="text-red-700 font-bold">{boss.hp.toFixed(2)}</span></div>
+                <div><b>⚔️ Attack:</b> <span className="text-red-700 font-bold">{boss.attack.toFixed(2)}</span></div>
+                <div><b>🛡️ Defense:</b> <span className="text-yellow-700 font-bold">{boss.defense.toFixed(2)}%</span></div>
+                <div><b>💥 Crit:</b> <span className="text-pink-700 font-bold">{boss.crit ? boss.crit.toFixed(1) : 0}%</span></div>
+              </div>
+            </div>
+          </div>
+        </details>
       </div>
         {/* Battle Animations CSS */}
       <style>{`
@@ -594,6 +631,11 @@ const Minigame = ({ playerStats }) => {
           filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
         }        .text-shadow {
           text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        }
+        .glow-red {
+          box-shadow: 0 0 24px 8px #ff2222, 0 0 48px 16px #ff2222;
+          filter: drop-shadow(0 0 16px #ff2222) drop-shadow(0 0 8px #ff2222);
+          transition: box-shadow 0.2s, filter 0.2s;
         }
       `}</style>
     </div>
