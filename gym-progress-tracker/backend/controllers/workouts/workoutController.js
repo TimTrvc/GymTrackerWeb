@@ -8,7 +8,7 @@ const getWorkouts = async (req, res) => {
             [userId]
         );
 
-        res.status(200).json(result.rows);
+        res.status(200).json({ workouts: result.rows });
     } catch (err) {
         console.error('Fehler beim Abrufen der Workouts:', err);
         res.status(500).json({ error: 'Serverseiten-Fehler beim Abrufen der Workouts' });

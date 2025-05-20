@@ -35,9 +35,7 @@ const pool = new Pool({
     database: process.env.DB_NAME || 'progress_tracker',
     password: process.env.DB_PASSWORD || 'admin',
     port: process.env.DB_PORT || 5432,
-    ssl: {
-        rejectUnauthorized: false
-    }
+    ssl: process.env.DB_SSLMODE === 'require' ? { rejectUnauthorized: false } : false
 });
 
 

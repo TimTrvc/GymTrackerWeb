@@ -6,6 +6,11 @@ import exercisesService from "@/services/exercisesService";
 import XpRewardNotification from "@/components/features/avatar/XpRewardNotification";
 import useActivityTracker from "@/hooks/useActivityTracker";
 
+
+import WorkoutSession from "./WorkoutSession.jsx";
+import { addTrainingSession } from '@/services/trainingSessionsService';
+import { addExercisePerformance } from '@/services/exercisePerformanceService';
+
 /**
  * WorkoutView-Komponente zur Anzeige von Workouts
  * 
@@ -32,12 +37,82 @@ const WorkoutView = ({
   const [workoutExercises, setWorkoutExercises] = useState({});
   const [expandedWorkout, setExpandedWorkout] = useState(null);
   const [exerciseDetails, setExerciseDetails] = useState({});
+  // Workout-Session State
+  const [activeSession, setActiveSession] = useState(null); // {workout, exercises}
     // Activity tracking and XP rewards
   const { xpReward, trackWorkoutCompletion, clearXpReward } = useActivityTracker();
   const [completedWorkouts, setCompletedWorkouts] = useState([]);
+
+  const startWorkoutSession = async (workout) => {
+    // Übungen laden (falls noch nicht geladen)
+    let exercises = workoutExercises[workout.workout_id];
+    if (!exercises) {
+      try {
+        exercises = await getWorkoutExercises(workout.workout_id);
+        setWorkoutExercises(prev => ({ ...prev, [workout.workout_id]: exercises }));
+      } catch (e) {
+        alert('Fehler beim Laden der Übungen für das Workout.');
+        return;
+      }
+    }
+    setActiveSession({ workout, exercises });
+  };
+
+  // Workout-Session beenden und Ergebnisse speichern
+  const finishWorkoutSession = async (sessionData) => {
+    if (!activeSession) return;
+    const { workout, exercises } = activeSession;
+    setActiveSession(null);
+
+    try {
+      // 1. Trainingssession speichern
+      const sessionPayload = {
+        workout_id: workout.workout_id,
+        session_date: new Date().toISOString(),
+        duration_minutes: workout.duration_minutes || null,
+        calories_burned: null,
+        mood_rating: null,
+        effort_level: null,
+        notes: '',
+        location: ''
+      };
+      const sessionRes = await addTrainingSession(sessionPayload);
+      const sessionId = sessionRes?.trainingSession?.session_id;
+      if (!sessionId) throw new Error('Session konnte nicht gespeichert werden.');
+
+      // 2. Alle Übungsleistungen speichern
+      // sessionData: { [exerciseIdx]: [{weight, reps}, ...] }
+      for (const [exerciseIdx, setsArr] of Object.entries(sessionData)) {
+        const exercise = exercises[exerciseIdx];
+        if (!exercise) continue;
+        for (let setIdx = 0; setIdx < setsArr.length; setIdx++) {
+          const set = setsArr[setIdx];
+          if (!set.weight && !set.reps) continue; // Leere Sätze überspringen
+          const perfPayload = {
+            session_id: sessionId,
+            exercise_id: exercise.exercise_id,
+            set_number: setIdx + 1,
+            reps: set.reps,
+            weight: set.weight,
+            is_warmup: false,
+            is_dropset: false,
+            is_failure: false,
+            rpe: null,
+            notes: ''
+          };
+          await addExercisePerformance(perfPayload);
+        }
+      }
+      alert('Workout abgeschlossen und gespeichert!');
+    } catch (err) {
+      alert('Fehler beim Speichern der Session: ' + (err.message || err));
+    }
+  };
   
   // Funktion zum Laden der Übungen für ein Workout
   const loadExercisesForWorkout = async (workoutId) => {
+  // Workout-Session starten
+
     try {
       const exercises = await getWorkoutExercises(workoutId);
       setWorkoutExercises(prev => ({
@@ -164,6 +239,16 @@ const WorkoutView = ({
    */
   const ActionButtons = ({ workout }) => (
     <div className="mt-4 flex flex-wrap gap-2 justify-between">
+      <button
+        onClick={() => startWorkoutSession(workout)}
+        className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors flex items-center"
+        aria-label={`Workout "${workout.name}" starten`}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+        Starten
+      </button>
       <button 
         onClick={() => markWorkoutCompleted(workout)}
         className={`px-3 py-1 ${
@@ -190,7 +275,6 @@ const WorkoutView = ({
           </>
         )}
       </button>
-      
       <div className="flex space-x-2">
         <button 
           className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition-colors"
@@ -278,12 +362,23 @@ const WorkoutView = ({
     );
   };
 
+  // Wenn eine Workout-Session aktiv ist, zeige diese an
+  if (activeSession) {
+    return (
+      <WorkoutSession
+        workout={activeSession.workout}
+        exercises={activeSession.exercises}
+        onFinish={finishWorkoutSession}
+      />
+    );
+  }
   // Wenn keine Workouts vorhanden sind, zeige den Leerzustand an
   if (workouts.length === 0) {
     return <EmptyState />;
   }
   return (
-    <div className="max-w-3xl mx-auto">      {xpReward && (
+    <div className="max-w-3xl mx-auto">
+      {xpReward && (
         <XpRewardNotification
           xpAmount={xpReward.amount}
           message={xpReward.message}
@@ -291,7 +386,6 @@ const WorkoutView = ({
           onAnimationComplete={clearXpReward}
         />
       )}
-    
       <h2 className="text-2xl font-bold mb-6">Meine Workouts</h2>
       <div className="space-y-4">
         {workouts.map((workout) => (
