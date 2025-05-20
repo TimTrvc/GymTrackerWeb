@@ -3,8 +3,9 @@
  * A simplified avatar widget for display on the home dashboard
  */
 import React from 'react';
-import { FaHeart, FaBolt } from 'react-icons/fa';
-import { GiSwordWound } from 'react-icons/gi';
+import { FaHeart } from 'react-icons/fa';
+import { GiSwordWound,GiCheckedShield,GiBoltSpellCast } from 'react-icons/gi';
+import { LiaRunningSolid } from "react-icons/lia";
 import useAvatar from '@/hooks/useAvatar';
 
 const HomeAvatarWidget = () => {
@@ -54,43 +55,43 @@ const HomeAvatarWidget = () => {
             <span className="flex items-center">
               <FaHeart className="text-red-500 mr-2" /> HP
             </span>
-            <span className="text-indigo-700">{avatar.hp}/100</span>
+            <span className="text-indigo-700">{avatar.hp}</span>
           </div>
-          <div className="mt-1 w-full bg-gray-200 rounded h-2.5 overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-red-500 to-red-400" 
-              style={{ width: `${Math.min(avatar.hp, 100)}%` }}
-            ></div>
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center">
+            <span className="flex items-center">
+              <GiBoltSpellCast className="text-blue-500 mr-2" /> MP
+            </span>
+            <span className="text-indigo-700">{avatar.mp}</span>
           </div>
         </div>
         
         <div>
           <div className="flex justify-between items-center">
             <span className="flex items-center">
-              <GiSwordWound className="text-green-500 mr-2" /> Attack
+              <GiSwordWound className="text-orange-500 mr-2" /> Attack
             </span>
-            <span className="text-indigo-700">{avatar.attack}/100</span>
+            <span className="text-indigo-700">{avatar.attack}</span>
           </div>
-          <div className="mt-1 w-full bg-gray-200 rounded h-2.5 overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-green-500 to-green-400" 
-              style={{ width: `${Math.min(avatar.attack, 100)}%` }}
-            ></div>
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center">
+            <span className="flex items-center">
+              <GiCheckedShield className="text-brown-500 mr-2" /> Defense
+            </span>
+            <span className="text-indigo-700">{avatar.agility}</span>
           </div>
         </div>
         
         <div>
           <div className="flex justify-between items-center">
             <span className="flex items-center">
-              <FaBolt className="text-yellow-500 mr-2" /> Agility
+              <LiaRunningSolid className="text-purple-500 mr-2" /> Agility
             </span>
-            <span className="text-indigo-700">{avatar.agility}/100</span>
-          </div>
-          <div className="mt-1 w-full bg-gray-200 rounded h-2.5 overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-yellow-500 to-yellow-400" 
-              style={{ width: `${Math.min(avatar.agility, 100)}%` }}
-            ></div>
+            <span className="text-indigo-700">{avatar.agility}</span>
           </div>
         </div>
       </div>
