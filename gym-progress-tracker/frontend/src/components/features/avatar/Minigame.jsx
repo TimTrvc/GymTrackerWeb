@@ -225,6 +225,8 @@ const Minigame = ({ playerStats }) => {
         setTimeout(() => setCritAnim(false), 1000);
         setBossAttackMessage(`Boss lands a CRITICAL HIT! (${boss.crit.toFixed(1)}% chance)`);
         setLog((l) => [...l, `Boss lands a CRITICAL HIT! (${boss.crit.toFixed(1)}% chance)`]);
+        // Apply crit damage multiplier
+        const critDmg = Math.round(dmg * 1.7);
         if (didDodge(player.agility)) {
           setDodgeAnim(true);
           setTimeout(() => setDodgeAnim(false), 800);
@@ -236,15 +238,15 @@ const Minigame = ({ playerStats }) => {
           }, 2000);
         } else {
           setTimeout(() => {
-            setShowBossDmg(dmg);
+            setShowBossDmg(critDmg);
             setTimeout(() => setShowBossDmg(0), 1500);
             
-            const newPlayerHp = Math.max(0, player.currentHp - dmg);
+            const newPlayerHp = Math.max(0, player.currentHp - critDmg);
             setPlayer((p) => ({ ...p, currentHp: newPlayerHp }));
-            setBossAttackMessage(`Boss attacks for ${dmg} damage!`);
+            setBossAttackMessage(`Boss attacks for ${critDmg} damage!`);
             setLog((l) => [
               ...l,
-              `Boss attacks for ${dmg} damage! Player HP: ${newPlayerHp.toFixed(2)}/${player.hp.toFixed(2)}`,
+              `Boss attacks for ${critDmg} damage! Player HP: ${newPlayerHp.toFixed(2)}/${player.hp.toFixed(2)}`,
             ]);
             
             if (newPlayerHp <= 0) {
