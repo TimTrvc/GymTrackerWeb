@@ -10,7 +10,7 @@ import React, { useState } from "react";
  */
 const WorkoutSession = ({ workout, exercises, onFinish }) => {
   const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
-  const [setInputs, setSetInputs] = useState({}); // { [exerciseIdx]: [{weight, reps}, ...] }
+  const [setInputs, setSetInputs] = useState({}); // { [exercise_id]: [{weight, reps}, ...] }
 
   if (!exercises || exercises.length === 0) {
     return <div>Keine Übungen für dieses Workout gefunden.</div>;
@@ -20,14 +20,15 @@ const WorkoutSession = ({ workout, exercises, onFinish }) => {
   const sets = currentExercise.sets || 1;
 
   // Initialisiere Sätze falls noch nicht vorhanden
-  const currentSets = setInputs[currentExerciseIdx] || Array.from({ length: sets }, () => ({ weight: '', reps: '' }));
+  const currentSets = setInputs[currentExercise.exercise_id] || Array.from({ length: sets }, () => ({ weight: '', reps: '' }));
 
   const handleInputChange = (setIdx, field, value) => {
     setSetInputs(prev => {
       const updated = { ...prev };
-      const setsArr = [...(updated[currentExerciseIdx] || currentSets)];
+      const key = currentExercise.exercise_id;
+      const setsArr = [...(updated[key] || currentSets)];
       setsArr[setIdx] = { ...setsArr[setIdx], [field]: value };
-      updated[currentExerciseIdx] = setsArr;
+      updated[key] = setsArr;
       return updated;
     });
   };
@@ -37,7 +38,7 @@ const WorkoutSession = ({ workout, exercises, onFinish }) => {
       setCurrentExerciseIdx(currentExerciseIdx + 1);
     } else {
       // Workout abgeschlossen
-      if (onFinish) onFinish(setInputs);
+      if (onFinish) onFinish(setInputs); // setInputs ist jetzt { [exercise_id]: [...] }
     }
   };
 

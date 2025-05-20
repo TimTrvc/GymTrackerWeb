@@ -10,6 +10,14 @@ class TrainingSessionsService extends BaseService {
   }
 
   /**
+   * Holt alle Trainingssessions des Nutzers
+   * @returns {Promise<Array>} - Liste von Sessions
+   */
+  async getAllSessions() {
+    return this.get('/');
+  }
+
+  /**
    * Fügt eine Trainingssession hinzu
    * @param {object} sessionData - Daten für die Trainingssession
    * @returns {Promise<Object>} - Hinzugefügte Session
@@ -22,3 +30,4 @@ class TrainingSessionsService extends BaseService {
 const trainingSessionsService = new TrainingSessionsService();
 export default trainingSessionsService;
 export const addTrainingSession = (sessionData) => trainingSessionsService.addSession(sessionData);
+export const getTrainingSessions = () => trainingSessionsService.getAllSessions();

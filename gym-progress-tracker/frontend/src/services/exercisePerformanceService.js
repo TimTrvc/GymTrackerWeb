@@ -22,3 +22,10 @@ class ExercisePerformanceService extends BaseService {
 const exercisePerformanceService = new ExercisePerformanceService();
 export default exercisePerformanceService;
 export const addExercisePerformance = (performanceData) => exercisePerformanceService.addPerformance(performanceData);
+
+/**
+ * Holt alle Übungsleistungen einer Session
+ * @param {string|number} sessionId
+ * @returns {Promise<Array>} - Liste der Leistungen
+ */
+export const getExercisePerformances = (sessionId) => exercisePerformanceService.get(`/${sessionId}`);

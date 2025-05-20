@@ -98,7 +98,7 @@ const WorkoutCreate = ({
     }
 
     const newExercise = {
-      exercise_id: exerciseToAdd.id,
+      exercise_id: exerciseToAdd.exercise_id ?? exerciseToAdd.id,
       name: exerciseToAdd.name,
       description: exerciseToAdd.description || "",
       sets: exerciseSets,

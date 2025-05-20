@@ -81,16 +81,22 @@ const WorkoutView = ({
       if (!sessionId) throw new Error('Session konnte nicht gespeichert werden.');
 
       // 2. Alle Übungsleistungen speichern
-      // sessionData: { [exerciseIdx]: [{weight, reps}, ...] }
-      for (const [exerciseIdx, setsArr] of Object.entries(sessionData)) {
-        const exercise = exercises[exerciseIdx];
-        if (!exercise) continue;
+      // sessionData: { [exercise_id]: [{weight, reps}, ...] }
+      console.log('sessionData keys:', Object.keys(sessionData));
+      console.log('exercises array:', exercises);
+      for (const [exerciseId, setsArr] of Object.entries(sessionData)) {
+        // Versuche, die exercise_id flexibel zu finden (exercise_id oder id)
+        const exercise = exercises.find(e => String(e.exercise_id ?? e.id) === String(exerciseId));
+        if (!exercise) {
+          console.warn('Exercise not found for id:', exerciseId, exercises);
+          continue;
+        }
         for (let setIdx = 0; setIdx < setsArr.length; setIdx++) {
           const set = setsArr[setIdx];
           if (!set.weight && !set.reps) continue; // Leere Sätze überspringen
           const perfPayload = {
             session_id: sessionId,
-            exercise_id: exercise.exercise_id,
+            exercise_id: exercise.exercise_id ?? exercise.id,
             set_number: setIdx + 1,
             reps: set.reps,
             weight: set.weight,
@@ -100,6 +106,7 @@ const WorkoutView = ({
             rpe: null,
             notes: ''
           };
+          console.log('Sending performance:', perfPayload);
           await addExercisePerformance(perfPayload);
         }
       }
