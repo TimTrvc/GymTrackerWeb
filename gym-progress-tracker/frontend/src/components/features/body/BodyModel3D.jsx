@@ -3,8 +3,8 @@ import React, { useRef, useEffect,useState } from 'react'
 import PropTypes from 'prop-types'
 
 
-import femaleImg from '../../../assets/female.png'
-import maleImg   from '../../../assets/male.png'
+import femaleImg from '../../../assets/Female.png'
+import maleImg   from '../../../assets/Male.png'
 
 // your body‐part shapes
 const BODY_PARTS = [
