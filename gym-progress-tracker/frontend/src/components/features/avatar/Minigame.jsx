@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import useAvatar from '@/hooks/useAvatar';
-import { GiShardSword, GiKatana, GiShuriken } from "react-icons/gi"
+import { GiShardSword, GiKatana, GiShuriken } from "react-icons/gi";
+import "./game.css"; 
 
 // Calculate boss stats with compounded increases per level
 function getBossStats(level = 1) {
@@ -317,7 +318,7 @@ const Minigame = ({ playerStats }) => {
           {/* Player Character */}
           <div className="character-container">
             <div className={`character-model player-model flex justify-center items-center text-8xl ${dodgeAnim ? 'animate-dodge' : ''}`}>
-              🥷
+              <span className="twemoji--ninja-medium-skin-tone"></span>
               <span className="katana absolute left-58 bottom-13 text-5xl transform rotate-0"><GiKatana/></span>
             </div>
             <div className="hp-bar mt-4 w-48">
@@ -396,7 +397,7 @@ const Minigame = ({ playerStats }) => {
         {/* Character display */}
         <div className="character-container mb-6">
           <div className="character-model flex justify-center items-center text-9xl">
-            {result === 'win' ? '🥷' : '👻'}
+            {result === 'win' ? <span className="twemoji--ninja-medium-skin-tone"></span> : '👻'}
           </div>
         </div>
         
@@ -440,7 +441,7 @@ const Minigame = ({ playerStats }) => {
             </div>
           </div>
           <div className={`character-model player-model flex justify-center items-center text-8xl ${playerSwordMove ? 'animate-sword-move' : ''} ${dodgeAnim ? 'animate-dodge' : ''}`}>
-            🥷
+            <span className="twemoji--ninja-medium-skin-tone"></span>
             {/* Katana for basic attack (always visible, animates on attack) */}
             <span className={`katana absolute -right-3 bottom-0 text-5xl transform rotate-0 ${attackAnim && !abilityAnim ? 'animate-katana-slash' : ''}`}>
               <GiKatana />
@@ -525,7 +526,7 @@ const Minigame = ({ playerStats }) => {
             Show Character Stats
           </summary>
           <div className="flex flex-col md:flex-row justify-between gap-8 w-full">            <div className="bg-white/90 rounded-2xl shadow-xl p-5 flex-1 border-2 border-green-300">
-              <h3 className="font-bold text-green-700 text-xl mb-3 flex items-center gap-2">🥷 Player</h3>              <div className="space-y-2 text-base">
+              <h3 className="font-bold text-green-700 text-xl mb-3 flex items-center gap-2"><span className="twemoji--ninja-medium-skin-tone"></span> Player</h3>              <div className="space-y-2 text-base">
                 <div><b>❤️ HP:</b> <span className="text-red-700 font-bold">{player.hp.toFixed(2)}</span></div>
                 <div><b>🔮 MP:</b> <span className="text-blue-700 font-bold">{playerStats.mp}</span></div>
                 <div><b>⚔️ Attack:</b> <span className="text-red-700 font-bold">{player.attack}</span></div>
