@@ -10,6 +10,7 @@ import { MdSportsGymnastics } from "react-icons/md";
 import { PiBowlFoodFill } from "react-icons/pi";
 import { RiBodyScanFill } from "react-icons/ri";
 import { UserCircleIcon } from '@heroicons/react/24/outline';
+import { FaChartLine } from "react-icons/fa";
 
 /**
  * Navigationsdaten - ausgelagert nach SOLID (Single Responsibility)
@@ -28,6 +29,12 @@ const NAVIGATION_DATA = {
       description: 'Schaue dir hier die Workouts an und füge deine eigenen hinzu!', 
       href: '/workouts', 
       icon: MdSportsGymnastics 
+    },
+    {
+      name: 'Statistiken',
+      description: 'Analysiere deinen Trainingsfortschritt und persönliche Rekorde!',
+      href: '/statistics',
+      icon: FaChartLine
     },
   ],
   body: [

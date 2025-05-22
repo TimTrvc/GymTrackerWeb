@@ -99,9 +99,8 @@ const Workout = () => {
 
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
-
-    // Load workouts when switching to view or edit tabs
-    if (tabId === 'view' || tabId === 'edit') {
+    // Load workouts when switching to view tab
+    if (tabId === 'view') {
       loadWorkouts();
     }
   };
@@ -109,14 +108,18 @@ const Workout = () => {
   return (
     <WorkoutLayout>
       {/* Tab Navigation */}
-      <WorkoutNav activeTab={activeTab} handleTabClick={handleTabClick} />
+      {/* Nur "Meine Workouts" Tab anzeigen */}
+      <WorkoutNav activeTab={activeTab} handleTabClick={handleTabClick} tabs={[{ id: 'view', label: 'Meine Workouts' }]} />
 
       {/* Tab Content */}
-      <TabContent 
-        activeTab={activeTab} 
-        workouts={workouts} 
-        handleWorkoutSubmit={handleWorkoutSubmit} 
-      />
+      {/* handleTabClick an WorkoutView weitergeben für das Plus-Button-Handling */}
+      {activeTab === 'view' ? (
+        <WorkoutView workouts={workouts} handleTabClick={handleTabClick} />
+      ) : activeTab === 'create' ? (
+        <WorkoutCreate handleWorkoutSubmit={handleWorkoutSubmit} handleTabClick={handleTabClick} />
+      ) : activeTab === 'edit' ? (
+        <WorkoutEdit workouts={workouts} />
+      ) : null}
     </WorkoutLayout>
   );
 };
