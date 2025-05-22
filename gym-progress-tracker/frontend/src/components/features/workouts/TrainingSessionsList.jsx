@@ -16,9 +16,13 @@ const TrainingSessionsList = () => {
 
   // Lade alle Übungen einmalig für Mapping ID -> Name
   useEffect(() => {
-    getTrainingSessions().then(setSessions);
+    getTrainingSessions().then(data => {
+      console.log('DEBUG: fetched sessions', data);
+      setSessions(data);
+    });
     // Übungen für Mapping laden
     exercisesService.get && exercisesService.get().then(allExercises => {
+      console.log('DEBUG: fetched allExercises', allExercises);
       if (Array.isArray(allExercises)) {
         const map = {};
         allExercises.forEach(ex => {
@@ -29,9 +33,15 @@ const TrainingSessionsList = () => {
     });
     // Workouts für Mapping laden
     workoutService.getAllWorkouts && workoutService.getAllWorkouts().then(allWorkouts => {
-      if (Array.isArray(allWorkouts)) {
+      // Falls API-Response ein Objekt mit workouts-Array ist, extrahiere das Array
+      let workoutsArr = allWorkouts;
+      if (allWorkouts && Array.isArray(allWorkouts.workouts)) {
+        workoutsArr = allWorkouts.workouts;
+      }
+      console.log('DEBUG: normalized allWorkouts', workoutsArr);
+      if (Array.isArray(workoutsArr)) {
         const map = {};
-        allWorkouts.forEach(w => {
+        workoutsArr.forEach(w => {
           map[String(w.workout_id)] = w.name;
         });
         setWorkoutMap(map);
@@ -50,21 +60,36 @@ const TrainingSessionsList = () => {
     }
   };
 
+  // Debug: Log loaded workouts and session ids
+  useEffect(() => {
+    if (Object.keys(workoutMap).length && sessions.length) {
+      // Log all workout ids and names
+      console.log('DEBUG: workoutMap', workoutMap);
+      // Log all session workout_ids
+      console.log('DEBUG: session workout_ids', sessions.map(s => s.workout_id));
+    }
+  }, [workoutMap, sessions]);
+
   return (
     <div className="bg-white p-6 rounded-xl shadow-md mt-8">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Meine Trainingseinheiten</h2>
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-1/2">
           <ul className="divide-y">
-            {sessions.map(session => (
-              <li key={session.session_id} className="py-2 cursor-pointer hover:bg-gray-50 rounded px-2"
-                  onClick={() => handleSelectSession(session)}>
-                <div className="font-semibold">{formatRelativeDate(session.session_date)}</div>
-                <div className="text-sm text-gray-500">Workout: {workoutMap[String(session.workout_id)] || session.workout_id}</div>
-                <div className="text-xs text-gray-400">Dauer: {session.duration_minutes || '-'} min</div>
-                <div className="text-xs text-gray-400">Dauer: {session.duration_minutes || '-'} min</div>
-              </li>
-            ))}
+            {sessions.map(session => {
+              // Versuche, auch mit template_id zu matchen, falls vorhanden
+              let workoutName = workoutMap[String(session.workout_id)]
+                || workoutMap[String(session.template_id)]
+                || session.workout_id;
+              return (
+                <li key={session.session_id} className="py-3 cursor-pointer hover:bg-gray-50 rounded px-2"
+                    onClick={() => handleSelectSession(session)}>
+                  <div className="text-lg font-bold text-gray-900 leading-tight">{workoutName}</div>
+                  <div className="text-xs text-gray-400 mb-1">{formatRelativeDate(session.session_date)}</div>
+                  <div className="text-xs text-gray-400">Dauer: {session.duration_minutes || '-'} min</div>
+                </li>
+              );
+            })}
           </ul>
         </div>
         <div className="md:w-1/2">
@@ -116,4 +141,5 @@ function formatRelativeDate(dateString) {
 }
 
 export default TrainingSessionsList;
+  
   

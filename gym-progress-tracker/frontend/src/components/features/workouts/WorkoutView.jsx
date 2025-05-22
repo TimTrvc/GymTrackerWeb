@@ -31,7 +31,8 @@ const WorkoutView = ({
   workouts = [], 
   onView = () => {}, 
   onEdit = () => {}, 
-  onDelete = () => {} 
+  onDelete = () => {},
+  handleTabClick = () => {}
 }) => {
   // State zum Speichern der Übungen für jedes Workout
   const [workoutExercises, setWorkoutExercises] = useState({});
@@ -384,7 +385,7 @@ const WorkoutView = ({
     return <EmptyState />;
   }
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto relative">
       {xpReward && (
         <XpRewardNotification
           xpAmount={xpReward.amount}
@@ -402,6 +403,15 @@ const WorkoutView = ({
           />
         ))}
       </div>
+      {/* Floating Action Button für neues Workout */}
+      <button
+        className="fixed bottom-8 right-8 z-50 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg text-4xl transition-all"
+        title="Neues Workout erstellen"
+        aria-label="Neues Workout erstellen"
+        onClick={() => handleTabClick('create')}
+      >
+        +
+      </button>
     </div>
   );
 };
