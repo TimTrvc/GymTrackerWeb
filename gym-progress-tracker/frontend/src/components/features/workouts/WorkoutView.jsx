@@ -10,6 +10,7 @@ import useActivityTracker from "@/hooks/useActivityTracker.jsx";
 import WorkoutSession from "./WorkoutSession.jsx";
 import { addTrainingSession } from '@/services/trainingSessionsService';
 import { addExercisePerformance } from '@/services/exercisePerformanceService';
+import avatarService from "@/services/avatarService";
 
 /**
  * WorkoutView-Komponente zur Anzeige von Workouts
@@ -42,6 +43,7 @@ const WorkoutView = ({
   const [activeSession, setActiveSession] = useState(null); // {workout, exercises}
     // Activity tracking and XP rewards
   const { xpReward, clearXpReward, trackCustomXp } = useActivityTracker();
+  
 
   const startWorkoutSession = async (workout) => {
     // Übungen laden (falls noch nicht geladen)
@@ -84,6 +86,7 @@ const WorkoutView = ({
       // sessionData: { [exercise_id]: [{weight, reps}, ...] }
       console.log('sessionData keys:', Object.keys(sessionData));
       console.log('exercises array:', exercises);
+      let totalSets = 0;
       for (const [exerciseId, setsArr] of Object.entries(sessionData)) {
         // Versuche, die exercise_id flexibel zu finden (exercise_id oder id)
         const exercise = exercises.find(e => String(e.exercise_id ?? e.id) === String(exerciseId));
@@ -108,9 +111,19 @@ const WorkoutView = ({
           };
           console.log('Sending performance:', perfPayload);
           await addExercisePerformance(perfPayload);
+          totalSets++;
         }
       }
-      alert('Workout abgeschlossen und gespeichert!');
+
+      // XP vergeben (z.B. 25 XP + 2 XP pro Satz, max 45 XP)
+      const baseXp = 25;
+      const perSetXp = 2;
+      const maxXp = 45;
+      const totalXp = Math.min(baseXp + totalSets * perSetXp, maxXp);
+      // XP über avatarService vergeben und Popup anzeigen
+      await trackCustomXp(totalXp, `Workout abgeschlossen! Du hast ${totalXp} XP für deine Leistung erhalten.`);
+
+      // alert entfernt: Erfolgsmeldung nur noch über XP-Reward-Popup
     } catch (err) {
       alert('Fehler beim Speichern der Session: ' + (err.message || err));
     }
