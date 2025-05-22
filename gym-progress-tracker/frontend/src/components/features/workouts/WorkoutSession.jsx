@@ -105,6 +105,13 @@ const WorkoutSession = ({ workout, exercises, onFinish }) => {
 
   // Workout abschließen
   const handleFinish = () => {
+    // Sicherstellen, dass der letzte Satz gespeichert ist (falls noch nicht geschehen)
+    const currentExercise = exercises[currentExerciseIdx];
+    const currentSets = setInputs[currentExercise.exercise_id] || [];
+    // Wenn der aktuelle Satz noch nicht ausgefüllt ist, nichts tun
+    if (!currentSets[currentSetIdx].weight && !currentSets[currentSetIdx].reps) return;
+    // Optional: Hier könnte man noch validieren, ob die Werte plausibel sind
+    // (z.B. >0)
     if (onFinish) onFinish(setInputs);
   };
 

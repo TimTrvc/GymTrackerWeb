@@ -232,7 +232,11 @@ const WorkoutCreate = ({
       exercises: selectedExercises
     };
     
-    handleWorkoutSubmit(completeFormData);
+    // Nach dem Erstellen direkt zur Workout-Übersicht wechseln, falls handleTabClick übergeben
+    await handleWorkoutSubmit(completeFormData);
+    if (handleTabClick) {
+      handleTabClick('view');
+    }
   };
   // Rendert ein Lade- oder Fehler-Display bei Bedarf
   if (categoriesLoading || exercisesLoading) return <LoadingDisplay message="Übungsdaten werden geladen..." />;

@@ -26,36 +26,21 @@ const XpRewardNotification = ({
   if (!visible) return null;
   
   return (
-    <div className="fixed top-20 right-5 z-50 flex items-center select-none">
-      <div className={`
-        animate-slideInRight bg-gradient-to-r 
-        ${isLevelUp 
-          ? 'from-yellow-400 via-yellow-200 to-amber-400 border-yellow-300' 
-          : 'from-indigo-500 via-purple-400 to-pink-400 border-indigo-300'} 
-        text-white p-6 rounded-2xl shadow-2xl border-4
-        transform transition-all duration-300 ${visible ? 'opacity-100 scale-105' : 'opacity-0 translate-x-10'}
-        flex flex-col items-center min-w-[280px]
-      `}>
-        <div className="flex flex-col items-center">
-          <div className="mb-2 animate-bounce text-4xl drop-shadow-lg">
-            {isLevelUp ? '🏆' : '✨'}
-          </div>
-          <div className="text-lg font-bold mb-1 tracking-wide drop-shadow-sm">
-            {isLevelUp ? 'LEVEL UP!' : 'XP erhalten!'}
-          </div>
-          <div className="text-base font-medium mb-2 text-center opacity-90">
-            {message}
-          </div>
-          <div className="flex items-center justify-center gap-2 mt-1">
-            <span className="text-3xl font-extrabold text-yellow-300 drop-shadow-glow animate-pop">+{xpAmount}</span>
-            <span className="text-lg font-semibold text-white/80">XP</span>
-          </div>
-          {isLevelUp && (
-            <span className="mt-2 bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full shadow">LEVEL UP!</span>
-          )}
-        </div>
-        <div className="mt-2 text-xs text-white/70 italic animate-fadeIn">Stark! Weiter so! 🚀</div>
+    <div className="fixed top-20 right-5 z-50 select-none">
+      <div className={`animate-slideInRight bg-white border-4 rainbow-border px-6 py-4 rounded-2xl shadow-xl flex items-center gap-4 min-w-[220px] ${visible ? 'opacity-100 scale-105' : 'opacity-0 translate-x-10'} transition-all duration-300`}> 
+        <span className="text-3xl">✨</span>
+        <span className="font-bold text-lg text-gray-800">{message}</span>
       </div>
+      <style>{`
+        .rainbow-border {
+          border-image: linear-gradient(90deg, #ff5ec4, #fffb00, #00e0ff, #ff5ec4) 1;
+        }
+        @keyframes slideInRight {
+          0% { opacity: 0; transform: translateX(100px) scale(0.9); }
+          100% { opacity: 1; transform: translateX(0) scale(1.05); }
+        }
+        .animate-slideInRight { animation: slideInRight 0.5s cubic-bezier(.4,2,.6,1) both; }
+      `}</style>
     </div>
   );
 };

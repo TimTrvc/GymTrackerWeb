@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import PropTypes from 'prop-types';
 import { AuthContext } from '../../context/AuthContext';
@@ -66,6 +66,19 @@ const NAVIGATION_DATA = {
 const Navbar = () => {
   const { isAuthenticated, logoutUser } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Hamburger button for mobile
+  const HamburgerButton = () => (
+    <button
+      className="md:hidden flex flex-col justify-center items-center w-10 h-10 focus:outline-none"
+      aria-label="Menü öffnen"
+      onClick={() => setMobileMenuOpen((open) => !open)}
+    >
+      <span className={`block h-0.5 w-6 bg-white transition-all duration-300 mb-1 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+      <span className={`block h-0.5 w-6 bg-white transition-all duration-300 mb-1 ${mobileMenuOpen ? 'opacity-0' : ''}`}></span>
+      <span className={`block h-0.5 w-6 bg-white transition-all duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+    </button>
+  );
 
   // Event-Handler in eigenständige Funktion extrahiert (Single Responsibility)
   const handleLogout = () => {
@@ -128,9 +141,39 @@ const Navbar = () => {
           <Logo />
         </div>
 
-        {/* Right: Navigation Items */}
-        <div className="flex items-center space-x-12">
+        {/* Hamburger for mobile */}
+        <div className="flex md:hidden">
+          <HamburgerButton />
+        </div>
+
+        {/* Right: Navigation Items (desktop) */}
+        <div className="hidden md:flex items-center space-x-12">
           {isAuthenticated ? <AuthenticatedNav /> : <UnauthenticatedNav />}
+        </div>
+      </div>
+
+      {/* Mobile menu overlay */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-40 bg-black bg-opacity-50" onClick={() => setMobileMenuOpen(false)}></div>
+      )}
+      <div
+        className={`md:hidden fixed top-0 right-0 z-50 w-3/4 max-w-xs h-full bg-indigo-700 shadow-lg transform transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{ minWidth: '220px' }}
+      >
+        <div className="flex flex-col h-full p-6 space-y-6">
+          <div className="flex items-center justify-between mb-6">
+            <Logo />
+            <button
+              className="text-white focus:outline-none text-2xl"
+              aria-label="Menü schließen"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              ×
+            </button>
+          </div>
+          <div className="flex flex-col space-y-6">
+            {isAuthenticated ? <AuthenticatedNav /> : <UnauthenticatedNav />}
+          </div>
         </div>
       </div>
     </nav>

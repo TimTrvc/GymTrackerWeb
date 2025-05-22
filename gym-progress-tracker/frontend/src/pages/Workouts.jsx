@@ -60,7 +60,9 @@ const useWorkoutData = () => {
     } catch (error) {
       console.error('Fehler beim Laden der Workouts:', error);
     }
-  };  const handleWorkoutSubmit = async (formData) => {
+  };
+
+  const handleWorkoutSubmit = async (formData) => {
     // Formdata wird jetzt direkt als Objekt übergeben
     // Alle Daten inklusive Übungen in workoutData übernehmen
     const workoutData = {
@@ -71,19 +73,19 @@ const useWorkoutData = () => {
       is_public: formData.is_public,
       exercises: formData.exercises // Übungen aus formData übernehmen
     };
-    
     try {
       const isOK = await addWorkout(workoutData);
-
       if (isOK) {
-        alert(SUCCESS_MESSAGE);
-        // Formular zurücksetzen oder zu View-Tab wechseln könnte hier ergänzt werden
+        // Nach erfolgreichem Erstellen direkt zu "Meine Workouts" wechseln und neu laden
+        setActiveTab('view');
+        await loadWorkouts();
       } else {
-        alert(ERROR_MESSAGE);
+        // Fehlerbehandlung (optional Toast/Popup)
+        // alert(ERROR_MESSAGE);
       }
     } catch (error) {
       console.error('Fehler beim Hinzufügen des Workouts:', error);
-      alert(ERROR_MESSAGE);
+      // alert(ERROR_MESSAGE);
     }
   };
 
@@ -91,18 +93,23 @@ const useWorkoutData = () => {
 };
 
 const Workout = () => {
-  const [activeTab, setActiveTab] = useState('create');
-  
+  const [activeTab, setActiveTab] = useState('view');
+
   // Use custom hooks
   useAuthCheck();
   const { workouts, loadWorkouts, handleWorkoutSubmit } = useWorkoutData();
 
-  const handleTabClick = (tabId) => {
-    setActiveTab(tabId);
-    // Load workouts when switching to view tab
-    if (tabId === 'view') {
+  // Workouts beim ersten Rendern laden, wenn Tab "view"
+  useEffect(() => {
+    if (activeTab === 'view') {
       loadWorkouts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId);
+    // Workouts werden jetzt automatisch im useEffect geladen
   };
 
   return (
