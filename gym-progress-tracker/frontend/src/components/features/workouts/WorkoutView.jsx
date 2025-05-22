@@ -4,7 +4,7 @@ import Hoverer from "../../animation/Hoverer.jsx";
 import { getWorkoutExercises } from "@/services/workoutExercisesService";
 import exercisesService from "@/services/exercisesService";
 import XpRewardNotification from "@/components/features/avatar/XpRewardNotification";
-import useActivityTracker from "@/hooks/useActivityTracker";
+import useActivityTracker from "@/hooks/useActivityTracker.jsx";
 
 
 import WorkoutSession from "./WorkoutSession.jsx";
@@ -41,8 +41,7 @@ const WorkoutView = ({
   // Workout-Session State
   const [activeSession, setActiveSession] = useState(null); // {workout, exercises}
     // Activity tracking and XP rewards
-  const { xpReward, trackWorkoutCompletion, clearXpReward } = useActivityTracker();
-  const [completedWorkouts, setCompletedWorkouts] = useState([]);
+  const { xpReward, clearXpReward, trackCustomXp } = useActivityTracker();
 
   const startWorkoutSession = async (workout) => {
     // Übungen laden (falls noch nicht geladen)
@@ -154,24 +153,7 @@ const WorkoutView = ({
     }
   };
     // Funktion zum Markieren eines Workouts als abgeschlossen und XP erhalten
-  const markWorkoutCompleted = async (workout) => {
-    if (completedWorkouts.includes(workout.workout_id)) return;
-    
-    try {
-      // Anzahl der Übungen im Workout ermitteln
-      const exercises = workoutExercises[workout.workout_id] || [];
-      const exerciseCount = exercises.length;
-      
-      // Workout-Abschluss tracken und XP erhalten über den Hook
-      await trackWorkoutCompletion(workout, exerciseCount);
-      
-      // Workout als abgeschlossen markieren
-      setCompletedWorkouts([...completedWorkouts, workout.workout_id]);
-      
-    } catch (error) {
-      console.error('Fehler beim Tracken des Workouts:', error);
-    }
-  };
+  // XP-Logik wird jetzt am Ende der WorkoutSession berechnet
   
   /**
    * Komponente für den Leerzustand (keine Workouts)
@@ -256,32 +238,6 @@ const WorkoutView = ({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
         </svg>
         Starten
-      </button>
-      <button 
-        onClick={() => markWorkoutCompleted(workout)}
-        className={`px-3 py-1 ${
-          completedWorkouts.includes(workout.workout_id) 
-            ? 'bg-green-200 text-green-800' 
-            : 'bg-green-100 text-green-700 hover:bg-green-200'
-        } rounded transition-colors flex items-center`}
-        disabled={completedWorkouts.includes(workout.workout_id)}
-        aria-label={`Workout "${workout.name}" abschließen`}
-      >
-        {completedWorkouts.includes(workout.workout_id) ? (
-          <>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            Abgeschlossen
-          </>
-        ) : (
-          <>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            Abschließen
-          </>
-        )}
       </button>
       <div className="flex space-x-2">
         <button 
@@ -376,7 +332,26 @@ const WorkoutView = ({
       <WorkoutSession
         workout={activeSession.workout}
         exercises={activeSession.exercises}
-        onFinish={finishWorkoutSession}
+        onFinish={async (sessionData) => {
+          // XP-Berechnung basierend auf tatsächlicher Leistung
+          let totalXp = 0;
+          let totalSets = 0;
+          Object.values(sessionData).forEach(setsArr => {
+            setsArr.forEach(set => {
+              const reps = Number(set.reps) || 0;
+              const weight = Number(set.weight) || 0;
+              const setXp = Math.max(1, Math.round((weight * reps) * 0.5));
+              totalXp += setXp;
+              totalSets++;
+            });
+          });
+          // XP vergeben über Hook für Popup
+          if (totalXp > 0) {
+            await trackCustomXp(totalXp, `Workout abgeschlossen! Du hast ${totalXp} XP für deine Leistung erhalten.`);
+          }
+          // Session abschließen (alte Logik)
+          await finishWorkoutSession(sessionData);
+        }}
       />
     );
   }
@@ -438,3 +413,4 @@ WorkoutView.propTypes = {
 };
 
 export default WorkoutView;
+
