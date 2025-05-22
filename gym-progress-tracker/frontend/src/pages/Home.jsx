@@ -90,7 +90,8 @@ const Home = () => {
     { icon: <FaDumbbell />, title: 'Übungen', href: '/exercises', color: 'bg-blue-500' },
     { icon: <MdSportsGymnastics />, title: 'Workouts', href: '/workouts', color: 'bg-purple-500' },
     { icon: <MdFoodBank />, title: 'Ernährung', href: '/nutrition', color: 'bg-green-500' },
-    { icon: <RiBodyScanFill />, title: 'Körpermaße', href: '/body', color: 'bg-orange-500' }
+    { icon: <RiBodyScanFill />, title: 'Körpermaße', href: '/body', color: 'bg-orange-500' },
+    { icon: <FaChartLine />, title: 'Statistiken', href: '/statistics', color: 'bg-pink-500' }
   ];
 
   const testimonials = [

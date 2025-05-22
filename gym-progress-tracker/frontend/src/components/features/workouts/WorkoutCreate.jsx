@@ -23,6 +23,7 @@ import { TextField, TextArea, SelectField, CheckboxField } from '@/components/co
  */
 const WorkoutCreate = ({ 
   handleWorkoutSubmit,
+  handleTabClick = null,
   initialValues = {
     name: '',
     description: '',
@@ -98,7 +99,7 @@ const WorkoutCreate = ({
     }
 
     const newExercise = {
-      exercise_id: exerciseToAdd.id,
+      exercise_id: exerciseToAdd.exercise_id ?? exerciseToAdd.id,
       name: exerciseToAdd.name,
       description: exerciseToAdd.description || "",
       sets: exerciseSets,
@@ -435,13 +436,22 @@ const WorkoutCreate = ({
           </div>
         )}
         
-        <div className="mt-8">
+        <div className="mt-8 flex gap-4">
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 transition-colors"
+            className="flex-1 bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 transition-colors"
           >
             Workout erstellen
           </button>
+          {handleTabClick && (
+            <button
+              type="button"
+              className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-md hover:bg-gray-300 transition-colors"
+              onClick={() => handleTabClick('view')}
+            >
+              Abbrechen
+            </button>
+          )}
         </div>
       </form>
     </div>

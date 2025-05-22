@@ -30,6 +30,20 @@ const addExercisePerformance = async (req, res) => {
         notes
     } = req.body;
 
+    // Debug-Log für eingehende Daten
+    console.log('addExercisePerformance payload:', {
+        session_id,
+        exercise_id,
+        set_number,
+        reps,
+        weight,
+        is_warmup,
+        is_dropset,
+        is_failure,
+        rpe,
+        notes
+    });
+
     try {
         const result = await pool.query(
             `INSERT INTO exercise_performances (session_id, exercise_id, set_number, reps, weight, is_warmup, is_dropset, is_failure, rpe, notes)

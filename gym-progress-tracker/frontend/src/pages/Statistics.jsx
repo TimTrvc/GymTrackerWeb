@@ -1,11 +1,103 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import HeroSection from '@/components/layout/HeroSection';
+import TrainingSessionsList from '@/components/features/workouts/TrainingSessionsList.jsx';
+import StatisticsOverview from './StatisticsOverview.jsx';
+import PersonalRecordsTable from './PersonalRecordsTable.jsx';
+import StatisticsCharts from '@/components/features/statistics/StatisticsCharts';
+import { getTrainingSessions } from '@/services/trainingSessionsService';
+import { getExercisePerformances } from '@/services/exercisePerformanceService';
+import exercisesService from '@/services/exercisesService';
 
 /**
  * Statistics page component
  * Shows user progress and training statistics
  */
 const Statistics = () => {
+  const [frequencyData, setFrequencyData] = useState([]);
+  const [progressData, setProgressData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+
+      // Hilfsfunktion: ISO Woche berechnen
+      function getISOWeekString(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        // Donnerstag in dieser Woche finden
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+        // 1. Januar der Woche
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+        // Kalenderwoche berechnen
+        const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+        return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`;
+      }
+
+      const sessions = await getTrainingSessions();
+      const weekMap = {};
+      const now = new Date();
+      for (let i = 7; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(now.getDate() - i * 7);
+        const week = getISOWeekString(d);
+        weekMap[week] = 0;
+      }
+      sessions.forEach(s => {
+        const d = new Date(s.session_date);
+        const week = getISOWeekString(d);
+        if (weekMap[week] !== undefined) weekMap[week]++;
+      });
+      setFrequencyData(Object.entries(weekMap).map(([label, value]) => ({ label, value })));
+
+      // Fortschritt pro Übung: z.B. max Gewicht pro Woche für Top-3 Übungen
+      const allPerfs = [];
+      for (const session of sessions) {
+        const perfs = await getExercisePerformances(session.session_id);
+        allPerfs.push(...perfs);
+      }
+      // Top 3 meistgenutzte Übungen
+      const exerciseCount = {};
+      allPerfs.forEach(p => { if (p.exercise_id) exerciseCount[p.exercise_id] = (exerciseCount[p.exercise_id] || 0) + 1; });
+      const topExercises = Object.entries(exerciseCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([id])=>id);
+      // Namen laden
+      let exerciseMap = {};
+      try {
+        const allExercises = await exercisesService.get();
+        if (Array.isArray(allExercises)) {
+          exerciseMap = Object.fromEntries(allExercises.map(ex => [String(ex.exercise_id), ex.name]));
+        }
+      } catch {}
+      // Für jede Top-Übung: durchschnittliches Gewicht pro Woche (statt max)
+      const weekLabels = Object.keys(weekMap);
+      const progressArr = topExercises.map((exId, idx) => {
+        const values = weekLabels.map(week => {
+          // alle Sätze dieser Übung in dieser Woche
+          const perfs = allPerfs.filter(p => {
+            if (String(p.exercise_id) !== String(exId)) return false;
+            // Fallback: robustes Datum
+            let dateStr = p.performed_at || p.created_at || p.updated_at || p.session_date;
+            if (!dateStr) return false;
+            const d = new Date(dateStr);
+            if (isNaN(d)) return false;
+            const w = getISOWeekString(d);
+            return w === week;
+          });
+          if (!perfs.length) return 0;
+          // Maximales Gewicht aller Sätze dieser Woche
+          return Math.max(...perfs.map(p => Number(p.weight) || 0));
+        });
+        return {
+          label: exerciseMap[exId] || exId,
+          values,
+          color: `hsl(${idx*60},70%,50%)`
+        };
+      });
+      setProgressData(progressArr);
+      setLoading(false);
+    }
+    fetchData();
+  }, []);
+
   return (
     <>
       <HeroSection 
@@ -13,75 +105,18 @@ const Statistics = () => {
         subtitle="Verfolge deinen Fortschritt und analysiere deine Leistung" 
       />
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-white p-6 rounded-xl shadow-md mb-8">
-          <h2 className="text-2xl font-bold mb-6 text-gray-800">Trainingsübersicht</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-indigo-50 p-5 rounded-lg">
-              <h3 className="text-lg font-semibold mb-2">Trainingseinheiten</h3>
-              <p className="text-3xl font-bold text-indigo-600">24</p>
-              <p className="text-sm text-gray-500">in den letzten 30 Tagen</p>
-            </div>
-            <div className="bg-green-50 p-5 rounded-lg">
-              <h3 className="text-lg font-semibold mb-2">Gesamtgewicht</h3>
-              <p className="text-3xl font-bold text-green-600">4250 kg</p>
-              <p className="text-sm text-gray-500">in den letzten 30 Tagen</p>
-            </div>
-            <div className="bg-purple-50 p-5 rounded-lg">
-              <h3 className="text-lg font-semibold mb-2">Trainingszeit</h3>
-              <p className="text-3xl font-bold text-purple-600">16.5 h</p>
-              <p className="text-sm text-gray-500">in den letzten 30 Tagen</p>
-            </div>
-          </div>
+        <StatisticsOverview />
+        <div className="mb-8">
+          {loading ? (
+            <div className="h-64 flex items-center justify-center bg-gray-100 rounded text-gray-500">Diagramme werden geladen...</div>
+          ) : (
+            <StatisticsCharts frequencyData={frequencyData} progressData={progressData} />
+          )}
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-white p-6 rounded-xl shadow-md">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">Trainingshäufigkeit</h2>
-            <div className="h-64 flex items-center justify-center bg-gray-100 rounded">
-              <p className="text-gray-500">Diagramm wird geladen...</p>
-              {/* Hier würde ein echtes Diagramm eingebunden werden */}
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-md">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">Fortschritte pro Übung</h2>
-            <div className="h-64 flex items-center justify-center bg-gray-100 rounded">
-              <p className="text-gray-500">Diagramm wird geladen...</p>
-              {/* Hier würde ein echtes Diagramm eingebunden werden */}
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white p-6 rounded-xl shadow-md mt-8">
-          <h2 className="text-2xl font-bold mb-6 text-gray-800">Persönliche Rekorde</h2>
-          <table className="min-w-full">
-            <thead>
-              <tr>
-                <th className="text-left py-3 px-4 font-semibold text-sm text-gray-600 border-b">Übung</th>
-                <th className="text-left py-3 px-4 font-semibold text-sm text-gray-600 border-b">Gewicht</th>
-                <th className="text-left py-3 px-4 font-semibold text-sm text-gray-600 border-b">Datum</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="py-3 px-4 border-b">Bankdrücken</td>
-                <td className="py-3 px-4 border-b font-medium">95 kg</td>
-                <td className="py-3 px-4 border-b text-gray-500">15.04.2025</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4 border-b">Kniebeuge</td>
-                <td className="py-3 px-4 border-b font-medium">120 kg</td>
-                <td className="py-3 px-4 border-b text-gray-500">23.04.2025</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4 border-b">Kreuzheben</td>
-                <td className="py-3 px-4 border-b font-medium">140 kg</td>
-                <td className="py-3 px-4 border-b text-gray-500">05.05.2025</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <PersonalRecordsTable />
       </div>
+      {/* Eigene Training Sessions Übersicht */}
+      <TrainingSessionsList />
     </>
   );
 };

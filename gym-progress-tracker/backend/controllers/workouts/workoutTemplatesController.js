@@ -27,10 +27,10 @@ const getWorkouts = async (req, res) => {
 
     try {
         const result = await pool.query(
-            'SELECT * FROM workout_templates WHERE created_by = ' + user_id
+            'SELECT * FROM workout_templates WHERE created_by = $1', [user_id]
         );
         res.json({
-            workouts: result
+            workouts: result.rows
         });
     } catch (err) {
         console.error('Fehler bei der Workoutabfrage:', err);

@@ -1,14 +1,34 @@
-/**
- * useActivityTracker - Custom hook to track user activities and award XP
- * This hook provides a centralized way to track different fitness activities
- * and award experience points accordingly.
- */
+// Alle Imports müssen am Dateianfang stehen!
 import { useState, useCallback } from 'react';
 import activityTrackerService from '@/services/activityTrackerService';
 
 const useActivityTracker = () => {
   const [isTracking, setIsTracking] = useState(false);
   const [xpReward, setXpReward] = useState(null);
+
+  // Track custom XP and show reward popup
+  // @param {number} xpAmount - XP to award
+  // @param {string} message - Message to show
+  const trackCustomXp = useCallback(async (xpAmount, message = '') => {
+    try {
+      setIsTracking(true);
+      // Avatar XP vergeben
+      const avatarService = (await import('@/services/avatarService')).default;
+      const result = await avatarService.addExperience(xpAmount);
+      setXpReward({
+        amount: xpAmount,
+        message: message || `+${xpAmount} XP erhalten!`,
+        isLevelUp: result?.leveledUp,
+        type: 'custom'
+      });
+      return result;
+    } catch (error) {
+      console.error('Error tracking custom XP:', error);
+      return { success: false, error };
+    } finally {
+      setIsTracking(false);
+    }
+  }, []);
   
   /**
    * Track a workout completion and award XP
@@ -103,6 +123,7 @@ const useActivityTracker = () => {
     trackWorkoutCompletion,
     trackExerciseSets,
     trackPersonalRecord,
+    trackCustomXp,
     clearXpReward
   };
 };
