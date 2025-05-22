@@ -76,7 +76,7 @@ const Navbar = () => {
   // UI-Komponenten nach Funktionalität getrennt (Single Responsibility)
   const Logo = () => (
     <Link to="/" className="text-2xl font-bold text-white flex items-center" aria-label="Zur Startseite">
-      <span className="mr-2" role="img" aria-label="Muskel-Emoji">💪</span> GymTrack
+      <span className="mr-2" role="img" aria-label="Muskel-Emoji">💪</span> MuscleQuest
     </Link>
   );
 

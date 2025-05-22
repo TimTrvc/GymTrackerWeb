@@ -98,7 +98,7 @@ const Footer = () => {
    */
   const InfoSection = () => (
     <div>
-      <h4 className="text-xl font-bold mb-4">GymTrack</h4>
+      <h4 className="text-xl font-bold mb-4">MuscleQuest</h4>
       <p className="text-gray-400">Dein persönlicher Fitness-Tracker für optimale Erfolge im Gym.</p>
     </div>
   );
@@ -153,7 +153,7 @@ const Footer = () => {
    */
   const CopyrightSection = () => (
     <div className="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
-      <p>&copy; {new Date().getFullYear()} GymTrack. Alle Rechte vorbehalten.</p>
+      <p>&copy; {new Date().getFullYear()} MuscleQuest. Alle Rechte vorbehalten.</p>
     </div>
   );
 
