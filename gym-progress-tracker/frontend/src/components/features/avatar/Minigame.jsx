@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import useAvatar from '@/hooks/useAvatar';
-import { GiBatteredAxe } from "react-icons/gi"
+import { GiShardSword, GiKatana, GiShuriken } from "react-icons/gi"
 
 // Calculate boss stats with compounded increases per level
 function getBossStats(level = 1) {
@@ -53,6 +53,11 @@ function didDodge(dodgeChance) {
   return Math.random() < Math.min(0.9, (dodgeChance || 0) / 100);
 }
 
+// Utility: sleep for async/await timing
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 const Minigame = ({ playerStats }) => {
   const { updateBossLevel, refreshAvatar } = useAvatar();
   const [mode, setMode] = useState('preview'); // 'preview', 'fight', 'result'
@@ -83,6 +88,9 @@ const Minigame = ({ playerStats }) => {
   const [waitingForPlayerAction, setWaitingForPlayerAction] = useState(true);
   const [bossAttackMessage, setBossAttackMessage] = useState('');
   const [swordGlow, setSwordGlow] = useState(false);
+  const [playerSwordMove, setPlayerSwordMove] = useState(false);
+  const [bossSwordMove, setBossSwordMove] = useState(false);
+  const [bossAttackAnim, setBossAttackAnim] = useState(false);
   
   const logRef = useRef(null);
   const logEndRef = useRef(null);
@@ -132,7 +140,6 @@ const Minigame = ({ playerStats }) => {
     setBossLevelUpMsg(`Boss Level Up! You are now at Boss Level ${newLevel}`);
     await refreshAvatar && refreshAvatar();
     setMode('result');
-    setTimeout(() => window.location.reload(), 500); // Force reload to get fresh props
   };
 
   const handlePlayerDefeat = () => {
@@ -140,166 +147,142 @@ const Minigame = ({ playerStats }) => {
     setGameOver(true);
     setResult('lose');
     setMode('result');
-  };  const handleAttack = () => {
+  };  
+
+  // Method to handle Attacks
+  const handleAttack = async () => {
     if (gameOver || !waitingForPlayerAction) return;
     setWaitingForPlayerAction(false);
-    setAttackAnim(true);
-    setTimeout(() => setAttackAnim(false), 700);
-    
+    setPlayerSwordMove(true); // Move player forward
+    await sleep(700); // Move duration
+    setAttackAnim(true); // Attack animation
+    await sleep(500); // Wait for attack animation
     const dmg = calculateDamage(player.attack, boss.defense);
     setShowPlayerDmg(dmg);
     setTimeout(() => setShowPlayerDmg(0), 1500);
-    
     const newBossHp = Math.max(0, boss.currentHp - dmg);
     setBoss((b) => ({ ...b, currentHp: newBossHp }));
     setLog((l) => [
       ...l,
       `Player attacks for ${dmg} damage! Boss HP: ${newBossHp.toFixed(2)}/${boss.hp.toFixed(2)}`,
     ]);
-    
     // Reduce cooldown counter if on cooldown
     if (abilityCooldown > 0) {
       const newCooldown = abilityCooldown - 1;
       setAbilityCooldown(newCooldown);
-      
-      // If cooldown reaches 0, enable ability again
       if (newCooldown === 0) {
         setCanUseAbility(true);
       }
     }
-    
+    await sleep(500); // Wait after attack
+    setAttackAnim(false);
+    setPlayerSwordMove(false); // Move back
     if (newBossHp <= 0) {
-      handleBossDefeat();
+      setTimeout(handleBossDefeat, 500);
       return;
     }
-    
-    setTimeout(bossTurn, 1200);
-    setTurn((t) => t + 1);
+    setTimeout(() => {
+      bossTurn();
+      setTurn((t) => t + 1);
+    }, 500); // Wait before boss turn
   };
-  
-  const handleAbility = () => {
+
+  // Method to handle abilities
+  const handleAbility = async () => {
     if (gameOver || !canUseAbility || !waitingForPlayerAction) return;
     setWaitingForPlayerAction(false);
     setAbilityAnim(true);
-    setTimeout(() => setAbilityAnim(false), 900);
-    
+    await sleep(800); // Wait for shuriken animation
+    setAbilityAnim(false);
     const dmg = calculateAbilityDamage(player.mp, boss.defense);
     setShowPlayerDmg(dmg);
     setTimeout(() => setShowPlayerDmg(0), 1500);
-    
     const newBossHp = Math.max(0, boss.currentHp - dmg);
     setBoss((b) => ({ ...b, currentHp: newBossHp }));
-    
-    // Set cooldown to 2 rounds and disable ability usage
     setAbilityCooldown(2);
     setCanUseAbility(false);
-    
     setLog((l) => [
       ...l,
       `Player uses ability for ${dmg} damage! Boss HP: ${newBossHp.toFixed(2)}/${boss.hp.toFixed(2)}`,
     ]);
-    
     if (newBossHp <= 0) {
       handleBossDefeat();
       return;
     }
-    
-    setTimeout(bossTurn, 1200);
-    setTurn((t) => t + 1);  };
-  
-  const bossTurn = () => {
+    await sleep(500); // Wait before boss turn
+    bossTurn();
+    setTurn((t) => t + 1);
+  };
+
+  // Handle Boss Attack + Animations
+  const bossTurn = async () => {
     if (gameOver) return;
-    
     setWaitingForPlayerAction(false);
-    
-    // Boss crit logic
+    setBossSwordMove(true);
     const isCrit = Math.random() < (boss.crit || 0) / 100;
-    let dmg = calculateDamage(boss.attack, player.defense);
-    
     if (isCrit) {
       setSwordGlow(true);
-      setBossAttackMessage('Boss is preparing a CRITICAL HIT!');
-      setTimeout(() => {
-        setSwordGlow(false);
-        setCritAnim(true);
-        setTimeout(() => setCritAnim(false), 1000);
-        setBossAttackMessage(`Boss lands a CRITICAL HIT! (${boss.crit.toFixed(1)}% chance)`);
-        setLog((l) => [...l, `Boss lands a CRITICAL HIT! (${boss.crit.toFixed(1)}% chance)`]);
-        // Apply crit damage multiplier
-        const critDmg = Math.round(dmg * 1.7);
-        if (didDodge(player.agility)) {
-          setDodgeAnim(true);
-          setTimeout(() => setDodgeAnim(false), 800);
-          setBossAttackMessage("You dodged the boss's attack!");
-          setLog((l) => [...l, "You dodged the boss's attack!"]);
-          setTimeout(() => {
-            setBossAttackMessage('');
-            setWaitingForPlayerAction(true);
-          }, 2000);
-        } else {
-          setTimeout(() => {
-            setShowBossDmg(critDmg);
-            setTimeout(() => setShowBossDmg(0), 1500);
-            
-            const newPlayerHp = Math.max(0, player.currentHp - critDmg);
-            setPlayer((p) => ({ ...p, currentHp: newPlayerHp }));
-            setBossAttackMessage(`Boss attacks for ${critDmg} damage!`);
-            setLog((l) => [
-              ...l,
-              `Boss attacks for ${critDmg} damage! Player HP: ${newPlayerHp.toFixed(2)}/${player.hp.toFixed(2)}`,
-            ]);
-            
-            if (newPlayerHp <= 0) {
-              handlePlayerDefeat();
-              return;
-            }
-            
-            setTimeout(() => {
-              setBossAttackMessage('');
-              setWaitingForPlayerAction(true);
-            }, 1500);
-          }, 1000);
-        }
-      }, 1000); // Glow duration
-      return;
     }
-    
-    setBossAttackMessage('Boss prepares to attack!');
+    await sleep(700);
+    await sleep(200);
+    setBossAttackAnim(true);
+    setCritAnim(isCrit);
+    setTimeout(() => setCritAnim(false), 1000);
+    let dmg = calculateDamage(boss.attack, player.defense);
+    if (isCrit) {
+      setBossAttackMessage(`Boss lands a CRITICAL HIT! (${boss.crit.toFixed(1)}% chance)`);
+      setLog((l) => [...l, `Boss lands a CRITICAL HIT! (${boss.crit.toFixed(1)}% chance)`]);
+      dmg = Math.round(dmg * 1.7);
+    } else {
+      setBossAttackMessage('Boss attacks!');
+    }
+    // Implement dodge mechanic
+    await sleep(250);
     if (didDodge(player.agility)) {
       setDodgeAnim(true);
       setTimeout(() => setDodgeAnim(false), 800);
       setBossAttackMessage("You dodged the boss's attack!");
       setLog((l) => [...l, "You dodged the boss's attack!"]);
-      setTimeout(() => {
-        setBossAttackMessage('');
-        setWaitingForPlayerAction(true);
-      }, 2000);
+      await sleep(300);
+      setBossAttackAnim(false);
+      setSwordGlow(false);
+      await sleep(250);
+      setBossSwordMove(false);
+      setBossAttackMessage('');
+      setWaitingForPlayerAction(true);
+      return;
     } else {
-      setTimeout(() => {
-        setShowBossDmg(dmg);
-        setTimeout(() => setShowBossDmg(0), 1500);
-        
-        const newPlayerHp = Math.max(0, player.currentHp - dmg);
-        setPlayer((p) => ({ ...p, currentHp: newPlayerHp }));
-        setBossAttackMessage(`Boss attacks for ${dmg} damage!`);
-        setLog((l) => [
-          ...l,
-          `Boss attacks for ${dmg} damage! Player HP: ${newPlayerHp.toFixed(2)}/${player.hp.toFixed(2)}`,
-        ]);
-        
-        if (newPlayerHp <= 0) {
-          handlePlayerDefeat();
-          return;
-        }
-        
+      setShowBossDmg(dmg);
+      setTimeout(() => setShowBossDmg(0), 1500);
+      const newPlayerHp = Math.max(0, player.currentHp - dmg);
+      setPlayer((p) => ({ ...p, currentHp: newPlayerHp }));
+      setBossAttackMessage(`Boss attacks for ${dmg} damage!`);
+      setLog((l) => [
+        ...l,
+        `Boss attacks for ${dmg} damage! Player HP: ${newPlayerHp.toFixed(2)}/${player.hp.toFixed(2)}`,
+      ]);
+      if (newPlayerHp <= 0) {
         setTimeout(() => {
-          setBossAttackMessage('');
-          setWaitingForPlayerAction(true);
-        }, 1500);
-      }, 1000);
+          handlePlayerDefeat();
+        }, 500);
+        setBossAttackAnim(false);
+        setSwordGlow(false);
+        await sleep(250);
+        setBossSwordMove(false);
+        return;
+      }
     }
+    await sleep(300);
+    setBossAttackAnim(false);
+    setSwordGlow(false);
+    await sleep(250);
+    setBossSwordMove(false);
+    setTimeout(() => {
+      setBossAttackMessage('');
+      setWaitingForPlayerAction(true);
+    }, 500);
   };
-  
+
   const handleRestart = async () => {
     await refreshAvatar && refreshAvatar();
     setPlayer({
@@ -333,9 +316,9 @@ const Minigame = ({ playerStats }) => {
         <div className="w-full flex justify-around items-center mb-12 relative">
           {/* Player Character */}
           <div className="character-container">
-            <div className="character-model player-model flex justify-center items-center text-8xl">
-              🦸
-              <span className="sword absolute right-55 bottom-15 text-5xl transform rotate-90">🗡️   </span>
+            <div className={`character-model player-model flex justify-center items-center text-8xl ${dodgeAnim ? 'animate-dodge' : ''}`}>
+              🥷
+              <span className="katana absolute left-58 bottom-13 text-5xl transform rotate-0"><GiKatana/></span>
             </div>
             <div className="hp-bar mt-4 w-48">
               <div className="flex justify-between mb-1">
@@ -354,9 +337,10 @@ const Minigame = ({ playerStats }) => {
           </div>
           
           {/* Boss Character */}
-          <div className="character-container">          <div className="character-model boss-model flex justify-center items-center text-8xl">
+          <div className="character-container">          
+            <div className="character-model boss-model flex justify-center items-center text-8xl">
               👹
-              <span className={`sword absolute left-53 bottom-13 text-5xl transform rotate-180 ${critAnim ? 'glow-effect' : ''} ${swordGlow ? 'glow-red' : ''}`}>🗡️</span>
+              <span className='sword absolute right-57 bottom-14 text-5xl transform scale-y-[-1] rotate-180'><GiShardSword/></span>
             </div>
             <div className="hp-bar mt-4 w-48">
               <div className="flex justify-between mb-1">
@@ -412,7 +396,7 @@ const Minigame = ({ playerStats }) => {
         {/* Character display */}
         <div className="character-container mb-6">
           <div className="character-model flex justify-center items-center text-9xl">
-            {result === 'win' ? '🦸' : '👻'}
+            {result === 'win' ? '🥷' : '👻'}
           </div>
         </div>
         
@@ -455,23 +439,25 @@ const Minigame = ({ playerStats }) => {
               ></div>
             </div>
           </div>
-          <div className={`relative ${dodgeAnim ? 'animate-dodge' : ''}`}>
-            <div className="character-model player-model flex justify-center items-center text-8xl">
-              🦸
-              <span className={`sword absolute -right-2 bottom-0 text-5xl transform rotate-180 ${attackAnim ? 'animate-player-attack' : ''}`}>🗡️</span>
-            </div>
-            {showBossDmg > 0 && (
-              <div className="damage-number text-red-600 font-extrabold text-3xl animate-float-up absolute -top-6 left-0 right-0 text-center">
-                -{showBossDmg}
-              </div>
-            )}
+          <div className={`character-model player-model flex justify-center items-center text-8xl ${playerSwordMove ? 'animate-sword-move' : ''} ${dodgeAnim ? 'animate-dodge' : ''}`}>
+            🥷
+            {/* Katana for basic attack (always visible, animates on attack) */}
+            <span className={`katana absolute -right-3 bottom-0 text-5xl transform rotate-0 ${attackAnim && !abilityAnim ? 'animate-katana-slash' : ''}`}>
+              <GiKatana />
+            </span>
+            {/* No shuriken on player, only in center animation */}
           </div>
+          {showBossDmg > 0 && (
+            <div className="damage-number text-red-600 font-extrabold text-3xl animate-float-up absolute -top-6 left-0 right-0 text-center">
+              -{showBossDmg}
+            </div>
+          )}
         </div>
         
         {/* Center Battle Animations */}
         <div className="battle-fx absolute left-0 right-0 flex justify-center items-center pointer-events-none z-10">
-          {attackAnim && <div className="attack-fx text-6xl animate-sword-slash">⚔️</div>}
-          {abilityAnim && <div className="ability-fx text-6xl animate-ability-orb">✨</div>}
+          {/* Only show shuriken flying for ability (center, not on player) */}
+          {abilityAnim && <span className="shuriken-fx text-6xl animate-shuriken-throw"><GiShuriken /></span>}
         </div>
         
         {/* Boss Character with HP bar */}
@@ -487,18 +473,17 @@ const Minigame = ({ playerStats }) => {
               ></div>
             </div>
           </div>
-          <div className={`relative ${critAnim ? 'animate-crit-attack' : ''}`}>
-            <div className="character-model boss-model flex justify-center items-center text-8xl">
-              👹
-              <span className={`sword absolute -left-6 bottom-0 text-5xl transform rotate-90 ${swordGlow ? 'glow-red' : ''}`}>🗡️</span>
-            </div>
-            {showPlayerDmg > 0 && (
-              <div className="damage-number text-red-600 font-extrabold text-3xl animate-float-up absolute -top-6 left-0 right-0 text-center">
-                -{showPlayerDmg}
-              </div>
-            )}
+          <div className={`character-model boss-model flex justify-center items-center text-8xl ${bossSwordMove ? 'animate-sword-move-boss' : ''}`}>
+            👹
+            <span className={`sword absolute -left-15 bottom-0 text-5xl transform scale-y-[-1] rotate-180 ${swordGlow ? 'glow-red' : ''} ${bossAttackAnim ? 'animate-boss-sword-swing' : ''}`}><GiShardSword/></span>
           </div>
-        </div>      </div>
+          {showPlayerDmg > 0 && (
+            <div className="damage-number text-red-600 font-extrabold text-3xl animate-float-up absolute -top-6 left-0 right-0 text-center">
+              -{showPlayerDmg}
+            </div>
+          )}
+        </div>
+      </div>
       
       {/* Fixed height area for battle message */}
       <div className="min-h-[80px] flex items-center justify-center mb-6">
@@ -540,7 +525,7 @@ const Minigame = ({ playerStats }) => {
             Show Character Stats
           </summary>
           <div className="flex flex-col md:flex-row justify-between gap-8 w-full">            <div className="bg-white/90 rounded-2xl shadow-xl p-5 flex-1 border-2 border-green-300">
-              <h3 className="font-bold text-green-700 text-xl mb-3 flex items-center gap-2">🧑‍🎤 Player</h3>              <div className="space-y-2 text-base">
+              <h3 className="font-bold text-green-700 text-xl mb-3 flex items-center gap-2">🥷 Player</h3>              <div className="space-y-2 text-base">
                 <div><b>❤️ HP:</b> <span className="text-red-700 font-bold">{player.hp.toFixed(2)}</span></div>
                 <div><b>🔮 MP:</b> <span className="text-blue-700 font-bold">{playerStats.mp}</span></div>
                 <div><b>⚔️ Attack:</b> <span className="text-red-700 font-bold">{player.attack}</span></div>
@@ -566,17 +551,16 @@ const Minigame = ({ playerStats }) => {
           50% { transform: rotate(-90deg) translateX(30px); }
           100% { transform: rotate(0deg); }
         }
-        @keyframes sword-slash {
-          0% { opacity: 0; transform: scale(0.5); }
-          10% { opacity: 1; }
-          90% { opacity: 1; transform: scale(1.5) rotate(30deg); }
-          100% { opacity: 0; transform: scale(1.8) rotate(45deg); }
+        @keyframes katana-slash {
+          0% { transform: rotate(0deg) scale(1); }
+          20% { transform: rotate(60deg) scale(1.2); }
+          60% { transform: rotate(90deg) scale(1.1); }
+          100% { transform: rotate(0deg) scale(1); }
         }
-        @keyframes ability-orb {
-          0% { opacity: 0; transform: scale(0) translateX(-150px); }
-          20% { opacity: 1; transform: scale(1) translateX(-120px); }
-          80% { opacity: 1; transform: scale(1.5) translateX(120px); }
-          100% { opacity: 0; transform: scale(0) translateX(150px); }
+        @keyframes shuriken-throw {
+          0% { opacity: 1; transform: translateX(-200px) scale(1) rotate(0deg); }
+          80% { opacity: 1; transform: translateX(280px) scale(1.2) rotate(720deg); }
+          100% { opacity: 0; transform: translateX(320px) scale(1.1) rotate(1080deg); }
         }
         @keyframes crit-attack {
           0% { transform: translateX(0); }
@@ -598,14 +582,41 @@ const Minigame = ({ playerStats }) => {
           80% { opacity: 1; transform: translateY(-30px); }
           100% { opacity: 0; transform: translateY(-50px); }
         }
+        @keyframes sword-move {
+          0% { transform: translateX(0) rotate(0deg) scale(1); }
+          80% { transform: translateX(370px) rotate(-30deg) scale(1.2); }
+          100% { transform: translateX(370px) rotate(-30deg) scale(1.2); }
+        }
+        @keyframes sword-move-boss {
+          0% { transform: scaleY(1) rotate(0deg) translateX(0); }
+          80% { transform: scaleY(1) rotate(0deg) translateX(-370px) scale(1.2); }
+          100% { transform: scaleY(1) rotate(0deg) translateX(-370px) scale(1.2); }
+        }
+        @keyframes boss-sword-swing {
+          0%   { transform: translateY(-40px) scaleY(-1) rotate(90deg); }
+          50%  { transform: translateY(-10px) scaleY(-1) rotate(0deg); }
+          100% { transform: translateY(-30px) scaleY(-1) rotate(45deg); }
+        }
         .animate-player-attack {
           animation: player-attack 0.6s ease-in-out;
         }
-        .animate-sword-slash {
-          animation: sword-slash 0.6s ease-in-out;
+        .animate-katana-slash {
+          animation: katana-slash 0.5s cubic-bezier(0.4,1.2,0.6,1) forwards;
+          filter: drop-shadow(0 0 8px #fffbe6);
+          z-index: 20;
         }
-        .animate-ability-orb {
-          animation: ability-orb 1s ease-in-out;
+        .animate-shuriken-throw {
+          animation: shuriken-throw 1.5s cubic-bezier(0.4,1.2,0.6,1) forwards;
+          filter: drop-shadow(0 0 8px #bfcfff) drop-shadow(0 0 16px #bfcfff);
+          z-index: 21;
+        }
+        .animate-boss-sword-swing {
+          animation: boss-sword-swing 0.5s cubic-bezier(0.4,1.2,0.6,1) forwards;
+          filter: drop-shadow(0 0 8px #fffbe6);
+          z-index: 20;
+        }
+        .shuriken-fx {
+          display: inline-block;
         }
         .animate-crit-attack {
           animation: crit-attack 0.6s ease-in-out;
@@ -615,6 +626,26 @@ const Minigame = ({ playerStats }) => {
         }
         .animate-float-up {
           animation: float-up 1.8s ease-out forwards;
+        }
+        .animate-sword-move {
+          animation: sword-move 0.7s cubic-bezier(0.4,1.2,0.6,1) forwards;
+        }
+        .animate-sword-move-boss {
+          animation: sword-move-boss 0.7s cubic-bezier(0.4,1.2,0.6,1) forwards;
+        }
+        .katana {
+          transition: all 0.3s ease;
+          filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
+        }
+        .shuriken {
+          transition: all 0.3s ease;
+          filter: drop-shadow(0 0 8px #bfcfff);
+        }
+        .character-model .sword {
+          transform-origin: bottom right;
+        }
+        .character-model .katana {
+          transform-origin: bottom left;
         }
         .character-model {
           position: relative;
@@ -628,10 +659,7 @@ const Minigame = ({ playerStats }) => {
           align-items: center;
           margin: 2rem 0;
         }
-        .sword {
-          transition: all 0.3s ease;
-          filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
-        }        .text-shadow {
+        .text-shadow {
           text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
         }
         .glow-red {
