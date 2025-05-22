@@ -94,17 +94,22 @@ const useWorkoutData = () => {
 
 const Workout = () => {
   const [activeTab, setActiveTab] = useState('view');
-  
+
   // Use custom hooks
   useAuthCheck();
   const { workouts, loadWorkouts, handleWorkoutSubmit } = useWorkoutData();
 
-  const handleTabClick = (tabId) => {
-    setActiveTab(tabId);
-    // Load workouts when switching to view tab
-    if (tabId === 'view') {
+  // Workouts beim ersten Rendern laden, wenn Tab "view"
+  useEffect(() => {
+    if (activeTab === 'view') {
       loadWorkouts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId);
+    // Workouts werden jetzt automatisch im useEffect geladen
   };
 
   return (
