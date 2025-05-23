@@ -2,7 +2,7 @@
  * Avatar Component
  * Displays the user's game avatar with level system, stats, and upgrade options
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaShieldAlt, FaRunning, FaHeart, FaMagic } from 'react-icons/fa';
 import { GiSwordWound, GiLevelEndFlag } from 'react-icons/gi';
 import useAvatar from '@/hooks/useAvatar';
@@ -15,7 +15,9 @@ const AvatarGame = () => {
     error, 
     levelUpMode,
     addExperience, 
-    upgradeStat 
+    upgradeStat,
+    processLevelUps,
+    refreshAvatar // import refreshAvatar
   } = useAvatar();
   
   const [testExp, setTestExp] = useState(25); // Default experience points to add for testing
@@ -29,22 +31,28 @@ const AvatarGame = () => {
       console.log('Level up!');
     }
   };
-  // Function to handle stat upgrade with animation
-  const handleUpgradeStat = (statType) => {
-    console.log(`Upgrading stat: ${statType}`, { 
-      currentValue: avatar[statType],
-      avatar
-    });
-    
+  // Function to handle stat upgrade with animation and check for more level-ups
+  const handleUpgradeStat = async (statType) => {
     setAnimateStat(statType);
-    upgradeStat(statType);
-    
-    // Add this to check if avatar is updated after upgrade
-    setTimeout(() => {
-      console.log(`Stat ${statType} after upgrade timeout:`, avatar[statType]);
-    }, 2000);
-    
+    await upgradeStat(statType);
     setTimeout(() => setAnimateStat(null), 1000);
+    // Always refresh avatar after upgrade, then process level-ups with the latest data
+    const updated = await refreshAvatar();
+    // Use the latest avatar data for processLevelUps
+    if (updated && updated.experience >= 100) {
+      processLevelUps();
+    }
+  };
+
+  // Add a manual level up button
+  const handleManualLevelUp = async () => {
+    // Deduct 100 XP and trigger stat selection
+    if (avatar && avatar.experience >= 100 && !levelUpMode) {
+      // Update avatar XP locally and in backend
+      const updatedStats = { ...avatar, experience: avatar.experience - 100 };
+      // Only update XP, not stats
+      await upgradeStat('_xp_only'); // We'll handle this in useAvatar
+    }
   };
 
   // Update renderStatCard for new design
@@ -125,7 +133,19 @@ const AvatarGame = () => {
                       <span className="text-3xl">💪</span>
                     </div>
                     <h2 className="text-2xl font-extrabold text-indigo-900 tracking-wide drop-shadow-lg">Lv. {avatar.level} Avatar</h2>
-                  </div>
+                  </div>                  {/* Level Up Button (only if XP >= 100 and not in stat selection) - now above XP bar */}
+                  {avatar.experience >= 100 && !levelUpMode && (
+                    <button
+                      className="mb-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold rounded-lg shadow transition self-end"
+                      onClick={async () => {
+                        // Process the level-up which will trigger the backend level-up logic
+                        // to deduct XP and increase level
+                        await processLevelUps();
+                      }}
+                    >
+                      ⭐ Level Up Available! ⭐
+                    </button>
+                  )}
                   {/* Experience Bar on left */}
                   <div className="w-full">
                     <div className="flex justify-between mb-1 text-sm font-semibold">

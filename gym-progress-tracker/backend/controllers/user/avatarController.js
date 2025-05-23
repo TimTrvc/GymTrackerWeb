@@ -78,7 +78,8 @@ const addExperience = async (req, res) => {
     const userId = req.users.id;
     const { experiencePoints } = req.body;
     
-    if (!experiencePoints || isNaN(experiencePoints)) {
+    // Accept 0 as a valid value, only reject if undefined, null, or not a number
+    if (experiencePoints === undefined || experiencePoints === null || isNaN(experiencePoints)) {
         return res.status(400).json({ error: 'Valid experience points are required' });
     }
 

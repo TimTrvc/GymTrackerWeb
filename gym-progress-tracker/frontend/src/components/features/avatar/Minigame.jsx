@@ -13,12 +13,12 @@ function getBossStats(level = 1) {
   if (level > 1) {
     // HP and attack scale exponentially
     hp = +(hp * Math.pow(1.15, level - 1)).toFixed(2);
-    attack = +(attack * Math.pow(1.12, level - 1)).toFixed(2);
+    attack = +(attack * Math.pow(1.2, level - 1)).toFixed(2);
     // Defense scales: each level, defense += 1 + 0.1 * defense (recursive)
     let def = 1;
     let critChance = 2;
     for (let i = 2; i <= level; i++) {
-      def = def + 1 + 0.1 * def;
+      def = def + 0.5 + 0.1 * def;
       critChance = critChance + 1 + 0.05 * critChance;
       if (def > 90) { def = 90; }
       if (critChance > 100) { critChance = 100; }

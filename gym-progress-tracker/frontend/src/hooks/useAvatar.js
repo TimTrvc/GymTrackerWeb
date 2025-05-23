@@ -53,11 +53,20 @@ const useAvatar = () => {
   };
   /**
    * Update a specific avatar stat
-   * @param {string} statType - The stat to upgrade (hp, mp, attack, defense, agility)
+   * @param {string} statType - The stat to upgrade (hp, mp, attack, defense, agility, _xp_only)
    */
   const upgradeStat = async (statType) => {
     try {
       if (!avatar) return;
+      // Special case: only handle level-up UI, no XP deduction here
+      if (statType === '_xp_only') {
+        setLoading(true);
+        // Update local level up mode state directly, no XP deduction here
+        // to avoid double deduction (backend already handles XP deduction)
+        setLevelUpMode(true);
+        setLoading(false);
+        return;
+      }
       const updatedStats = { ...avatar };
       if (statType === 'hp') {
         updatedStats.hp = (updatedStats.hp || 10) * 1.2;
@@ -101,6 +110,37 @@ const useAvatar = () => {
       setLoading(false);
     }
   };
+  /**
+   * Process all available level-ups if XP > 100, step by step
+   * After each level up, user must upgrade a stat before continuing
+   */
+  const processLevelUps = async () => {
+    if (!avatar) return;
+    let leveledUp = false;
+    
+    // If XP is already over 100, we can just set level up mode directly
+    if (avatar.experience >= 100) {
+      setLoading(true);
+      try {
+        // Backend expects XP to be added, so add 0 to trigger level up logic
+        const { avatar: updatedAvatar, leveledUp: didLevelUp } = await avatarService.addExperience(0);
+        setAvatar(updatedAvatar);
+        
+        // Regardless of what the backend says, if XP is over 100, we should show level up mode
+        if (didLevelUp || updatedAvatar.experience >= 100) {
+          setLevelUpMode(true);
+          leveledUp = true;
+        }
+      } catch (err) {
+        console.error('Failed to process level up:', err);
+        setError('Failed to process level up');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    return leveledUp;
+  };
 
   // Fetch avatar data on component mount
   useEffect(() => {
@@ -116,7 +156,8 @@ const useAvatar = () => {
     addExperience,
     upgradeStat,
     updateBossLevel,
-    refreshAvatar: fetchAvatar
+    refreshAvatar: fetchAvatar,
+    processLevelUps // Expose the new function
   };
 };
 
