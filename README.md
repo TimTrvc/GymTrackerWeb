@@ -88,7 +88,3 @@ Working on GymTracker provided valuable experience in:
 - Understanding the importance of good prompt engineering for AI-assisted development
 - Building modern web applications with React
 - Using JavaScript on both the frontend and backend (Node.js)
-
----
-
-Thank you for checking out GymTracker! If you have any questions or suggestions, feel free to open an issue or contribute to the project.
