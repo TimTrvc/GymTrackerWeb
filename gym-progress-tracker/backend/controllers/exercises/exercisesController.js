@@ -1,99 +1,122 @@
+/**
+ * Retrieves all exercises from the database.
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @returns {void}
+ */
 const getAllExercises = async (req, res) => {
     const pool = req.app.get('db');
-
     try {
         const result = await pool.query('SELECT * FROM exercises');
         res.status(200).json(result.rows);
     } catch (err) {
-        console.error('Fehler beim Abrufen der Übungen:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Abrufen der Übungen' });
+        console.error('Error retrieving exercises:', err);
+        res.status(500).json({ error: 'Server error while retrieving exercises' });
     }
 };
 
+/**
+ * Retrieves a single exercise by its ID.
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @returns {void}
+ */
 const getExerciseById = async (req, res) => {
     const pool = req.app.get('db');
     const { exercise_id } = req.params;
-
     try {
         const result = await pool.query('SELECT * FROM exercises WHERE exercise_id = $1', [exercise_id]);
-
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Übung nicht gefunden' });
+            return res.status(404).json({ error: 'Exercise not found' });
         }
-
         res.status(200).json(result.rows[0]);
     } catch (err) {
-        console.error('Fehler beim Abrufen der Übung:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Abrufen der Übung' });
+        console.error('Error retrieving exercise:', err);
+        res.status(500).json({ error: 'Server error while retrieving exercise' });
     }
 };
 
+/**
+ * Retrieves all exercises for a given category ID.
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @returns {void}
+ */
 const getExerciseByCategoryId = async (req, res) => {
     const pool = req.app.get('db');
     const { category_id } = req.params;
-
-    try {        const result = await pool.query('SELECT * FROM exercises WHERE category_id = $1', [category_id]);
-
+    try {
+        const result = await pool.query('SELECT * FROM exercises WHERE category_id = $1', [category_id]);
         // Return an empty array instead of a 404 error when no exercises are found
         res.status(200).json(result.rows);
     } catch (err) {
-        console.error('Fehler beim Abrufen der Übungen:', err);
-        res.status(500).json({error: 'Serverseiten-Fehler beim Abrufen der Übungen'})
+        console.error('Error retrieving exercises:', err);
+        res.status(500).json({ error: 'Server error while retrieving exercises' });
     }
-}
+};
 
+/**
+ * Adds a new exercise to the database.
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @returns {void}
+ */
 const addExercise = async (req, res) => {
     const pool = req.app.get('db');
     const {
-      category_id,
-      name,
-      description,
-      instructions,
-      difficulty_level,
-      primary_muscle_group,
-      secondary_muscle_groups,
-      equipment_needed,
-      is_compound,
-      video_url,
-      image_url,
-      is_public
+        category_id,
+        name,
+        description,
+        instructions,
+        difficulty_level,
+        primary_muscle_group,
+        secondary_muscle_groups,
+        equipment_needed,
+        is_compound,
+        video_url,
+        image_url,
+        is_public
     } = req.body;
     const created_by = req.user?.id || null; // Optional: Auth middleware
-  
     try {
-      const result = await pool.query(
-        `INSERT INTO exercises (category_id, name, description, instructions, difficulty_level, 
-         primary_muscle_group, secondary_muscle_groups, equipment_needed, is_compound, video_url, 
-         image_url, created_by, is_public) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
-         RETURNING exercise_id, name`,
-        [
-          category_id,
-          name,
-          description,
-          instructions,
-          difficulty_level,
-          primary_muscle_group,
-          secondary_muscle_groups,
-          equipment_needed,
-          is_compound,
-          video_url,
-          image_url,
-          created_by,
-          is_public
-        ]
-      );
-  
-      res.status(201).json({
-        message: 'Übung erfolgreich hinzugefügt',
-        exercise: result.rows[0]
-      });
+        const result = await pool.query(
+            `INSERT INTO exercises (category_id, name, description, instructions, difficulty_level, 
+             primary_muscle_group, secondary_muscle_groups, equipment_needed, is_compound, video_url, 
+             image_url, created_by, is_public) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
+             RETURNING exercise_id, name`,
+            [
+                category_id,
+                name,
+                description,
+                instructions,
+                difficulty_level,
+                primary_muscle_group,
+                secondary_muscle_groups,
+                equipment_needed,
+                is_compound,
+                video_url,
+                image_url,
+                created_by,
+                is_public
+            ]
+        );
+        res.status(201).json({
+            message: 'Exercise added successfully',
+            exercise: result.rows[0]
+        });
     } catch (err) {
-      console.error('Fehler beim Hinzufügen der Übung:', err);
-      res.status(500).json({ error: 'Serverseiten-Fehler beim Hinzufügen der Übung' });
+        console.error('Error adding exercise:', err);
+        res.status(500).json({ error: 'Server error while adding exercise' });
     }
-  };
+};
 
+/**
+ * Updates an existing exercise by its ID.
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @returns {void}
+ */
 const updateExercise = async (req, res) => {
     const pool = req.app.get('db');
     const { exercise_id } = req.params;
@@ -111,7 +134,6 @@ const updateExercise = async (req, res) => {
         image_url,
         is_public
     } = req.body;
-
     try {
         const result = await pool.query(
             `UPDATE exercises 
@@ -136,25 +158,28 @@ const updateExercise = async (req, res) => {
                 exercise_id
             ]
         );
-
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Übung nicht gefunden' });
+            return res.status(404).json({ error: 'Exercise not found' });
         }
-
         res.status(200).json({
-            message: 'Übung erfolgreich aktualisiert',
+            message: 'Exercise updated successfully',
             exercise: result.rows[0]
         });
     } catch (err) {
-        console.error('Fehler beim Aktualisieren der Übung:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Aktualisieren der Übung' });
+        console.error('Error updating exercise:', err);
+        res.status(500).json({ error: 'Server error while updating exercise' });
     }
 };
 
+/**
+ * Deletes an exercise by its ID.
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @returns {void}
+ */
 const deleteExercise = async (req, res) => {
     const pool = req.app.get('db');
     const { exercise_id } = req.params;
-
     try {
         const result = await pool.query(
             `DELETE FROM exercises 
@@ -162,19 +187,20 @@ const deleteExercise = async (req, res) => {
              RETURNING exercise_id`,
             [exercise_id]
         );
-
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Übung nicht gefunden' });
+            return res.status(404).json({ error: 'Exercise not found' });
         }
-
         res.status(200).json({
-            message: 'Übung erfolgreich gelöscht',
+            message: 'Exercise deleted successfully',
             exercise_id: result.rows[0].exercise_id
         });
     } catch (err) {
-        console.error('Fehler beim Löschen der Übung:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Löschen der Übung' });
+        console.error('Error deleting exercise:', err);
+        res.status(500).json({ error: 'Server error while deleting exercise' });
     }
 };
 
+/**
+ * Exports exercise controller functions.
+ */
 module.exports = { getAllExercises, getExerciseById, getExerciseByCategoryId, addExercise, updateExercise, deleteExercise };

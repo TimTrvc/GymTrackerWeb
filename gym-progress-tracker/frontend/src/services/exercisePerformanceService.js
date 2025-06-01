@@ -2,7 +2,9 @@ import BaseService from './BaseService';
 import { EXERCISE_ENDPOINTS } from '@/config/apiEndpoints';
 
 /**
- * Service für die Verwaltung von Übungsleistungen (exercise performances)
+ * Service for managing exercise performances (sets and results).
+ * @class ExercisePerformanceService
+ * @extends BaseService
  */
 class ExercisePerformanceService extends BaseService {
   constructor() {
@@ -10,22 +12,30 @@ class ExercisePerformanceService extends BaseService {
   }
 
   /**
-   * Fügt eine Übungsleistung hinzu (ein Satz)
-   * @param {object} performanceData - Daten für die Übungsleistung
-   * @returns {Promise<Object>} - Hinzugefügte Leistung
+   * Adds an exercise performance (a set).
+   * @param {object} performanceData - Data for the exercise performance.
+   * @returns {Promise<Object>} The added performance.
    */
   async addPerformance(performanceData) {
     return this.post('', performanceData);
   }
 }
 
+
+// Export singleton instance
 const exercisePerformanceService = new ExercisePerformanceService();
 export default exercisePerformanceService;
+
+/**
+ * Adds an exercise performance (compatibility export).
+ * @param {object} performanceData
+ * @returns {Promise<Object>}
+ */
 export const addExercisePerformance = (performanceData) => exercisePerformanceService.addPerformance(performanceData);
 
 /**
- * Holt alle Übungsleistungen einer Session
- * @param {string|number} sessionId
- * @returns {Promise<Array>} - Liste der Leistungen
+ * Gets all exercise performances for a session.
+ * @param {string|number} sessionId - The session ID.
+ * @returns {Promise<Array>} List of performances.
  */
 export const getExercisePerformances = (sessionId) => exercisePerformanceService.get(`/${sessionId}`);

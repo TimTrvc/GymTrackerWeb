@@ -1,9 +1,15 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-import path from 'path'
 
-// https://vite.dev/config/
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import path from 'path';
+
+/**
+ * Vite configuration for the frontend project.
+ * - Sets up path alias for '@/src'.
+ * - Adds React and Tailwind CSS plugins.
+ * @see {@link https://vite.dev/config/}
+ */
 export default defineConfig({
   resolve: {
     alias: {
@@ -14,4 +20,4 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-})
+});

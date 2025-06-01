@@ -2,8 +2,12 @@ const API_URL = process.env.API_URL;
 
 const progressList = document.getElementById('progressList');
 
+/**
+ * Fetches progress data from the backend API and displays it.
+ * @returns {Promise<void>}
+ */
 const fetchProgress = async () => {
-  console.log("Fetching...")
+    console.log("Fetching...");
     try {
         const response = await fetch(`${API_URL}/api/progress`);
         console.log('Fetch Response Status:', response.status); // Debug log
@@ -20,9 +24,13 @@ const fetchProgress = async () => {
     }
 };
 
+/**
+ * Displays the progress data in the DOM.
+ * @param {Array} progressData - Array of progress objects containing exercise, records, and improvement.
+ */
 const displayProgress = (progressData) => {
     const progressList = document.getElementById('progress-items');
-    progressList.innerHTML = ''; // Clear existing content
+    progressList.innerHTML = '';
 
     progressData.forEach(({ exercise, records, improvement }) => {
         // Create a container for each exercise
@@ -68,8 +76,13 @@ const displayProgress = (progressData) => {
 };
 const progressForm = document.getElementById('add-progress');
 
+/**
+ * Handles the submission of the add-progress form and sends data to the backend.
+ * @param {Event} e - The form submission event.
+ * @returns {Promise<void>}
+ */
 progressForm.addEventListener('submit', async (e) => {
-    e.preventDefault(); // Prevent the default form submission behavior
+    e.preventDefault();
 
     // Get form data
     const date = document.getElementById('date').value;
@@ -77,7 +90,7 @@ progressForm.addEventListener('submit', async (e) => {
     const reps = parseInt(document.getElementById('reps').value, 10);
     const weight = parseInt(document.getElementById('weight').value, 10);
 
-    console.log('Form Data:', { date, exercise, reps, weight }); // Debug log
+    console.log('Form Data:', { date, exercise, reps, weight });
 
     try {
         // Send data to the backend
@@ -87,12 +100,12 @@ progressForm.addEventListener('submit', async (e) => {
             body: JSON.stringify({ date, exercise, reps, weight }),
         });
 
-        console.log('Response Status:', response.status); // Debug log
+        console.log('Response Status:', response.status);
 
         if (response.ok) {
-            console.log('Progress added successfully'); // Debug log
-            progressForm.reset(); // Clear the form inputs
-            fetchProgress(); // Refresh the progress list
+            console.log('Progress added successfully');
+            progressForm.reset();
+            fetchProgress();
         } else {
             const errorData = await response.json();
             console.error('Failed to add progress:', errorData);

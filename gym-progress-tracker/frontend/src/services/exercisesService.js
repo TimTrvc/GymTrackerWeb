@@ -1,42 +1,48 @@
 import BaseService from './BaseService';
 import { EXERCISE_ENDPOINTS } from '@/config/apiEndpoints';
 
+
 /**
- * Service für die Verwaltung von Übungen
- * Verwendet zentrale API-Endpunkte (DRY-Prinzip)
+ * Service for managing exercises.
+ * Uses central API endpoints (DRY principle).
+ * @class ExercisesService
+ * @extends BaseService
  */
 class ExercisesService extends BaseService {
   constructor() {
     super(EXERCISE_ENDPOINTS.BASE);
-  }  /**
-   * Holt Übungen nach Kategorie
-   * @param {number|string} categoryIdentifier - ID oder Name der Kategorie
-   * @returns {Promise<Array>} - Liste von Übungen
+  }
+
+  /**
+   * Gets exercises by category.
+   * @param {number|string} categoryIdentifier - ID or name of the category.
+   * @returns {Promise<Array>} List of exercises.
+   * @throws {Error} If the category ID is not numeric.
    */
   async getByCategory(categoryIdentifier) {
-    // Stelle sicher, dass wir immer eine numerische ID verwenden
+    // Ensure we always use a numeric ID
     let categoryParam;
-    
     if (typeof categoryIdentifier === 'string') {
-      // Versuchen, den String in eine Zahl umzuwandeln
+      // Try to convert the string to a number
       if (!isNaN(parseInt(categoryIdentifier))) {
         categoryParam = parseInt(categoryIdentifier);
       } else {
-        // Wenn es sich um einen Kategorienamen handelt, loggen und einen Fehler werfen
-        console.error("Kategorie-ID muss numerisch sein, erhielt:", categoryIdentifier);
-        throw new Error("Kategorie-ID muss numerisch sein");
+        // If it's a category name, log and throw an error
+        console.error("Category ID must be numeric, received:", categoryIdentifier);
+        throw new Error("Category ID must be numeric");
       }
     } else {
-      // Wenn es bereits eine Zahl ist, verwenden wir sie direkt
+      // If it's already a number, use it directly
       categoryParam = categoryIdentifier;
     }
-    
     return this.get(`category/${categoryParam}`);
   }
+
   /**
-   * Holt eine spezifische Übung nach ID
-   * @param {number} exerciseId - ID der Übung
-   * @returns {Promise<Object>} - Übungsdetails
+   * Gets a specific exercise by ID.
+   * @param {number} exerciseId - ID of the exercise.
+   * @returns {Promise<Object>} Exercise details.
+   * @throws {Error} If the exercise ID is invalid.
    */
   async getById(exerciseId) {
     console.log("Fetching exercise by ID:", exerciseId);
@@ -54,20 +60,36 @@ class ExercisesService extends BaseService {
   }
 
   /**
-   * Erstellt eine neue Übung
-   * @param {object} exerciseData - Daten der neuen Übung
-   * @returns {Promise<Object>} - Erstellte Übung
+   * Creates a new exercise.
+   * @param {object} exerciseData - Data for the new exercise.
+   * @returns {Promise<Object>} Created exercise.
    */
   async create(exerciseData) {
     return this.post('', exerciseData);
   }
 }
 
-// Singleton-Instanz des Services exportieren
+// Export singleton instance of the service
 const exercisesService = new ExercisesService();
 export default exercisesService;
 
-// Kompatibilitätsexporte für alte Methoden (Legacy-Unterstützung)
+/**
+ * Gets exercises by category (compatibility export).
+ * @param {number|string} categoryId
+ * @returns {Promise<Array>}
+ */
 export const getExerciseByCategory = (categoryId) => exercisesService.getByCategory(categoryId);
+
+/**
+ * Gets an exercise by its ID (compatibility export).
+ * @param {number} exerciseId
+ * @returns {Promise<Object>}
+ */
 export const getExerciseById = (exerciseId) => exercisesService.getById(exerciseId);
+
+/**
+ * Creates a new exercise (compatibility export).
+ * @param {object} exerciseData
+ * @returns {Promise<Object>}
+ */
 export const createExercise = (exerciseData) => exercisesService.create(exerciseData);

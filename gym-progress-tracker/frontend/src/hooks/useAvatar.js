@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import avatarService from '../services/avatarService';
 
 /**
- * Custom hook for handling avatar data and operations
- * @returns {Object} Avatar data, loading state, and functions
+ * React hook for handling avatar data and operations, including experience, stats, and boss level.
+ *
+ * @returns {Object} Avatar data, loading state, error, and avatar operation functions.
  */
 const useAvatar = () => {
   const [avatar, setAvatar] = useState(null);
@@ -12,7 +13,8 @@ const useAvatar = () => {
   const [levelUpMode, setLevelUpMode] = useState(false);
 
   /**
-   * Fetch avatar data from the server
+   * Fetches avatar data from the server and updates state.
+   * @returns {Promise<void>}
    */
   const fetchAvatar = async () => {
     try {
@@ -29,8 +31,9 @@ const useAvatar = () => {
   };
 
   /**
-   * Add experience points to the avatar
-   * @param {number} points - The amount of experience to add
+   * Adds experience points to the avatar and handles level up state.
+   * @param {number} points - The amount of experience to add.
+   * @returns {Promise<boolean>} True if avatar leveled up, false otherwise.
    */
   const addExperience = async (points) => {
     try {
@@ -52,8 +55,9 @@ const useAvatar = () => {
     }
   };
   /**
-   * Update a specific avatar stat
-   * @param {string} statType - The stat to upgrade (hp, mp, attack, defense, agility, _xp_only)
+   * Upgrades a specific avatar stat (hp, mp, attack, defense, agility, _xp_only).
+   * @param {string} statType - The stat to upgrade.
+   * @returns {Promise<void>}
    */
   const upgradeStat = async (statType) => {
     try {
@@ -95,8 +99,9 @@ const useAvatar = () => {
   };
 
   /**
-   * Update the boss level
-   * @param {number} level - The new boss level
+   * Updates the boss level for the avatar.
+   * @param {number} level - The new boss level.
+   * @returns {Promise<void>}
    */
   const updateBossLevel = async (level) => {
     try {
@@ -111,8 +116,8 @@ const useAvatar = () => {
     }
   };
   /**
-   * Process all available level-ups if XP > 100, step by step
-   * After each level up, user must upgrade a stat before continuing
+   * Processes all available level-ups if XP > 100. User must upgrade a stat after each level up.
+   * @returns {Promise<boolean>} True if a level up was processed, false otherwise.
    */
   const processLevelUps = async () => {
     if (!avatar) return;

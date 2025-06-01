@@ -1,3 +1,10 @@
+/**
+ * Retrieves all goals for the authenticated user.
+ * @param {object} req - Express request object containing user info.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If there is a server-side error during goal retrieval.
+ */
 const getGoals = async (req, res) => {
     const pool = req.app.get('db');
     const userId = req.users.id;
@@ -7,14 +14,20 @@ const getGoals = async (req, res) => {
             `SELECT * FROM goals WHERE user_id = $1 ORDER BY created_at DESC`,
             [userId]
         );
-
         res.status(200).json(result.rows);
     } catch (err) {
-        console.error('Fehler beim Abrufen der Ziele:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Abrufen der Ziele' });
+        console.error('Error retrieving goals:', err);
+        res.status(500).json({ error: 'Server error retrieving goals' });
     }
 };
 
+/**
+ * Adds a new goal for the authenticated user.
+ * @param {object} req - Express request object containing goal details in body and user info.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If there is a server-side error during goal creation.
+ */
 const addGoal = async (req, res) => {
     const pool = req.app.get('db');
     const userId = req.users.id;
@@ -35,15 +48,22 @@ const addGoal = async (req, res) => {
         );
 
         res.status(201).json({
-            message: 'Ziel erfolgreich hinzugefügt',
+            message: 'Goal added successfully',
             goal: result.rows[0]
         });
     } catch (err) {
-        console.error('Fehler beim Hinzufügen des Ziels:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Hinzufügen des Ziels' });
+        console.error('Error adding goal:', err);
+        res.status(500).json({ error: 'Server error adding goal' });
     }
 };
 
+/**
+ * Updates an existing goal by its ID.
+ * @param {object} req - Express request object containing goal_id in params and update details in body.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If the goal is not found or a server error occurs during update.
+ */
 const updateGoal = async (req, res) => {
     const pool = req.app.get('db');
     const { goal_id } = req.params;
@@ -63,19 +83,26 @@ const updateGoal = async (req, res) => {
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Ziel nicht gefunden' });
+            return res.status(404).json({ error: 'Goal not found' });
         }
 
         res.status(200).json({
-            message: 'Ziel erfolgreich aktualisiert',
+            message: 'Goal updated successfully',
             goal: result.rows[0]
         });
     } catch (err) {
-        console.error('Fehler beim Aktualisieren des Ziels:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Aktualisieren des Ziels' });
+        console.error('Error updating goal:', err);
+        res.status(500).json({ error: 'Server error updating goal' });
     }
 };
 
+/**
+ * Deletes a goal by its ID.
+ * @param {object} req - Express request object containing goal_id in params.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If the goal is not found or a server error occurs during deletion.
+ */
 const deleteGoal = async (req, res) => {
     const pool = req.app.get('db');
     const { goal_id } = req.params;
@@ -87,17 +114,20 @@ const deleteGoal = async (req, res) => {
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Ziel nicht gefunden' });
+            return res.status(404).json({ error: 'Goal not found' });
         }
 
         res.status(200).json({
-            message: 'Ziel erfolgreich gelöscht',
+            message: 'Goal deleted successfully',
             goal_id: result.rows[0].goal_id
         });
     } catch (err) {
-        console.error('Fehler beim Löschen des Ziels:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Löschen des Ziels' });
+        console.error('Error deleting goal:', err);
+        res.status(500).json({ error: 'Server error deleting goal' });
     }
 };
 
+/**
+ * Exports goal controller functions.
+ */
 module.exports = { getGoals, addGoal, updateGoal, deleteGoal };

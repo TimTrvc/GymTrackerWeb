@@ -2,24 +2,26 @@ const API_URL = process.env.API_URL;
 
 
 
-// Prüfen, ob der Benutzer authentifiziert ist
+/**
+ * Checks if the user is authenticated on DOMContentLoaded.
+ * Redirects to login page if no token is found.
+ */
 document.addEventListener('DOMContentLoaded', function() {
-  // Token aus localStorage holen
+  // Get token from localStorage
   const token = localStorage.getItem('token');
 
-  // Falls kein Token vorhanden ist, zur Login-Seite umleiten
+  // Redirect to login page if no token is present
   if (!token) {
     window.location.href = 'login.html';
     return;
   }
 
-  // Workout-Formular-Handler
+  // Workout form handler
   const workoutForm = document.getElementById('workoutForm');
 
   workoutForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-
-    // Formular-Daten sammeln
+    // Collect form data
     const formData = {
       name: document.getElementById('name').value,
       description: document.getElementById('description').value,
@@ -31,7 +33,11 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     try {
-      // API-Aufruf, um das Workout hinzuzufügen
+      /**
+       * Sends a POST request to add a new workout.
+       * @param {Object} formData - The workout data to add.
+       * @returns {Promise<void>}
+       */
       const response = await fetch(API_URL + '/api/workouts/add', {
         method: 'POST',
         headers: {
@@ -44,28 +50,28 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = await response.json();
 
       if (response.ok) {
-        // Erfolgsmeldung anzeigen
+        // Show success message
         alert('Workout erfolgreich hinzugefügt!');
-        workoutForm.reset(); // Formular zurücksetzen
+        workoutForm.reset(); // Reset form
       } else {
-        // Fehlermeldung anzeigen
+        // Show error message
         alert(`Fehler: ${data.error || 'Unbekannter Fehler aufgetreten'}`);
       }
     } catch (error) {
-      console.error('Fehler beim Hinzufügen des Workouts:', error);
-      alert('Fehler beim Hinzufügen des Workouts. Bitte versuche es später erneut.');
+      console.error('Error adding workout:', error);
+      alert('Error adding workout. Please try again later.');
     }
   });
 });
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Tab-Funktionalität
+  // Tab functionality
   const tabButtons = document.querySelectorAll('.tab-button');
   const tabContents = document.querySelectorAll('.tab-content');
 
   tabButtons.forEach(button => {
     button.addEventListener('click', function() {
-      // Tab-Buttons aktualisieren
+      // Update tab buttons
       tabButtons.forEach(btn => {
         btn.classList.remove('active', 'border-indigo-500', 'text-indigo-600');
         btn.classList.add('border-transparent', 'text-gray-500');
@@ -73,30 +79,33 @@ document.addEventListener('DOMContentLoaded', function() {
       this.classList.add('active', 'border-indigo-500', 'text-indigo-600');
       this.classList.remove('border-transparent', 'text-gray-500');
 
-      // Tab-Inhalte aktualisieren
+      // Update tab contents
       const targetId = this.id.replace('tab-', 'tab-content-');
       tabContents.forEach(content => {
         content.classList.add('hidden');
       });
       document.getElementById(targetId).classList.remove('hidden');
 
-      // Bei Wechsel zum Anzeigen-Tab die Workouts laden
+      // Load workouts when switching to view tab
       if (this.id === 'tab-view') {
         loadWorkouts();
       }
 
-      // Bei Wechsel zum Bearbeiten-Tab die Workout-Liste laden
+      // Load workouts for edit when switching to edit tab
       if (this.id === 'tab-edit') {
         loadWorkoutsForEdit();
       }
     });
   });
 
-  // Funktionen zum Laden der Workouts
+  /**
+   * Loads the list of workouts and displays them in the UI.
+   * Fetches workouts from the API and updates the DOM.
+   */
   function loadWorkouts() {
     const workoutsList = document.getElementById('workoutsList');
 
-    // API-Aufruf zum Laden der Workouts
+    // API call to load workouts
     fetch(API_URL + '/api/workouts/get', {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -135,19 +144,23 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         });
 
-        // Event-Listener für die Workout-Aktionen
+        // Add event listeners for workout actions
         addWorkoutActionListeners();
       })
       .catch(error => {
-        console.error('Fehler beim Laden der Workouts:', error);
-        workoutsList.innerHTML = '<p>Fehler beim Laden der Workouts. Bitte versuchen Sie es später erneut.</p>';
+        console.error('Error loading workouts:', error);
+        workoutsList.innerHTML = '<p>Error loading workouts. Please try again later.</p>';
       });
   }
 
+  /**
+   * Loads workouts for the edit dropdown menu.
+   * Populates the dropdown and sets up change event.
+   */
   function loadWorkoutsForEdit() {
     const workoutSelect = document.getElementById('workout-select');
 
-    // API-Aufruf zum Laden der Workouts für das Dropdown-Menü
+    // API call to load workouts for dropdown
     fetch(API_URL + '/api/workouts', {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -155,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
     })
       .then(response => response.json())
       .then(data => {
-        // Dropdown-Menü mit Workouts füllen
+        // Populate dropdown with workouts
         workoutSelect.innerHTML = '<option value="">Bitte Workout wählen</option>';
         data.forEach(workout => {
           workoutSelect.innerHTML += `<option value="${workout.id}">${workout.name}</option>`;
@@ -165,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Fehler beim Laden der Workouts:', error);
       });
 
-    // Event-Listener für das Dropdown-Menü
+    // Event listener for dropdown menu
     workoutSelect.addEventListener('change', function() {
       const selectedWorkoutId = this.value;
       if (selectedWorkoutId) {
@@ -176,8 +189,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  /**
+   * Loads a specific workout for editing.
+   * @param {string} workoutId - The ID of the workout to load.
+   */
   function loadWorkoutForEdit(workoutId) {
-    // API-Aufruf zum Laden eines bestimmten Workouts
+    // API call to load a specific workout
     fetch(`{API_URL}/api/workouts/${workoutId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -187,8 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(workout => {
         const form = document.getElementById('editWorkoutForm');
 
-        // Formular mit den Workout-Daten füllen
-        // Hier müssen Sie die entsprechenden Formularfelder anlegen und befüllen
+        // Fill the form with workout data (implement form fields as needed)
 
         form.classList.remove('hidden');
       })
@@ -197,8 +213,11 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   }
 
+  /**
+   * Adds event listeners for workout action buttons (view, edit, delete).
+   */
   function addWorkoutActionListeners() {
-    // Event-Listener für die Ansehen-Buttons
+    // Event listeners for view buttons
     document.querySelectorAll('.view-workout-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         const workoutId = this.getAttribute('data-id');
@@ -206,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
 
-    // Event-Listener für die Bearbeiten-Buttons
+    // Event listeners for edit buttons
     document.querySelectorAll('.edit-workout-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         const workoutId = this.getAttribute('data-id');
@@ -217,10 +236,10 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
 
-    // Event-Listener für die Löschen-Buttons
+    // Event listeners for delete buttons
     document.querySelectorAll('.delete-workout-btn').forEach(btn => {
       btn.addEventListener('click', function() {
-        if (confirm('Sind Sie sicher, dass Sie dieses Workout löschen möchten?')) {
+        if (confirm('Are you sure you want to delete this workout?')) {
           const workoutId = this.getAttribute('data-id');
           deleteWorkout(workoutId);
         }
@@ -228,8 +247,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  /**
+   * Deletes a workout by its ID.
+   * @param {string} workoutId - The ID of the workout to delete.
+   */
   function deleteWorkout(workoutId) {
-    // API-Aufruf zum Löschen eines Workouts
+    // API call to delete a workout
     fetch(`{API_URL}/api/workouts/${workoutId}`, {
       method: 'DELETE',
       headers: {
@@ -238,29 +261,36 @@ document.addEventListener('DOMContentLoaded', function() {
     })
       .then(response => {
         if (response.ok) {
-          // Workout aus der Liste entfernen und Liste aktualisieren
+          // Remove workout from the list and update
           loadWorkouts();
         } else {
-          throw new Error('Fehler beim Löschen des Workouts');
+          throw new Error('Error deleting workout');
         }
       })
       .catch(error => {
-        console.error('Fehler:', error);
-        alert('Fehler beim Löschen des Workouts. Bitte versuchen Sie es später erneut.');
+        console.error('Error:', error);
+        alert('Error deleting workout. Please try again later.');
       });
   }
 });
 
+/**
+ * Checks authentication and redirects to login if no token is found.
+ */
 function checkAuth() {
   const token = localStorage.getItem('token');
   if (!token) {
-    // Kein Token gefunden, Umleitung zum Login
+    // No token found, redirect to login
     window.location.href = '/frontend/sites/login.html';
   }
 }
 
+/**
+ * Fetches and displays workout details in a modal.
+ * @param {string} workoutId - The ID of the workout to view.
+ */
 function viewWorkoutDetails(workoutId) {
-  // Workout-Details von der API abrufen
+  // Fetch workout details from the API
   fetch(`${API_URL}/api/workouts/${workoutId}`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -268,17 +298,21 @@ function viewWorkoutDetails(workoutId) {
   })
     .then(response => response.json())
     .then(workout => {
-      // Modal mit den Workout-Details öffnen
+      // Open modal with workout details
       openWorkoutModal(workout);
     })
     .catch(error => {
-      console.error('Fehler beim Laden der Workout-Details:', error);
-      alert('Fehler beim Laden der Workout-Details. Bitte versuchen Sie es später erneut.');
+      console.error('Error loading workout details:', error);
+      alert('Error loading workout details. Please try again later.');
     });
 }
 
+/**
+ * Opens a modal displaying workout details.
+ * @param {Object} workout - The workout object to display.
+ */
 function openWorkoutModal(workout) {
-  // Falls du noch kein Modal-Element hast, erstelle eines
+  // Create modal element if it doesn't exist
   let modal = document.getElementById('workout-modal');
   if (!modal) {
     modal = document.createElement('div');
@@ -287,7 +321,7 @@ function openWorkoutModal(workout) {
     document.body.appendChild(modal);
   }
 
-  // Modal-Inhalt
+  // Modal content
   modal.innerHTML = `
     <div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
@@ -301,44 +335,44 @@ function openWorkoutModal(workout) {
 
       <div class="space-y-4">
         <div>
-          <h3 class="font-semibold">Beschreibung:</h3>
-          <p>${workout.description || 'Keine Beschreibung verfügbar'}</p>
+          <h3 class="font-semibold">Description:</h3>
+          <p>${workout.description || 'No description available'}</p>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <h3 class="font-semibold">Schwierigkeitsgrad:</h3>
+            <h3 class="font-semibold">Difficulty Level:</h3>
             <p>${workout.difficulty_level}</p>
           </div>
           <div>
-            <h3 class="font-semibold">Ziel:</h3>
+            <h3 class="font-semibold">Goal:</h3>
             <p>${workout.goal}</p>
           </div>
           <div>
-            <h3 class="font-semibold">Zielgruppe:</h3>
+            <h3 class="font-semibold">Target Audience:</h3>
             <p>${workout.target_audience}</p>
           </div>
           <div>
-            <h3 class="font-semibold">Dauer:</h3>
-            <p>${workout.estimated_duration_minutes} Minuten</p>
+            <h3 class="font-semibold">Duration:</h3>
+            <p>${workout.estimated_duration_minutes} minutes</p>
           </div>
         </div>
 
-        <!-- Hier könntest du weitere Workout-Details anzeigen -->
+        <!-- Additional workout details can be displayed here -->
 
         <div class="mt-6 flex justify-end">
           <button id="edit-from-modal" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 mr-2">
-            Bearbeiten
+            Edit
           </button>
           <button id="close-modal-btn" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
-            Schließen
+            Close
           </button>
         </div>
       </div>
     </div>
   `;
 
-  // Event-Listener für Modal-Buttons
+  // Event listeners for modal buttons
   document.getElementById('close-modal').addEventListener('click', () => {
     modal.remove();
   });
@@ -349,7 +383,7 @@ function openWorkoutModal(workout) {
 
   document.getElementById('edit-from-modal').addEventListener('click', () => {
     modal.remove();
-    // Hier könntest du die Bearbeitungsfunktion aufrufen
+    // You can call the edit function here if needed
     // editWorkout(workout.template_id);
   });
 }

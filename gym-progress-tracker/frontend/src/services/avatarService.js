@@ -1,6 +1,9 @@
+
 /**
  * Avatar Service
- * Handles all API calls related to the user's avatar functionality
+ * Handles all API calls related to the user's avatar functionality.
+ * @class AvatarService
+ * @extends BaseService
  */
 
 import BaseService from './BaseService';
@@ -11,29 +14,29 @@ import BaseService from './BaseService';
  */
 class AvatarService extends BaseService {
   /**
-   * Constructor for the Avatar Service
+   * Constructs the Avatar Service.
    */
   constructor() {
     super('/api/avatar');
   }
 
   /**
-   * Get the current user's avatar or create a new one if it doesn't exist
-   * @returns {Promise<Object>} The avatar data
+   * Gets the current user's avatar or creates a new one if it doesn't exist.
+   * @returns {Promise<Object>} The avatar data.
    */
   async getUserAvatar() {
     const response = await this.get();
     return response;
   }
   /**
-   * Update the avatar's stats (HP, MP, Attack, Defense, Agility)
-   * @param {Object} stats - The stats to update
-   * @param {number} stats.hp - Health points
-   * @param {number} stats.mp - Magic points
-   * @param {number} stats.attack - Attack value
-   * @param {number} stats.defense - Defense value
-   * @param {number} stats.agility - Agility value
-   * @returns {Promise<Object>} The updated avatar data
+   * Updates the avatar's stats (HP, MP, Attack, Defense, Agility).
+   * @param {Object} stats - The stats to update.
+   * @param {number} stats.hp - Health points.
+   * @param {number} stats.mp - Magic points.
+   * @param {number} stats.attack - Attack value.
+   * @param {number} stats.defense - Defense value.
+   * @param {number} stats.agility - Agility value.
+   * @returns {Promise<Object>} The updated avatar data.
    */
   async updateAvatarStats(stats) {
     console.log('Sending stats to backend:', stats);
@@ -53,9 +56,9 @@ class AvatarService extends BaseService {
   }
 
   /**
-   * Add experience points to the avatar with automatic level-up at 100 XP
-   * @param {number} experiencePoints - Amount of XP to add
-   * @returns {Promise<Object>} Object containing updated avatar and leveledUp flag
+   * Adds experience points to the avatar with automatic level-up at 100 XP.
+   * @param {number} experiencePoints - Amount of XP to add.
+   * @returns {Promise<Object>} Object containing updated avatar and leveledUp flag.
    */
   async addExperience(experiencePoints) {
     const response = await this.post('experience', { experiencePoints });
@@ -66,9 +69,9 @@ class AvatarService extends BaseService {
   }
 
   /**
-   * Update the avatar's boss level
-   * @param {number} bossLevel - The new boss level
-   * @returns {Promise<Object>} The updated avatar data
+   * Updates the avatar's boss level.
+   * @param {number} bossLevel - The new boss level.
+   * @returns {Promise<Object>} The updated avatar data.
    */
   async updateBossLevel(bossLevel) {
     const response = await this.put('boss-level', { bossLevel });
@@ -76,4 +79,5 @@ class AvatarService extends BaseService {
   }
 }
 
+// Export singleton instance of the service
 export default new AvatarService();

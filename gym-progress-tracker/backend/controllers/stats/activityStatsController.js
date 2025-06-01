@@ -1,3 +1,10 @@
+/**
+ * Retrieves all activity statistics for the authenticated user.
+ * @param {object} req - Express request object containing user info.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If there is a server-side error during activity stats retrieval.
+ */
 const getActivityStats = async (req, res) => {
     const pool = req.app.get('db');
     const userId = req.users.id;
@@ -7,14 +14,20 @@ const getActivityStats = async (req, res) => {
             `SELECT * FROM activity_stats WHERE user_id = $1 ORDER BY stat_date DESC`,
             [userId]
         );
-
         res.status(200).json(result.rows);
     } catch (err) {
-        console.error('Fehler beim Abrufen der Aktivitätsstatistiken:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Abrufen der Aktivitätsstatistiken' });
+        console.error('Error retrieving activity stats:', err);
+        res.status(500).json({ error: 'Server error retrieving activity stats' });
     }
 };
 
+/**
+ * Adds a new activity statistic for the authenticated user.
+ * @param {object} req - Express request object containing activity stats details in body and user info.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If there is a server-side error during activity stat creation.
+ */
 const addActivityStat = async (req, res) => {
     const pool = req.app.get('db');
     const userId = req.users.id;
@@ -37,15 +50,22 @@ const addActivityStat = async (req, res) => {
         );
 
         res.status(201).json({
-            message: 'Aktivitätsstatistik erfolgreich hinzugefügt',
+            message: 'Activity stat added successfully',
             stat: result.rows[0]
         });
     } catch (err) {
-        console.error('Fehler beim Hinzufügen der Aktivitätsstatistik:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Hinzufügen der Aktivitätsstatistik' });
+        console.error('Error adding activity stat:', err);
+        res.status(500).json({ error: 'Server error adding activity stat' });
     }
 };
 
+/**
+ * Deletes an activity statistic by its ID.
+ * @param {object} req - Express request object containing stat_id in params.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If the activity stat is not found or a server error occurs during deletion.
+ */
 const deleteActivityStat = async (req, res) => {
     const pool = req.app.get('db');
     const { stat_id } = req.params;
@@ -57,17 +77,20 @@ const deleteActivityStat = async (req, res) => {
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Aktivitätsstatistik nicht gefunden' });
+            return res.status(404).json({ error: 'Activity stat not found' });
         }
 
         res.status(200).json({
-            message: 'Aktivitätsstatistik erfolgreich gelöscht',
+            message: 'Activity stat deleted successfully',
             stat_id: result.rows[0].stat_id
         });
     } catch (err) {
-        console.error('Fehler beim Löschen der Aktivitätsstatistik:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Löschen der Aktivitätsstatistik' });
+        console.error('Error deleting activity stat:', err);
+        res.status(500).json({ error: 'Server error deleting activity stat' });
     }
 };
 
+/**
+ * Exports activity stats controller functions.
+ */
 module.exports = { getActivityStats, addActivityStat, deleteActivityStat };

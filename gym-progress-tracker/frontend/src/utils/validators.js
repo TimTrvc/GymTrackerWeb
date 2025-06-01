@@ -1,12 +1,13 @@
+
 /**
- * Zentrale Validierungsfunktionen für alle Formulare in der Anwendung
- * Folgt dem DRY-Prinzip durch Vermeidung duplizierter Validierungslogik
+ * Central validation functions for all forms in the application.
+ * Follows the DRY principle by avoiding duplicated validation logic.
  */
 
 /**
- * Überprüft, ob ein String eine valide E-Mail enthält
- * @param {string} email - Die zu prüfende E-Mail-Adresse
- * @returns {boolean} Ist die E-Mail gültig?
+ * Checks if a string contains a valid email address.
+ * @param {string} email - The email address to validate.
+ * @returns {boolean} True if the email is valid, false otherwise.
  */
 export const isValidEmail = (email) => {
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -14,41 +15,41 @@ export const isValidEmail = (email) => {
 };
 
 /**
- * Überprüft, ob ein Passwort den Sicherheitsanforderungen entspricht
- * @param {string} password - Das zu prüfende Passwort
- * @returns {boolean} Ist das Passwort sicher genug?
+ * Checks if a password meets security requirements.
+ * @param {string} password - The password to validate.
+ * @returns {boolean} True if the password is strong enough, false otherwise.
  */
 export const isStrongPassword = (password) => {
-  // Mindestens 8 Zeichen, ein Großbuchstabe, ein Kleinbuchstabe, eine Zahl
+  // At least 8 characters, one uppercase letter, one lowercase letter, one number
   const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
   return strongPasswordRegex.test(password);
 };
 
 /**
- * Überprüft, ob zwei Passwörter übereinstimmen
- * @param {string} password - Das Hauptpasswort
- * @param {string} confirmPassword - Die Bestätigung des Passworts
- * @returns {boolean} Stimmen die Passwörter überein?
+ * Checks if two passwords match.
+ * @param {string} password - The main password.
+ * @param {string} confirmPassword - The password confirmation.
+ * @returns {boolean} True if the passwords match, false otherwise.
  */
 export const passwordsMatch = (password, confirmPassword) => {
   return password === confirmPassword;
 };
 
 /**
- * Überprüft, ob ein Benutzername gültig ist
- * @param {string} username - Der zu prüfende Benutzername
- * @returns {boolean} Ist der Benutzername gültig?
+ * Checks if a username is valid.
+ * @param {string} username - The username to validate.
+ * @returns {boolean} True if the username is valid, false otherwise.
  */
 export const isValidUsername = (username) => {
-  // Nur Buchstaben, Zahlen, Unterstriche, min 3, max 20 Zeichen
+  // Only letters, numbers, underscores, min 3, max 20 characters
   const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
   return usernameRegex.test(username);
 };
 
 /**
- * Überprüft, ob ein Gewichtswert gültig ist
- * @param {number|string} weight - Das zu prüfende Gewicht
- * @returns {boolean} Ist der Gewichtswert gültig?
+ * Checks if a weight value is valid.
+ * @param {number|string} weight - The weight value to validate.
+ * @returns {boolean} True if the weight is valid, false otherwise.
  */
 export const isValidWeight = (weight) => {
   const weightValue = parseFloat(weight);
@@ -56,9 +57,9 @@ export const isValidWeight = (weight) => {
 };
 
 /**
- * Überprüft, ob ein Wert für eine Wiederholungszahl gültig ist
- * @param {number|string} reps - Die zu prüfende Wiederholungszahl
- * @returns {boolean} Ist die Wiederholungszahl gültig?
+ * Checks if a value for repetitions is valid.
+ * @param {number|string} reps - The repetitions value to validate.
+ * @returns {boolean} True if the repetitions value is valid, false otherwise.
  */
 export const isValidReps = (reps) => {
   const repsValue = parseInt(reps);
@@ -66,20 +67,20 @@ export const isValidReps = (reps) => {
 };
 
 /**
- * Überprüft, ob ein Textfeld nicht leer ist
- * @param {string} value - Der zu prüfende Wert
- * @returns {boolean} Ist der Wert nicht leer?
+ * Checks if a text field is not empty.
+ * @param {string} value - The value to check.
+ * @returns {boolean} True if the value is not empty, false otherwise.
  */
 export const isNotEmpty = (value) => {
   return typeof value === 'string' && value.trim().length > 0;
 };
 
 /**
- * Überprüft, ob ein Wert innerhalb eines angegebenen Bereichs liegt
- * @param {number} value - Der zu prüfende Wert
- * @param {number} min - Minimaler Wert
- * @param {number} max - Maximaler Wert
- * @returns {boolean} Liegt der Wert im angegebenen Bereich?
+ * Checks if a value is within a given range.
+ * @param {number} value - The value to check.
+ * @param {number} min - Minimum allowed value.
+ * @param {number} max - Maximum allowed value.
+ * @returns {boolean} True if the value is in range, false otherwise.
  */
 export const isInRange = (value, min, max) => {
   const numValue = parseFloat(value);
@@ -87,31 +88,28 @@ export const isInRange = (value, min, max) => {
 };
 
 /**
- * Überprüft ein komplettes Registrierungsformular
- * @param {object} userData - Die zu prüfenden Registrierungsdaten
- * @returns {object} Validierungsergebnis mit Fehlern und Gesamtstatus
+ * Validates a complete registration form.
+ * @param {object} userData - The registration data to validate.
+ * @returns {object} Validation result with errors and overall status.
  */
 export const validateRegistration = (userData) => {
   const errors = {};
   
-  // Benutzername validieren
+  // Validate username
   if (!isValidUsername(userData.username)) {
-    errors.username = 'Der Benutzername muss zwischen 3 und 20 Zeichen lang sein und darf nur Buchstaben, Zahlen und Unterstriche enthalten.';
+    errors.username = 'Username must be 3-20 characters and contain only letters, numbers, and underscores.';
   }
-  
-  // E-Mail validieren
+  // Validate email
   if (!isValidEmail(userData.email)) {
-    errors.email = 'Bitte gib eine gültige E-Mail-Adresse ein.';
+    errors.email = 'Please enter a valid email address.';
   }
-  
-  // Passwort validieren
+  // Validate password
   if (!isStrongPassword(userData.password)) {
-    errors.password = 'Das Passwort muss mindestens 8 Zeichen lang sein und mindestens einen Großbuchstaben, einen Kleinbuchstaben und eine Zahl enthalten.';
+    errors.password = 'Password must be at least 8 characters and include an uppercase letter, a lowercase letter, and a number.';
   }
-  
-  // Passwortbestätigung validieren
+  // Validate password confirmation
   if (!passwordsMatch(userData.password, userData.confirmPassword)) {
-    errors.confirmPassword = 'Die Passwörter stimmen nicht überein.';
+    errors.confirmPassword = 'Passwords do not match.';
   }
   
   return {
@@ -121,19 +119,18 @@ export const validateRegistration = (userData) => {
 };
 
 /**
- * Überprüft ein Login-Formular
- * @param {object} credentials - Die zu prüfenden Anmeldedaten
- * @returns {object} Validierungsergebnis mit Fehlern und Gesamtstatus
+ * Validates a login form.
+ * @param {object} credentials - The login credentials to validate.
+ * @returns {object} Validation result with errors and overall status.
  */
 export const validateLogin = (credentials) => {
   const errors = {};
   
   if (!isNotEmpty(credentials.username)) {
-    errors.username = 'Bitte gib deinen Benutzernamen ein.';
+    errors.username = 'Please enter your username.';
   }
-  
   if (!isNotEmpty(credentials.password)) {
-    errors.password = 'Bitte gib dein Passwort ein.';
+    errors.password = 'Please enter your password.';
   }
   
   return {
@@ -143,15 +140,15 @@ export const validateLogin = (credentials) => {
 };
 
 /**
- * Überprüft ein Workout-Formular
- * @param {object} workoutData - Die zu prüfenden Workout-Daten
- * @returns {object} Validierungsergebnis mit Fehlern und Gesamtstatus
+ * Validates a workout form.
+ * @param {object} workoutData - The workout data to validate.
+ * @returns {object} Validation result with errors and overall status.
  */
 export const validateWorkout = (workoutData) => {
   const errors = {};
   
   if (!isNotEmpty(workoutData.name)) {
-    errors.name = 'Bitte gib einen Namen für das Workout ein.';
+    errors.name = 'Please enter a name for the workout.';
   }
   
   return {

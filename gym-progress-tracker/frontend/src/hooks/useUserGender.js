@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { getUserDetails } from '@/services/userService';
 
+
 /**
- * Hook to fetch the user's gender information
- * @returns {Object} Object containing gender and loading state
+ * React hook to fetch the user's gender information from the user service.
+ *
+ * @returns {Object} Object containing gender, loading, and error state.
  */
 const useUserGender = () => {
   const [gender, setGender] = useState('m'); // Default to male
@@ -11,10 +13,14 @@ const useUserGender = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    /**
+     * Fetches the user profile and updates gender state.
+     * @returns {Promise<void>}
+     */
     const fetchUserProfile = async () => {
       setLoading(true);
       try {
-        const userId = localStorage.getItem('userId'); // Assuming user ID is stored in localStorage
+        const userId = localStorage.getItem('userId');
         if (!userId) {
           throw new Error('User ID not found');
         }
@@ -30,7 +36,6 @@ const useUserGender = () => {
         setLoading(false);
       }
     };
-
     fetchUserProfile();
   }, []);
 

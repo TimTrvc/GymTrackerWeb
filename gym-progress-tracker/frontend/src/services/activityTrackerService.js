@@ -1,6 +1,9 @@
+
 /**
  * Activity Tracker Service
- * Handles tracking user activities and rewarding experience points for avatar progression
+ * Handles tracking user activities and rewarding experience points for avatar progression.
+ * @class ActivityTrackerService
+ * @extends BaseService
  */
 
 import BaseService from './BaseService';
@@ -8,10 +11,11 @@ import avatarService from './avatarService';
 
 class ActivityTrackerService extends BaseService {
   /**
-   * Track a completed workout and reward XP
-   * @param {number} workoutId - ID of the completed workout
-   * @param {number} exerciseCount - Number of exercises in the workout
-   * @returns {Promise<Object>} The result of the XP addition
+   * Tracks a completed workout and rewards experience points.
+   * @param {number} workoutId - ID of the completed workout.
+   * @param {number} [exerciseCount=1] - Number of exercises in the workout.
+   * @returns {Promise<Object>} The result of the XP addition.
+   * @throws {Error} If tracking fails.
    */
   async trackWorkoutCompletion(workoutId, exerciseCount = 1) {
     try {
@@ -27,7 +31,7 @@ class ActivityTrackerService extends BaseService {
       // Add experience points to the avatar
       const result = await avatarService.addExperience(totalXp);
       
-      // Log this activity 
+      // Log this activity
       this.logActivity('workout_completion', {
         workoutId,
         exerciseCount,
@@ -43,10 +47,11 @@ class ActivityTrackerService extends BaseService {
   }
   
   /**
-   * Track completed exercise sets and reward XP
-   * @param {number} exerciseId - ID of the exercise
-   * @param {number} sets - Number of sets completed
-   * @returns {Promise<Object>} The result of the XP addition
+   * Tracks completed exercise sets and rewards experience points.
+   * @param {number} exerciseId - ID of the exercise.
+   * @param {number} [sets=1] - Number of sets completed.
+   * @returns {Promise<Object>} The result of the XP addition.
+   * @throws {Error} If tracking fails.
    */
   async trackExerciseSets(exerciseId, sets = 1) {
     try {
@@ -75,9 +80,10 @@ class ActivityTrackerService extends BaseService {
   }
   
   /**
-   * Track a new personal record and reward XP
-   * @param {number} exerciseId - ID of the exercise
-   * @returns {Promise<Object>} The result of the XP addition
+   * Tracks a new personal record and rewards experience points.
+   * @param {number} exerciseId - ID of the exercise.
+   * @returns {Promise<Object>} The result of the XP addition.
+   * @throws {Error} If tracking fails.
    */
   async trackPersonalRecord(exerciseId) {
     try {
@@ -102,9 +108,10 @@ class ActivityTrackerService extends BaseService {
   }
   
   /**
-   * Track completion of a training session and reward XP
-   * @param {Object} sessionData - Training session data
-   * @returns {Promise<Object>} The result of the XP addition
+   * Tracks completion of a training session and rewards experience points.
+   * @param {Object} sessionData - Training session data.
+   * @returns {Promise<Object>} The result of the XP addition.
+   * @throws {Error} If tracking fails.
    */
   async trackTrainingSession(sessionData) {
     try {
@@ -136,10 +143,11 @@ class ActivityTrackerService extends BaseService {
   }
   
   /**
-   * Log user activity (internal method)
+   * Logs user activity (internal method).
    * @private
-   * @param {string} activityType - Type of activity
-   * @param {Object} details - Activity details
+   * @param {string} activityType - Type of activity.
+   * @param {Object} details - Activity details.
+   * @returns {void}
    */
   logActivity(activityType, details) {
     // For now, just log to console

@@ -1,23 +1,36 @@
+/**
+ * Retrieves all nutrition logs for the authenticated user.
+ * @param {object} req - Express request object containing user info.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If there is a server-side error during nutrition log retrieval.
+ */
 const getNutritionLogs = async (req, res) => {
     const pool = req.app.get('db');
-    const userId = req.users.id; // Get the user ID from the authenticated user
+    const userId = req.users.id;
 
     try {
         const result = await pool.query(
             `SELECT * FROM nutrition_logs WHERE user_id = $1 ORDER BY log_date DESC`,
-            [userId] // Use the user ID to filter logs
+            [userId]
         );
-
         res.status(200).json(result.rows);
     } catch (err) {
-        console.error('Fehler beim Abrufen der Ernährungstagebücher:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Abrufen der Ernährungstagebücher' });
+        console.error('Error retrieving nutrition logs:', err);
+        res.status(500).json({ error: 'Server error retrieving nutrition logs' });
     }
 };
 
+/**
+ * Adds a new nutrition log for the authenticated user.
+ * @param {object} req - Express request object containing nutrition log details in body and user info.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If there is a server-side error during nutrition log creation.
+ */
 const addNutritionLog = async (req, res) => {
-    const pool = req.app.get('db'); // Ensure you're using the correct database pool
-    const user_id = req.users.id; // Get the user ID from the authenticated user
+    const pool = req.app.get('db');
+    const user_id = req.users.id;
 
     try {
         const {
@@ -27,10 +40,9 @@ const addNutritionLog = async (req, res) => {
             carbs_grams,
             fat_grams,
             notes,
-            log_date, // Accept log_date from the request body
+            log_date,
         } = req.body;
 
-        // Assign default value to log_date if it's not provided
         const logDate = log_date || new Date().toISOString().split('T')[0];
 
         const newLog = await pool.query(
@@ -46,6 +58,13 @@ const addNutritionLog = async (req, res) => {
     }
 };
 
+/**
+ * Deletes a nutrition log by its ID.
+ * @param {object} req - Express request object containing nutrition_log_id in params.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If the nutrition log is not found or a server error occurs during deletion.
+ */
 const deleteNutritionLog = async (req, res) => {
     const pool = req.app.get('db');
     const { nutrition_log_id } = req.params;
@@ -57,17 +76,20 @@ const deleteNutritionLog = async (req, res) => {
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Ernährungseintrag nicht gefunden' });
+            return res.status(404).json({ error: 'Nutrition log not found' });
         }
 
         res.status(200).json({
-            message: 'Ernährungseintrag erfolgreich gelöscht',
+            message: 'Nutrition log deleted successfully',
             nutrition_log_id: result.rows[0].nutrition_log_id
         });
     } catch (err) {
-        console.error('Fehler beim Löschen des Ernährungseintrags:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Löschen des Ernährungseintrags' });
+        console.error('Error deleting nutrition log:', err);
+        res.status(500).json({ error: 'Server error deleting nutrition log' });
     }
 };
 
+/**
+ * Exports nutrition log controller functions.
+ */
 module.exports = { getNutritionLogs, addNutritionLog, deleteNutritionLog };

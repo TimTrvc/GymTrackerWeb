@@ -1,33 +1,36 @@
+
 /**
- * Zentrale Fehlerbehandlung und Fehlertypen
- * Folgt dem Single Responsibility Principle und DRY
+ * Central error handling and error types.
+ * Follows the Single Responsibility Principle and DRY.
  */
 
-// Standard-Fehlermeldungen für häufige Anwendungsfälle
+
+/**
+ * Standard error messages for common application cases.
+ */
 export const ERROR_MESSAGES = {
-  NETWORK: 'Netzwerkfehler: Bitte überprüfen Sie Ihre Internetverbindung.',
-  UNAUTHORIZED: 'Nicht autorisiert: Bitte melden Sie sich erneut an.',
-  NOT_FOUND: 'Die angeforderte Ressource wurde nicht gefunden.',
-  SERVER: 'Ein Serverfehler ist aufgetreten. Bitte versuchen Sie es später erneut.',
-  VALIDATION: 'Bitte überprüfen Sie Ihre Eingaben.',
-  DEFAULT: 'Ein unerwarteter Fehler ist aufgetreten.'
+  NETWORK: 'Network error: Please check your internet connection.',
+  UNAUTHORIZED: 'Unauthorized: Please log in again.',
+  NOT_FOUND: 'The requested resource was not found.',
+  SERVER: 'A server error occurred. Please try again later.',
+  VALIDATION: 'Please check your input.',
+  DEFAULT: 'An unexpected error occurred.'
 };
 
 /**
- * Analysiert einen Fehler und gibt eine benutzerfreundliche Fehlermeldung zurück
- * @param {Error|Object} error - Der aufgetretene Fehler
- * @param {string} defaultMessage - Optionale Standardnachricht
- * @returns {string} Benutzerfreundliche Fehlermeldung
+ * Analyzes an error and returns a user-friendly error message.
+ * @param {Error|Object} error - The error that occurred.
+ * @param {string} [defaultMessage=ERROR_MESSAGES.DEFAULT] - Optional default message.
+ * @returns {string} User-friendly error message.
  */
 export const getErrorMessage = (error, defaultMessage = ERROR_MESSAGES.DEFAULT) => {
-  // Wenn kein Fehler vorhanden ist, Standardmeldung zurückgeben
+  // If no error is present, return the default message
   if (!error) return defaultMessage;
 
-  // Wenn der Fehler ein axios-Fehler ist
+  // If the error is an axios error
   if (error.response) {
     const { status } = error.response;
-    
-    // Statuscode-basierte Fehlermeldungen
+    // Status code-based error messages
     switch (status) {
       case 401:
         return ERROR_MESSAGES.UNAUTHORIZED;
@@ -38,40 +41,37 @@ export const getErrorMessage = (error, defaultMessage = ERROR_MESSAGES.DEFAULT) 
       case 500:
         return ERROR_MESSAGES.SERVER;
       default:
-        // Wenn der Server eine spezifische Fehlermeldung sendet, diese verwenden
+        // Use specific error message from server if available
         return error.response.data?.error || defaultMessage;
     }
   }
-  
-  // Netzwerkfehler
+  // Network error
   if (error.request && !error.response) {
     return ERROR_MESSAGES.NETWORK;
   }
-  
-  // Wenn der Fehler eine einfache Nachricht oder ein String ist
+  // If the error is a simple message or string
   if (error.message || typeof error === 'string') {
     return error.message || error;
   }
-  
   return defaultMessage;
 };
 
 /**
- * Protokolliert Fehler für Debugging-Zwecke
- * @param {Error|Object} error - Der zu protokollierende Fehler
- * @param {string} context - Der Kontext, in dem der Fehler aufgetreten ist
+ * Logs errors for debugging purposes.
+ * @param {Error|Object} error - The error to log.
+ * @param {string} [context='Application'] - The context in which the error occurred.
  */
-export const logError = (error, context = 'Anwendung') => {
-  // In Produktionsumgebung Fehler an einen Logging-Service senden
+export const logError = (error, context = 'Application') => {
+  // In production, send errors to a logging service
   if (import.meta.env.PROD) {
-    // Hier könnte ein externer Logging-Dienst eingebunden werden
-    console.error(`[${context}] Fehler:`, error);
+    // Here you could integrate an external logging service
+    console.error(`[${context}] Error:`, error);
   } else {
-    // In Entwicklungsumgebung detaillierte Fehlerinformationen anzeigen
-    console.group(`[${context}] Fehler:`);
+    // In development, show detailed error information
+    console.group(`[${context}] Error:`);
     console.error(error);
     if (error.response) {
-      console.log('Server-Antwort:', error.response.data);
+      console.log('Server response:', error.response.data);
       console.log('Status:', error.response.status);
     }
     console.groupEnd();
@@ -79,15 +79,14 @@ export const logError = (error, context = 'Anwendung') => {
 };
 
 /**
- * Behandelt einen Fehler und gibt eine strukturierte Antwort zurück
- * @param {Error|Object} error - Der zu behandelnde Fehler
- * @param {string} context - Der Kontext, in dem der Fehler aufgetreten ist
- * @returns {Object} Strukturierte Fehlerantwort
+ * Handles an error and returns a structured response.
+ * @param {Error|Object} error - The error to handle.
+ * @param {string} [context='Application'] - The context in which the error occurred.
+ * @returns {Object} Structured error response.
  */
-export const handleError = (error, context = 'Anwendung') => {
+export const handleError = (error, context = 'Application') => {
   const message = getErrorMessage(error);
   logError(error, context);
-  
   return {
     success: false,
     message,

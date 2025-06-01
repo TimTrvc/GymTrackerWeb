@@ -1,3 +1,7 @@
+
+/**
+ * Initializes navigation and page protection on DOMContentLoaded.
+ */
 document.addEventListener('DOMContentLoaded', function() {
   renderNavigation();
   protectPage();
@@ -7,44 +11,58 @@ document.addEventListener('DOMContentLoaded', function() {
   const logoutButton = document.getElementById('logout-button');
 
   if (token) {
-    // Benutzer ist angemeldet
+    // User is logged in
     if (loginButton) loginButton.style.display = 'none';
     if (logoutButton) {
       logoutButton.style.display = 'block';
       logoutButton.addEventListener('click', logout);
     }
   } else {
-    // Benutzer ist nicht angemeldet
+    // User is not logged in
     if (loginButton) loginButton.style.display = 'block';
     if (logoutButton) logoutButton.style.display = 'none';
   }
 });
 
+
+/**
+ * Checks if the user is logged in.
+ * @returns {boolean} True if logged in, false otherwise.
+ */
 function isLoggedIn() {
   return localStorage.getItem('token') !== null;
 }
 
+
+/**
+ * Returns the path prefix depending on the current location.
+ * @returns {string} Path prefix for navigation links.
+ */
 function getPathPrefix() {
-  // Prüft, ob die aktuelle Seite im /sites/ Ordner liegt
+  // Checks if the current page is in the /sites/ folder
   return window.location.pathname.includes('/sites/') ? '' : 'sites/';
 }
 
+
+/**
+ * Renders the navigation bar based on authentication state.
+ */
 function renderNavigation() {
   const navElement = document.querySelector('nav .flex.items-center.space-x-4');
   if (!navElement) return;
 
-  const prefix = getPathPrefix(); // entweder '' oder 'sites/'
+  const prefix = getPathPrefix(); // either '' or 'sites/'
 
   if (isLoggedIn()) {
     navElement.innerHTML = `
       <a href="${prefix}dashboard.html" class="hover:text-indigo-200">Dashboard</a>
       <a href="${prefix}workout.html" class="hover:text-indigo-200">Workouts</a>
-      <a href="${prefix}exercises.html" class="hover:text-indigo-200">Übungen</a>
-      <a href="${prefix}statistics.html" class="hover:text-indigo-200">Statistiken</a>
+      <a href="${prefix}exercises.html" class="hover:text-indigo-200">Exercises</a>
+      <a href="${prefix}statistics.html" class="hover:text-indigo-200">Statistics</a>
       <a href="#" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100" id="logout-btn">Logout</a>
     `;
 
-    // Logout-Funktion hinzufügen
+    // Add logout functionality
     document.getElementById('logout-btn')?.addEventListener('click', function(e) {
       e.preventDefault();
       localStorage.removeItem('token');
@@ -52,33 +70,38 @@ function renderNavigation() {
       window.location.href = '../index.html';
     });
   } else {
-    // Für nicht eingeloggte Benutzer
+    // For unauthenticated users
     navElement.innerHTML = `
       <a href="/sites/login.html" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100">Login</a>
     `;
   }
 }
 
+
+/**
+ * Protects pages that require authentication.
+ * Redirects to login if not authenticated.
+ */
 function protectPage() {
-  // Liste der geschützten Pfade
+  // List of protected paths
   const protectedPaths = ['workout.html', 'exercises.html', 'statistics.html','dashboard.html'];
 
-  // Aktueller Pfad
+  // Current path
   const currentPath = window.location.pathname.split('/').pop();
 
   if (protectedPaths.includes(currentPath) && !isLoggedIn()) {
-    // Benutzer ist nicht eingeloggt, aber versucht auf geschützte Seite zuzugreifen
+    // User is not logged in but tries to access a protected page
     window.location.href = '/sites/login.html';
   }
 }
 
-// In der auth.js eine neue Funktion hinzufügen:
+
+/**
+ * Logs out the user by clearing tokens and redirecting to login page.
+ */
 function logout() {
-  // Token aus dem localStorage entfernen
   localStorage.removeItem('token');
   localStorage.removeItem('user');
-
-  // Zur Login-Seite umleiten
   window.location.href = '/sites/login.html';
 }
 

@@ -4,8 +4,16 @@ const authMiddleware = require('../../middleware/authMiddleware');
 
 const router = express.Router();
 
-router.get('/',authMiddleware,getActivityStats);
-router.post('/',authMiddleware, addActivityStat);
-router.delete('/:stat_id',authMiddleware, deleteActivityStat);
+/**
+ * Routes for managing activity statistics.
+ * All routes require authentication.
+ *
+ * GET /              - Get all activity stats
+ * POST /             - Add a new activity stat
+ * DELETE /:stat_id   - Delete an activity stat by ID
+ */
+router.get('/', authMiddleware, getActivityStats);
+router.post('/', authMiddleware, addActivityStat);
+router.delete('/:stat_id', authMiddleware, deleteActivityStat);
 
 module.exports = router;

@@ -1,19 +1,19 @@
 import { useContext } from 'react';
 import { AuthContext } from '@/context/AuthContext';
 
+
 /**
- * Custom Hook für den einfachen Zugriff auf Authentifizierungsfunktionen
- * Vereinfacht die Verwendung des AuthContext in Komponenten (KISS-Prinzip)
- * 
- * @returns {Object} Authentifizierungsmethoden und -zustände
+ * React hook for accessing authentication methods and state from AuthContext.
+ * Simplifies usage of AuthContext in components.
+ *
+ * @returns {Object} Authentication methods and state from AuthContext.
+ * @throws {Error} If used outside of an AuthProvider.
  */
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  
   if (!context) {
-    throw new Error('useAuth muss innerhalb eines AuthProvider verwendet werden');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
-  
   return context;
 };
 
