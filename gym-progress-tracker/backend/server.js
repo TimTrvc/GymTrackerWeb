@@ -21,14 +21,16 @@ const workoutRoutes = require('./routes/workouts/workoutRoutes');
 const workoutExercisesRoutes = require('./routes/workouts/workoutExercisesRoutes');
 const emailRoutes = require('./routes/emailRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-const authMiddleware = require("./middleware/authMiddleware"); // Neue Admin-Routen importieren
+const authMiddleware = require("./middleware/authMiddleware");
 
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// PostgreSQL-Verbindung
+/**
+ * PostgreSQL connection pool setup using environment variables.
+ */
 const pool = new Pool({
     user: process.env.DB_USER || 'postgres',
     host: process.env.DB_HOST || 'localhost',
@@ -39,22 +41,22 @@ const pool = new Pool({
 });
 
 
-// Verbindungstest
+// Test database connection
 pool.query('SELECT NOW()', (err, res) => {
     if (err) {
-        console.error('Datenbankverbindung fehlgeschlagen:', err);
+        console.error('Database connection failed:', err);
     } else {
-        console.log('Datenbankverbindung erfolgreich etabliert.');
+        console.log('Database connection established successfully.');
     }
 });
 
-// Datenbank-Pool an App anhängen
+// Attach database pool to app
 app.set('db', pool);
 
-// Statische Dateien aus dem public-Verzeichnis bereitstellen
+// Serve static files from the public directory
 app.use(express.static('public'));
 
-// Routen
+// API routes
 app.use('/api/users', userRoutes);
 app.use('/api/workout-templates', workoutTemplateRoutes);
 app.use('/api/exercise-categories', exerciseCategoriesRoutes);
@@ -69,17 +71,21 @@ app.use('/api/personal-records', personalRecordsRoutes);
 app.use('/api/training-sessions', trainingSessionsRoutes);
 app.use('/api/user-connections', userConnectionsRoutes);
 app.use('/api/user-weight-logs', userWeightLogsRoutes);
-app.use('/api/avatar', avatarRoutes); // Avatar routes added
+app.use('/api/avatar', avatarRoutes);
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/workout-exercises', workoutExercisesRoutes);
 app.use('/api/emails', emailRoutes);
-app.use('/api/admin', authMiddleware, adminRoutes); // Admin-Routen hinzufügen
+app.use('/api/admin', authMiddleware, adminRoutes);
 
-// Einfache Home-Route
+/**
+ * Simple home route for API status check.
+ */
 app.get('/api', (req, res) => {
-    res.json({ message: 'API funktioniert!' });
+    res.json({ message: 'API is working!' });
 });
 
-// Server starten
+/**
+ * Start the Express server.
+ */
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server läuft auf Port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

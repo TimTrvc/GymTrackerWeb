@@ -1,66 +1,83 @@
+/**
+ * Retrieves all emails from the database.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>}
+ */
 const getEmails = async (req, res) => {
   const pool = req.app.get('db');
-
   try {
-    const result = await pool.query(`SELECT email FROM emails ORDER BY email ASC`); // Use "emails"
+    const result = await pool.query(`SELECT email FROM emails ORDER BY email ASC`);
     res.status(200).json(result.rows);
   } catch (err) {
-    console.error('Fehler beim Abrufen der E-Mail-Adressen:', err);
-    res.status(500).json({ error: 'Serverseiten-Fehler beim Abrufen der E-Mail-Adressen' });
+    console.error('Error retrieving emails:', err);
+    res.status(500).json({ error: 'Server error while retrieving emails.' });
   }
 };
 
+/**
+ * Adds a new email to the database.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>}
+ */
 const addEmail = async (req, res) => {
   const pool = req.app.get('db');
   const { email } = req.body;
 
   if (!email) {
-    return res.status(400).json({ error: 'E-Mail-Adresse ist erforderlich.' });
+    return res.status(400).json({ error: 'Email address is required.' });
   }
 
   try {
     const result = await pool.query(
-      `INSERT INTO emails (email) VALUES ($1) RETURNING email`, // Use "emails"
+      `INSERT INTO emails (email) VALUES ($1) RETURNING email`,
       [email]
     );
 
     res.status(201).json({
-      message: 'E-Mail-Adresse erfolgreich hinzugefügt.',
+      message: 'Email address added successfully.',
       email: result.rows[0].email
     });
   } catch (err) {
-    console.error('Fehler beim Hinzufügen der E-Mail-Adresse:', err);
+    console.error('Error adding email:', err);
 
     // Handle unique constraint violation
     if (err.code === '23505') {
-      return res.status(409).json({ error: 'E-Mail-Adresse existiert bereits.' });
+      return res.status(409).json({ error: 'Email address already exists.' });
     }
 
-    res.status(500).json({ error: 'Serverseiten-Fehler beim Hinzufügen der E-Mail-Adresse.' });
+    res.status(500).json({ error: 'Server error while adding email.' });
   }
 };
 
+/**
+ * Deletes an email from the database.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>}
+ */
 const deleteEmail = async (req, res) => {
   const pool = req.app.get('db');
   const { email } = req.params;
 
   try {
     const result = await pool.query(
-      `DELETE FROM emails WHERE email = $1 RETURNING email`, // Use "emails"
+      `DELETE FROM emails WHERE email = $1 RETURNING email`,
       [email]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'E-Mail-Adresse nicht gefunden.' });
+      return res.status(404).json({ error: 'Email address not found.' });
     }
 
     res.status(200).json({
-      message: 'E-Mail-Adresse erfolgreich gelöscht.',
+      message: 'Email address deleted successfully.',
       email: result.rows[0].email
     });
   } catch (err) {
-    console.error('Fehler beim Löschen der E-Mail-Adresse:', err);
-    res.status(500).json({ error: 'Serverseiten-Fehler beim Löschen der E-Mail-Adresse.' });
+    console.error('Error deleting email:', err);
+    res.status(500).json({ error: 'Server error while deleting email.' });
   }
 };
 

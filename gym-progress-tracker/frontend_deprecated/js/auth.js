@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const messageContainer = document.getElementById('message-container');
 
-  // Tab-Wechsel-Funktionalität
+  // Tab switching functionality
   loginTab.addEventListener('click', function() {
     loginTab.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
     registerTab.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
@@ -56,7 +56,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   });
 
-  // Login-Funktion
+  /**
+   * Handles user login when the login button is clicked.
+   * @param {Event} e - The click event.
+   * @returns {void}
+   */
   loginButton.addEventListener('click', async function(e) {
     e.preventDefault();
 
@@ -80,46 +84,50 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = await response.json();
 
       if (response.ok) {
-        // Erfolgreiche Anmeldung
+        // Successful login
         localStorage.setItem('token', data.token);
         localStorage.setItem('userId', data.user.id);
         localStorage.setItem('username', data.user.username);
 
         showMessage('Anmeldung erfolgreich! Du wirst weitergeleitet...', 'success');
 
-        // Weiterleitung nach erfolgreichem Login
+        // Redirect after successful login
         setTimeout(() => {
           window.location.href = '../public/index.html';
         }, 1500);
       } else {
-        // Fehlermeldung anzeigen
+        // Show error message
         showMessage(data.error || 'Anmeldung fehlgeschlagen', 'error');
       }
     } catch (error) {
-      console.error('Login-Fehler:', error);
-      showMessage('Ein Fehler ist aufgetreten. Bitte versuche es später erneut.', 'error');
+      console.error('Login error:', error);
+      showMessage('An error occurred. Please try again later.', 'error');
     }
   });
 
-  // Registrierungs-Funktion
+  /**
+   * Handles user registration when the register button is clicked.
+   * @param {Event} e - The click event.
+   * @returns {void}
+   */
   registerButton.addEventListener('click', async function(e) {
     e.preventDefault();
 
-    // Pflichtfelder überprüfen
+    // Check required fields
     if (!registerUsername.value || !registerEmail.value || !registerPassword.value || !registerPasswordConfirm.value) {
-      showMessage('Bitte fülle alle Pflichtfelder aus.', 'error');
+      showMessage('Please fill in all required fields.', 'error');
       return;
     }
 
-    // Passwörter überprüfen
+    // Check passwords
     if (registerPassword.value !== registerPasswordConfirm.value) {
-      showMessage('Die Passwörter stimmen nicht überein.', 'error');
+      showMessage('Passwords do not match.', 'error');
       return;
     }
 
-    // AGB-Zustimmung überprüfen
+    // Check terms agreement
     if (!agreeTerms.checked) {
-      showMessage('Bitte akzeptiere die Nutzungsbedingungen.', 'error');
+      showMessage('Please accept the terms and conditions.', 'error');
       return;
     }
 
@@ -144,28 +152,33 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = await response.json();
 
       if (response.ok) {
-        // Erfolgreiche Registrierung
+        // Successful registration
         localStorage.setItem('token', data.token);
         localStorage.setItem('userId', data.user.id);
         localStorage.setItem('username', data.user.username);
 
         showMessage('Registrierung erfolgreich! Du wirst weitergeleitet...', 'success');
 
-        // Weiterleitung nach erfolgreicher Registrierung
+        // Redirect after successful registration
         setTimeout(() => {
           window.location.href = '/index.html';
         }, 1500);
       } else {
-        // Fehlermeldung anzeigen
+        // Show error message
         showMessage(data.error || 'Registrierung fehlgeschlagen', 'error');
       }
     } catch (error) {
-      console.error('Registrierungs-Fehler:', error);
-      showMessage('Ein Fehler ist aufgetreten. Bitte versuche es später erneut.', 'error');
+      console.error('Registration error:', error);
+      showMessage('An error occurred. Please try again later.', 'error');
     }
   });
 
-  // Hilfsfunktion zum Anzeigen von Meldungen
+  /**
+   * Helper function to display messages to the user.
+   * @param {string} message - The message to display.
+   * @param {string} type - The type of message ('error' or 'success').
+   * @returns {void}
+   */
   function showMessage(message, type) {
     messageContainer.innerHTML = '';
 
@@ -182,10 +195,10 @@ document.addEventListener('DOMContentLoaded', function() {
     messageContainer.appendChild(messageElement);
   }
 
-  // Überprüfung, ob Benutzer bereits eingeloggt ist
+  // Check if user is already logged in
   const token = localStorage.getItem('token');
   if (token) {
-    // Optional: Automatische Weiterleitung, wenn bereits eingeloggt
+    // Optionally, redirect if already logged in
     // window.location.href = '/index.html';
   }
 });

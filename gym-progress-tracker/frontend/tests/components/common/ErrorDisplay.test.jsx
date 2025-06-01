@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import ErrorDisplay from '../../../src/components/common/ErrorDisplay';
+import ErrorDisplay from '../../../../src/components/common/ErrorDisplay';
 
 describe('ErrorDisplay', () => {
   it('renders default error message', () => {

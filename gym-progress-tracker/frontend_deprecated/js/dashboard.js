@@ -1,4 +1,8 @@
-// dashboard.js
+
+/**
+ * Dashboard script for displaying exercise progress and statistics.
+ * Handles chart rendering, table updates, and exercise selection.
+ */
 
 document.addEventListener('DOMContentLoaded', async () => {
     const exerciseSelector = document.getElementById('exercise-selector');
@@ -8,6 +12,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     let allData = [];
     let progressChart;
   
+    /**
+     * Fetches progress data from the API and initializes dashboard.
+     * @returns {Promise<void>}
+     */
     const fetchData = async () => {
       try {
         const res = await fetch('http://localhost:5000/api/progress');
@@ -16,10 +24,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         populateExerciseOptions(data);
         updateDashboard();
       } catch (err) {
-        console.error('Fehler beim Laden der Daten:', err);
+        console.error('Error loading data:', err);
       }
     };
   
+    /**
+     * Populates the exercise selector dropdown with available exercises.
+     * @param {Array} data - Array of exercise data objects.
+     */
     const populateExerciseOptions = (data) => {
       data.forEach(({ exercise }) => {
         const option = document.createElement('option');
@@ -29,6 +41,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     };
   
+    /**
+     * Updates dashboard statistics and UI based on selected exercise.
+     */
     const updateDashboard = () => {
       const selectedExercise = exerciseSelector.value;
       const filtered = selectedExercise
@@ -46,9 +61,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const currentWeekData = relevantRecords.filter(item => new Date(item.date) >= oneWeekAgo);
       const previousWeekData = relevantRecords.filter(item => new Date(item.date) >= twoWeeksAgo && new Date(item.date) < oneWeekAgo);
   
-      // === Stats ===
+      // === Statistics ===
       document.getElementById('entries-count').textContent = currentWeekData.length;
-      document.getElementById('entries-diff').textContent = `+${currentWeekData.length - previousWeekData.length} von letzter Woche`;
+      document.getElementById('entries-diff').textContent = `+${currentWeekData.length - previousWeekData.length} from last week`;
       document.getElementById('entries-progress').style.width = `${Math.min(currentWeekData.length * 10, 100)}%`;
       document.getElementById('entries-percentage').textContent = `${Math.min(currentWeekData.length * 10, 100)}%`;
   
@@ -56,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const prevWeight = previousWeekData.reduce((sum, r) => sum + r.reps * r.weight, 0);
       const diffWeight = totalWeight - prevWeight;
       document.getElementById('total-weight').textContent = Math.round(totalWeight);
-      document.getElementById('weight-diff').textContent = `${diffWeight >= 0 ? '+' : ''}${Math.round(diffWeight)} von letzter Woche`;
+      document.getElementById('weight-diff').textContent = `${diffWeight >= 0 ? '+' : ''}${Math.round(diffWeight)} from last week`;
       document.getElementById('weight-progress').style.width = `${Math.min(Math.round(totalWeight / 100), 100)}%`;
       document.getElementById('weight-percentage').textContent = `${Math.min(Math.round(totalWeight / 100), 100)}%`;
   
@@ -64,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const prevReps = previousWeekData.reduce((sum, r) => sum + r.reps, 0);
       const diffReps = totalReps - prevReps;
       document.getElementById('total-reps').textContent = totalReps;
-      document.getElementById('reps-diff').textContent = `${diffReps >= 0 ? '+' : ''}${diffReps} von letzter Woche`;
+      document.getElementById('reps-diff').textContent = `${diffReps >= 0 ? '+' : ''}${diffReps} from last week`;
       document.getElementById('reps-progress').style.width = `${Math.min(Math.round(totalReps / 5), 100)}%`;
       document.getElementById('reps-percentage').textContent = `${Math.min(Math.round(totalReps / 5), 100)}%`;
   
@@ -72,6 +87,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderProgressTable(filtered);
     };
   
+    /**
+     * Renders the progress chart for the selected exercise(s).
+     * @param {Array} filtered - Filtered exercise data.
+     */
     const renderChart = (filtered) => {
       const chartLabels = new Set();
       const datasets = [];
@@ -113,6 +132,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     };
   
+    /**
+     * Renders the progress table for the selected exercise(s).
+     * @param {Array} filtered - Filtered exercise data.
+     */
     const renderProgressTable = (filtered) => {
       progressTableSection.innerHTML = '';
   
@@ -130,15 +153,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         table.innerHTML = `
           <thead class="bg-gray-100">
             <tr>
-              <th class="p-2 text-left">Datum</th>
-              <th class="p-2 text-left">Wiederholungen</th>
-              <th class="p-2 text-left">Gewicht (kg)</th>
+              <th class="p-2 text-left">Date</th>
+              <th class="p-2 text-left">Repetitions</th>
+              <th class="p-2 text-left">Weight (kg)</th>
             </tr>
           </thead>
           <tbody>
             ${records.map(r => `
               <tr class="border-t">
-                <td class="p-2">${new Date(r.date).toLocaleDateString('de-DE')}</td>
+                <td class="p-2">${new Date(r.date).toLocaleDateString('en-US')}</td>
                 <td class="p-2">${r.reps}</td>
                 <td class="p-2">${r.weight}</td>
               </tr>
@@ -151,6 +174,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     };
   
+    /**
+     * Generates a random RGB color string.
+     * @returns {string} RGB color string.
+     */
     const getRandomColor = () => {
       const r = () => Math.floor(Math.random() * 256);
       return `rgb(${r()},${r()},${r()})`;

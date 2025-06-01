@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import LoadingDisplay from '../../../src/components/common/LoadingDisplay';
+import LoadingDisplay from '../../../../src/components/common/LoadingDisplay';
 
 describe('LoadingDisplay', () => {
   it('renders default message', () => {

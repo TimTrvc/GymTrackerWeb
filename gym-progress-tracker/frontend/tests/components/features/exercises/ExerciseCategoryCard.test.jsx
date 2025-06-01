@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import ExerciseCategoryCard from '../../../src/components/features/exercises/ExerciseCategoryCard';
+import ExerciseCategoryCard from '../../../../src/components/features/exercises/ExerciseCategoryCard';
 
 describe('ExerciseCategoryCard', () => {
   it('renders name and description', () => {

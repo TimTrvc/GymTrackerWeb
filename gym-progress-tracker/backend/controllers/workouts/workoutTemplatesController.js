@@ -1,10 +1,16 @@
+/**
+ * Adds a new workout template to the database.
+ * @param {object} req - Express request object containing workout details in body and user info.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If there is a server-side error during workout creation.
+ */
 const addWorkout = async (req, res) => {
     const pool = req.app.get('db');
     const { name, description, difficulty_level, target_audience, goal, estimated_duration_minutes, is_featured } = req.body;
-    const created_by = req.users.id;  // Von der Auth-Middleware bereitgestellt
+    const created_by = req.users.id;
 
     try {
-        // Workout in Datenbank einfügen
         const result = await pool.query(
             `INSERT INTO workout_templates (name, description, difficulty_level, target_audience, goal, 
       estimated_duration_minutes, created_by, is_featured)
@@ -13,14 +19,20 @@ const addWorkout = async (req, res) => {
             [name, description, difficulty_level, target_audience, goal,
                 estimated_duration_minutes, created_by, is_featured]
         );
-
-        // Rest des Codes
+        // Additional logic can be added here if needed
     } catch (err) {
-        console.error('Fehler bei der Workouterstellung:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler bei der Workouterstellung' });
+        console.error('Error creating workout:', err);
+        res.status(500).json({ error: 'Server error during workout creation' });
     }
 };
 
+/**
+ * Retrieves all workout templates created by the authenticated user.
+ * @param {object} req - Express request object containing user info.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If there is a server-side error during workout retrieval.
+ */
 const getWorkouts = async (req, res) => {
     const pool = req.app.get('db');
     const user_id = req.users.id;
@@ -33,45 +45,54 @@ const getWorkouts = async (req, res) => {
             workouts: result.rows
         });
     } catch (err) {
-        console.error('Fehler bei der Workoutabfrage:', err);
-        return res.status(500).json({ error: 'Serverseiten-Fehler bei der Workoutabfrage' });
+        console.error('Error retrieving workouts:', err);
+        return res.status(500).json({ error: 'Server error during workout retrieval' });
     }
 }
 
+/**
+ * Retrieves a workout template by its ID if it belongs to the user or is featured.
+ * @param {object} req - Express request object containing user info and workout_template_id param.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If the workout is not found or a server error occurs.
+ */
 const getWorkoutById = async (req, res) => {
     const pool = req.app.get('db');
     const user_id = req.users.id;
-    const workout_id = req.params.workout_template_id; // Nehme die ID aus den URL-Parametern
+    const workout_id = req.params.workout_template_id;
 
     try {
-        // Sichere Parameterized Query mit Bedingung:
-        // Workout gehört dem angemeldeten Benutzer ODER ist featured
+        // Secure parameterized query: workout must belong to user or be featured
         const result = await pool.query(
             'SELECT * FROM workout_templates WHERE template_id = $1 AND (created_by = $2 OR is_featured = true)',
             [workout_id, user_id]
         );
 
-        // Prüfen, ob ein Workout gefunden wurde
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Workout nicht gefunden oder Sie haben keine Berechtigung darauf zuzugreifen' });
+            return res.status(404).json({ error: 'Workout not found or you do not have permission to access it' });
         }
 
-        // Nur das einzelne Workout zurückgeben (rows[0] statt des ganzen result-Objekts)
         res.json(result.rows[0]);
     } catch (err) {
-        console.error('Fehler bei der Workoutabfrage:', err);
-        return res.status(500).json({ error: 'Serverseiten-Fehler bei der Workoutabfrage' });
+        console.error('Error retrieving workout:', err);
+        return res.status(500).json({ error: 'Server error during workout retrieval' });
     }
 };
 
-// Für workoutController.js
+/**
+ * Updates an existing workout template in the database.
+ * @param {object} req - Express request object containing workout details in body and user info.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If there is a server-side error during workout update.
+ */
 const editWorkout = async (req, res) => {
     const pool = req.app.get('db');
     const { workout_id, name, description, difficulty_level, target_audience, goal, estimated_duration_minutes, is_featured } = req.body;
-    const modified_by = req.user.id;  // Von der Auth-Middleware bereitgestellt
+    const modified_by = req.user.id;
 
     try {
-        // Workout in Datenbank aktualisieren
         const result = await pool.query(
             `UPDATE workout_templates 
              SET name = $1, description = $2, difficulty_level = $3, 
@@ -84,23 +105,29 @@ const editWorkout = async (req, res) => {
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Workout nicht gefunden' });
+            return res.status(404).json({ error: 'Workout not found' });
         }
 
         res.status(200).json({
-            message: 'Workout erfolgreich aktualisiert',
+            message: 'Workout updated successfully',
             workout: result.rows[0]
         });
     } catch (err) {
-        console.error('Fehler bei der Workout-Aktualisierung:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler bei der Workout-Aktualisierung' });
+        console.error('Error updating workout:', err);
+        res.status(500).json({ error: 'Server error during workout update' });
     }
 };
 
+/**
+ * Removes a workout template from the database by its ID.
+ * @param {object} req - Express request object containing workout_id in query.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>}
+ * @throws {Error} If the workout is not found or a server error occurs during deletion.
+ */
 const removeWorkout = async (req, res) => {
     const pool = req.app.get('db');
-    const { workout_id } = req.query; // Bei GET-Anfragen kommen Parameter aus query
-    // const { workout_id } = req.body; // Bei DELETE-Anfragen mit Body
+    const { workout_id } = req.query;
 
     try {
         const result = await pool.query(
@@ -111,16 +138,19 @@ const removeWorkout = async (req, res) => {
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Workout nicht gefunden' });
+            return res.status(404).json({ error: 'Workout not found' });
         }
 
         res.status(200).json({
-            message: 'Workout erfolgreich gelöscht',
+            message: 'Workout deleted successfully',
             workout_id: result.rows[0].workout_id
         });
     } catch (err) {
-        console.error('Fehler beim Löschen des Workouts:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Löschen des Workouts' });
+        console.error('Error deleting workout:', err);
+        res.status(500).json({ error: 'Server error during workout deletion' });
     }
 };
+/**
+ * Exports workout template controller functions.
+ */
 module.exports = { addWorkout, getWorkouts, getWorkoutById, editWorkout, removeWorkout };

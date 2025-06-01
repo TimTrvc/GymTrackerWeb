@@ -1,20 +1,31 @@
+/**
+ * Retrieves all workouts for the authenticated user.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>}
+ */
 const getWorkouts = async (req, res) => {
     const pool = req.app.get('db');
     const userId = req.users.id;
-
     try {
         const result = await pool.query(
             `SELECT * FROM workouts WHERE user_id = $1 ORDER BY created_at DESC`,
             [userId]
         );
-
         res.status(200).json({ workouts: result.rows });
     } catch (err) {
-        console.error('Fehler beim Abrufen der Workouts:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Abrufen der Workouts' });
+        console.error('Error retrieving workouts:', err);
+        res.status(500).json({ error: 'Server error while retrieving workouts.' });
     }
 };
 
+/**
+ * Adds a new workout and its exercises for the authenticated user.
+ * Uses a transaction to ensure atomicity.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>}
+ */
 const addWorkout = async (req, res) => {
     const pool = req.app.get('db');
     const userId = req.users.id;
@@ -24,27 +35,19 @@ const addWorkout = async (req, res) => {
         duration_minutes,
         difficulty_level,
         is_public,
-        exercises // Übungen aus der Anfrage holen
+        exercises
     } = req.body;
-
-    // Transaktion starten, um sicherzustellen, dass das Workout und seine Übungen zusammen gespeichert oder zusammen abgebrochen werden
     const client = await pool.connect();
-    
     try {
         await client.query('BEGIN');
-        
-        // Workout erstellen
         const workoutResult = await client.query(
             `INSERT INTO workouts (user_id, name, description, duration_minutes, difficulty_level, is_public)
              VALUES ($1, $2, $3, $4, $5, $6)
              RETURNING *`,
             [userId, name, description, duration_minutes, difficulty_level, is_public]
         );
-        
         const newWorkout = workoutResult.rows[0];
         const workoutId = newWorkout.workout_id;
-        
-        // Übungen hinzufügen, wenn welche vorhanden sind
         if (exercises && exercises.length > 0) {
             for (const exercise of exercises) {
                 await client.query(
@@ -67,25 +70,26 @@ const addWorkout = async (req, res) => {
                 );
             }
         }
-        
-        // Transaktion abschließen
         await client.query('COMMIT');
-        
         res.status(201).json({
-            message: 'Workout erfolgreich hinzugefügt',
+            message: 'Workout added successfully',
             workout: newWorkout
         });
     } catch (err) {
-        // Bei Fehlern Transaktion zurückrollen
         await client.query('ROLLBACK');
-        console.error('Fehler beim Hinzufügen des Workouts:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Hinzufügen des Workouts' });
+        console.error('Error adding workout:', err);
+        res.status(500).json({ error: 'Server error while adding workout.' });
     } finally {
-        // Client-Verbindung freigeben
         client.release();
     }
 };
 
+/**
+ * Updates an existing workout by its ID.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>}
+ */
 const updateWorkout = async (req, res) => {
     const pool = req.app.get('db');
     const { workout_id } = req.params;
@@ -96,7 +100,6 @@ const updateWorkout = async (req, res) => {
         difficulty_level,
         is_public
     } = req.body;
-
     try {
         const result = await pool.query(
             `UPDATE workouts
@@ -105,42 +108,43 @@ const updateWorkout = async (req, res) => {
              RETURNING *`,
             [name, description, duration_minutes, difficulty_level, is_public, workout_id]
         );
-
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Workout nicht gefunden' });
+            return res.status(404).json({ error: 'Workout not found' });
         }
-
         res.status(200).json({
-            message: 'Workout erfolgreich aktualisiert',
+            message: 'Workout updated successfully',
             workout: result.rows[0]
         });
     } catch (err) {
-        console.error('Fehler beim Aktualisieren des Workouts:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Aktualisieren des Workouts' });
+        console.error('Error updating workout:', err);
+        res.status(500).json({ error: 'Server error while updating workout.' });
     }
 };
 
+/**
+ * Deletes a workout by its ID.
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @returns {Promise<void>}
+ */
 const deleteWorkout = async (req, res) => {
     const pool = req.app.get('db');
     const { workout_id } = req.params;
-
     try {
         const result = await pool.query(
             `DELETE FROM workouts WHERE workout_id = $1 RETURNING workout_id`,
             [workout_id]
         );
-
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Workout nicht gefunden' });
+            return res.status(404).json({ error: 'Workout not found' });
         }
-
         res.status(200).json({
-            message: 'Workout erfolgreich gelöscht',
+            message: 'Workout deleted successfully',
             workout_id: result.rows[0].workout_id
         });
     } catch (err) {
-        console.error('Fehler beim Löschen des Workouts:', err);
-        res.status(500).json({ error: 'Serverseiten-Fehler beim Löschen des Workouts' });
+        console.error('Error deleting workout:', err);
+        res.status(500).json({ error: 'Server error while deleting workout.' });
     }
 };
 

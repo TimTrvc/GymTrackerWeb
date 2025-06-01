@@ -1,6 +1,11 @@
 /**
- * Avatar Routes
- * Routes for handling avatar functionality in the GymTracker app
+ * Routes for handling avatar functionality in the GymTracker app.
+ * All routes require authentication.
+ *
+ * GET /              - Get the user's avatar
+ * PUT /stats         - Update avatar stats
+ * POST /experience   - Add experience to avatar
+ * PUT /boss-level    - Update avatar boss level
  */
 
 const express = require('express');

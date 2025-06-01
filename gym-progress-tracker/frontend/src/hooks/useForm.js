@@ -1,36 +1,36 @@
 import { useState, useCallback } from 'react';
 
 /**
- * Custom Hook für die Verwaltung von Formularstatus und Validierung
- * Folgt dem SOLID Prinzip durch Kapselung der Formularlogik
- * 
- * @param {Object} initialValues - Anfangswerte des Formulars
- * @param {Function} validateFn - Validierungsfunktion
- * @param {Function} onSubmit - Funktion, die bei erfolgreicher Validierung aufgerufen wird
- * @returns {Object} Formularstatus, Hilfsfunktionen und Handler
+ * React hook for managing form state and validation, encapsulating form logic for reuse.
+ *
+ * @param {Object} initialValues - Initial values for the form fields.
+ * @param {Function} validateFn - Validation function that returns { isValid, errors }.
+ * @param {Function} onSubmit - Callback function called on successful validation.
+ * @returns {Object} Form state, helpers, and handlers.
  */
 export const useForm = (initialValues = {}, validateFn = () => ({ isValid: true, errors: {} }), onSubmit = () => {}) => {
-  // Formularstatus
+  // Form state
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   /**
-   * Aktualisiert einen einzelnen Formularwert
+   * Updates a single form field value.
+   * @param {object} e - The input change event.
    */
   const handleChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
     const fieldValue = type === 'checkbox' ? checked : value;
-    
     setValues((prevValues) => ({
       ...prevValues,
       [name]: fieldValue
     }));
   }, []);
-  
+
   /**
-   * Aktualisiert mehrere Formularwerte auf einmal
+   * Updates multiple form field values at once.
+   * @param {object} newValues - Object with new field values.
    */
   const setMultipleValues = useCallback((newValues) => {
     setValues((prevValues) => ({
@@ -38,54 +38,47 @@ export const useForm = (initialValues = {}, validateFn = () => ({ isValid: true,
       ...newValues
     }));
   }, []);
-  
+
   /**
-   * Markiert ein Feld als berührt, wenn der Fokus verloren geht
+   * Marks a field as touched and validates the form on blur.
+   * @param {object} e - The blur event.
    */
   const handleBlur = useCallback((e) => {
     const { name } = e.target;
-    
     setTouched((prevTouched) => ({
       ...prevTouched,
       [name]: true
     }));
-    
-    // Validiere das Feld, wenn es berührt wurde
     const validationResult = validateFn(values);
     setErrors(validationResult.errors || {});
   }, [values, validateFn]);
-  
+
   /**
-   * Behandelt die Formularabsendung
+   * Handles form submission, validates, and calls onSubmit if valid.
+   * @param {object} e - The submit event.
    */
   const handleSubmit = useCallback((e) => {
     e && e.preventDefault();
-    
-    // Markiere alle Felder als berührt
+    // Mark all fields as touched
     const allTouched = Object.keys(values).reduce((acc, key) => {
       acc[key] = true;
       return acc;
     }, {});
-    
     setTouched(allTouched);
-    
-    // Validiere das Formular
+    // Validate the form
     const validationResult = validateFn(values);
     setErrors(validationResult.errors || {});
-    
     if (validationResult.isValid) {
       setIsSubmitting(true);
-      
-      // Rufe die onSubmit-Funktion auf und setze isSubmitting zurück, wenn sie fertig ist
       Promise.resolve(onSubmit(values))
         .finally(() => {
           setIsSubmitting(false);
         });
     }
   }, [values, validateFn, onSubmit]);
-  
+
   /**
-   * Setzt das Formular auf seine Anfangswerte zurück
+   * Resets the form to its initial values and clears errors/touched state.
    */
   const resetForm = useCallback(() => {
     setValues(initialValues);
@@ -93,7 +86,7 @@ export const useForm = (initialValues = {}, validateFn = () => ({ isValid: true,
     setTouched({});
     setIsSubmitting(false);
   }, [initialValues]);
-  
+
   return {
     values,
     errors,
@@ -104,7 +97,11 @@ export const useForm = (initialValues = {}, validateFn = () => ({ isValid: true,
     handleSubmit,
     setMultipleValues,
     resetForm,
-    // Hilfsmethode, um zu prüfen, ob ein Feld Fehler hat und berührt wurde
+    /**
+     * Checks if a field has an error and has been touched.
+     * @param {string} fieldName - The field name to check.
+     * @returns {boolean}
+     */
     hasError: useCallback((fieldName) => !!(errors[fieldName] && touched[fieldName]), [errors, touched])
   };
 };

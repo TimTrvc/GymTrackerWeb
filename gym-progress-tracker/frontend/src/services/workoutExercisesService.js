@@ -1,9 +1,12 @@
 import BaseService from './BaseService';
 import { WORKOUT_ENDPOINTS } from '@/config/apiEndpoints';
 
+
 /**
- * Service für die Verwaltung von Workout-Übungen
- * Ermöglicht das Hinzufügen und Verwalten von Übungen zu einem Workout
+ * Service for managing workout exercises.
+ * Allows adding and managing exercises in a workout.
+ * @class WorkoutExercisesService
+ * @extends BaseService
  */
 class WorkoutExercisesService extends BaseService {
   constructor() {
@@ -11,38 +14,38 @@ class WorkoutExercisesService extends BaseService {
   }
 
   /**
-   * Holt alle Übungen eines Workouts
-   * @param {string|number} workoutId - ID des Workouts
-   * @returns {Promise<Array>} - Liste von Übungen im Workout
+   * Gets all exercises for a workout.
+   * @param {string|number} workoutId - ID of the workout.
+   * @returns {Promise<Array>} List of exercises in the workout.
    */
   async getWorkoutExercises(workoutId) {
     return this.get(`/${workoutId}`);
   }
 
   /**
-   * Fügt eine Übung zu einem Workout hinzu
-   * @param {object} exerciseData - Übungsdaten mit workout_id, exercise_id, position, sets, reps, rest_seconds
-   * @returns {Promise<Object>} - Hinzugefügte Übung
+   * Adds an exercise to a workout.
+   * @param {object} exerciseData - Exercise data with workout_id, exercise_id, position, sets, reps, rest_seconds.
+   * @returns {Promise<Object>} Added exercise.
    */
   async addExerciseToWorkout(exerciseData) {
     return this.post('/', exerciseData);
   }
 
   /**
-   * Löscht eine Übung aus einem Workout
-   * @param {string|number} workoutExerciseId - ID der Workout-Übung
-   * @returns {Promise<Object>} - Bestätigungsnachricht
+   * Removes an exercise from a workout.
+   * @param {string|number} workoutExerciseId - ID of the workout exercise.
+   * @returns {Promise<Object>} Confirmation message.
    */
   async removeExerciseFromWorkout(workoutExerciseId) {
     return this.delete(`/${workoutExerciseId}`);
   }
 }
 
-// Singleton-Instanz des Services exportieren
+// Export singleton instance of the service
 const workoutExercisesService = new WorkoutExercisesService();
 export default workoutExercisesService;
 
-// Kompatibilitätsexporte für einfachen Zugriff
+// Compatibility exports for easy access
 export const getWorkoutExercises = (workoutId) => workoutExercisesService.getWorkoutExercises(workoutId);
 export const addExerciseToWorkout = (exerciseData) => workoutExercisesService.addExerciseToWorkout(exerciseData);
 export const removeExerciseFromWorkout = (workoutExerciseId) => workoutExercisesService.removeExerciseFromWorkout(workoutExerciseId);
