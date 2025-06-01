@@ -3,7 +3,7 @@ import React from "react";
 
 const Contact = () => {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 pb-10">
+        <div className="bg-white pb-8">
             <HeroSection
                 title="Kontakt"
                 subtitle="Wir sind für dich da! Kontaktiere uns bei Fragen, Feedback oder Kooperationen."
@@ -11,8 +11,8 @@ const Contact = () => {
                 textColor="text-white"
                 size="large"
             />
-            <div className="max-w-2xl mx-auto px-4">
-                <div className="bg-white/90 rounded-2xl shadow-xl p-8 mt-8 text-gray-800 border-2 border-indigo-100">
+            <div className="max-w-2xl mx-auto px-4 mt-8 mb-8">
+                <div className="bg-white rounded-2xl shadow-xl p-8 text-gray-800 border-2 border-indigo-100">
                     <h2 className="text-2xl font-bold mb-4 text-indigo-700 flex items-center gap-2">
                         <span role="img" aria-label="Mail">📬</span> Kontaktmöglichkeiten
                     </h2>
