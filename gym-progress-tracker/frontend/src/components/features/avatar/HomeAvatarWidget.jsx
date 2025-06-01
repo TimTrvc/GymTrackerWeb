@@ -43,7 +43,7 @@ const HomeAvatarWidget = () => {
         <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
           <div 
             className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
-            style={{ width: `${avatar.experience}%` }}
+            style={{ width: `${Math.min(avatar.experience, 100)}%` }}
           ></div>
         </div>
         <span className="text-sm text-gray-600">{avatar.experience}/100 XP</span>

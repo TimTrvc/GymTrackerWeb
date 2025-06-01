@@ -6,12 +6,12 @@ import Workouts from '@/pages/Workouts';
 import Exercises from '@/pages/Exercises';
 import Contact from '@/pages/Contact';
 import Prices from '@/pages/Prices';
-import Features from '@/pages/Features';
 import Nutrition from '@/pages/Nutrition';
 import Body from '@/pages/Body';
 import Avatar from '@/pages/Avatar';
 import Profile from '@/pages/Profile';
 import Statistics from '@/pages/Statistics';
+import Privacy from '@/pages/Privacy';
 import { withPrivateRoute } from '@/components/features/auth/withPrivateRoute';
 
 /**
@@ -25,14 +25,14 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/workouts" element={withPrivateRoute(Workouts)} />      
       <Route path="/exercises" element={withPrivateRoute(Exercises)} />
-      <Route path="/contact" element={withPrivateRoute(Contact)} />
-      <Route path="/prices" element={withPrivateRoute(Prices)} />
-      <Route path="/features" element={withPrivateRoute(Features)} />
+      <Route path="/contact" element={<Contact/>} />
+      <Route path="/prices" element={<Prices/>} />
       <Route path="/nutrition" element={withPrivateRoute(Nutrition)} />      
       <Route path="/body" element={withPrivateRoute(Body)} />
       <Route path="/avatar" element={withPrivateRoute(Avatar)} />
       <Route path="/profile" element={withPrivateRoute(Profile)} />
       <Route path="/statistics" element={withPrivateRoute(Statistics)} />
+      <Route path="/privacy" element={<Privacy/>} />
     </Routes>
   );
 };
