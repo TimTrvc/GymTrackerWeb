@@ -110,7 +110,6 @@ const Footer = () => {
     // Datenstruktur für Links - erleichtert Erweiterungen (Open/Closed)
     const links = [
       { name: 'Home', to: '/' },
-      { name: 'Features', to: '/features' },
       { name: 'Preise', to: '/prices' },
       { name: 'Kontakt', to: '/contact' },
       { name: 'Datenschutz', to: '/privacy' }
